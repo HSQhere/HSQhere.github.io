@@ -1,45 +1,44 @@
 <!doctype html>
 <html lang="zh"><head>
-<title>入坑linux中，还有mujoco - HSQ 的个人博客</title>
+<title>Linux的胆战心惊之路 - HSQ 的个人博客</title>
 <meta charset="UTF-8">
 <meta name="keywords" content="">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
 
 <link rel="shortcut icon" href="/hexo_init/images/avatar.jpg" type="image/jpg" />
-<meta name="description" content="萌新入门中 环境配置的痛苦报错 看到lerobot入门的仿真 mujoco-playground 需要jax，而jax在Linux最稳定，所以小白勇闯ubuntu   确实高雅  报错  还在报错  柔弱小人倒一片 mujoco程序的模拟空间，真好玩   一堆人  2026-03-20">
+<meta name="description" content="初试Ubuntu  在一步步的关闭开始启动，和安全启动后，无法识别ssd。又搞了半天关了VAM。  正当我沉浸在喜悦中时现实又给我当头一棒。  关闭VAM 导致win报错了。🥹  喜提小蓝屏和玉玉症。😭 经过我不懈的努力终于成功，然后有感写贴。愿世界再无小蓝屏。 PS：还要在win关闭安全模式，再关VAM才可以回到我的Ubuntu。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="入坑linux中，还有mujoco">
-<meta property="og:url" content="https://hsqhere.github.io/2026/03/21/%E5%85%A5%E5%9D%91linux%E4%B8%AD%EF%BC%8C%E8%BF%98%E6%9C%89mujoco/index.html">
+<meta property="og:title" content="Linux的胆战心惊之路">
+<meta property="og:url" content="https://hsqhere.github.io/2026/03/23/Linux%E7%9A%84%E8%83%86%E6%88%98%E5%BF%83%E6%83%8A%E4%B9%8B%E8%B7%AF/index.html">
 <meta property="og:site_name" content="HSQ 的个人博客">
-<meta property="og:description" content="萌新入门中 环境配置的痛苦报错 看到lerobot入门的仿真 mujoco-playground 需要jax，而jax在Linux最稳定，所以小白勇闯ubuntu   确实高雅  报错  还在报错  柔弱小人倒一片 mujoco程序的模拟空间，真好玩   一堆人  2026-03-20">
+<meta property="og:description" content="初试Ubuntu  在一步步的关闭开始启动，和安全启动后，无法识别ssd。又搞了半天关了VAM。  正当我沉浸在喜悦中时现实又给我当头一棒。  关闭VAM 导致win报错了。🥹  喜提小蓝屏和玉玉症。😭 经过我不懈的努力终于成功，然后有感写贴。愿世界再无小蓝屏。 PS：还要在win关闭安全模式，再关VAM才可以回到我的Ubuntu。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://hsqhere.github.io/images/life/%E5%85%A5%E5%9D%91linux%E4%B8%AD2.png">
-<meta property="og:image" content="https://hsqhere.github.io/images/life/%E5%85%A5%E5%9D%91linux%E4%B8%AD1.png">
-<meta property="og:image" content="https://hsqhere.github.io/images/life/%E5%85%A5%E5%9D%91linux%E4%B8%AD3.png">
-<meta property="og:image" content="https://hsqhere.github.io/images/life/%E8%BF%98%E6%9C%89mujoco.png">
-<meta property="article:published_time" content="2026-03-21T00:53:01.000Z">
-<meta property="article:modified_time" content="2026-03-22T17:27:13.010Z">
+<meta property="og:image" content="https://hsqhere.github.io/images/life/ubuntu%E4%B8%8E%E5%8D%8E%E7%A1%95.jpg">
+<meta property="og:image" content="https://hsqhere.github.io/images/life/VAM%E5%85%B3%E9%97%AD%E5%AF%BC%E8%87%B4win%E6%8A%A5%E9%94%99.jpg">
+<meta property="og:image" content="https://hsqhere.github.io/images/life/%E5%AE%89%E5%85%A8%E6%A8%A1%E5%BC%8F.jpg">
+<meta property="article:published_time" content="2026-03-22T17:17:39.000Z">
+<meta property="article:modified_time" content="2026-03-22T17:32:29.583Z">
 <meta property="article:author" content="HSQ">
 <meta property="article:tag" content="Linux">
-<meta property="article:tag" content="仿真">
+<meta property="article:tag" content="报错">
 <meta property="article:tag" content="操作系统">
 <meta property="article:tag" content="日记">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://hsqhere.github.io/images/life/%E5%85%A5%E5%9D%91linux%E4%B8%AD2.png">
+<meta name="twitter:image" content="https://hsqhere.github.io/images/life/ubuntu%E4%B8%8E%E5%8D%8E%E7%A1%95.jpg">
 
 <link rel="stylesheet" href="/lib/fancybox/fancybox.css">
 <link rel="stylesheet" href="/lib/mdui_043tiny/mdui.css">
 
 
-<link rel="stylesheet" href="/lib/iconfont/iconfont.css?v=1774200761669">
+<link rel="stylesheet" href="/lib/iconfont/iconfont.css?v=1774200761666">
 
-<link rel="stylesheet" href="/css/style.css?v=1774200761669">
+<link rel="stylesheet" href="/css/style.css?v=1774200761666">
 
 
 
 
     
-        <link rel="stylesheet" href="/custom.css?v=1774200761669">
+        <link rel="stylesheet" href="/custom.css?v=1774200761666">
     
 
 
@@ -49,7 +48,7 @@
 <script src="/lib/lax.min.js" async></script>
 
 
-<script async src="/js/app.js?v=1774200761669"></script>
+<script async src="/js/app.js?v=1774200761666"></script>
 
  
 
@@ -149,7 +148,7 @@ window.MathJax = {
 </div>
 
 
-	<script async src="/js/search.js?v=1774200761669"></script>
+	<script async src="/js/search.js?v=1774200761667"></script>
 
 
 
@@ -323,19 +322,19 @@ window.MathJax = {
   <article>
     
         <div class="nexmoe-post-cover absolute" style="padding-top: NaN%;"> 
-            <img src="/images/life/入坑linux中2.png" alt="入坑linux中，还有mujoco" loading="lazy">
-            <h1>入坑linux中，还有mujoco</h1>
+            <img src="/images/life/VAM关闭导致win报错.jpg" alt="Linux的胆战心惊之路" loading="lazy">
+            <h1>Linux的胆战心惊之路</h1>
         </div>
     
     
     <div class="nexmoe-post-meta">
     <div class="nexmoe-rainbow">
-        <a class="nexmoefont icon-calendar-fill">2026年03月21日</a>
+        <a class="nexmoefont icon-calendar-fill">2026年03月23日</a>
         
             <a class="nexmoefont icon-appstore-fill -link" href="/categories/%E6%97%A5%E8%AE%B0/">日记</a>
         
         
-    <a><i class="nexmoefont icon-areachart"></i>约74字</a>
+    <a><i class="nexmoefont icon-areachart"></i>约117字</a>
     <a><i class="nexmoefont icon-time-circle-fill"></i>预计需要1分钟</a>
 
     </div>
@@ -346,24 +345,18 @@ window.MathJax = {
     
 </div>
 
-    <h1>萌新入门中</h1>
-<h2 id="环境配置的痛苦报错">环境配置的痛苦报错</h2>
-<p>看到lerobot入门的仿真 mujoco-playground 需要jax，而jax在Linux最稳定，所以小白勇闯ubuntu</p>
+    <h1>初试Ubuntu</h1>
 <div class="photo-grid">
-<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="/images/life/%E5%85%A5%E5%9D%91linux%E4%B8%AD2.png" alt="入坑linux中2" data-caption="入坑linux中2" loading="lazy"></p>
-<p>确实高雅</p>
-<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="/images/life/%E5%85%A5%E5%9D%91linux%E4%B8%AD1.png" alt="入坑linux中1" data-caption="入坑linux中1" loading="lazy"></p>
-<p>报错</p>
-<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="/images/life/%E5%85%A5%E5%9D%91linux%E4%B8%AD3.png" alt="入坑linux中3" data-caption="入坑linux中3" loading="lazy"></p>
-<p>还在报错</p>
+<p>在一步步的关闭开始启动，和安全启动后，无法识别ssd。又搞了半天关了VAM。</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="/images/life/ubuntu%E4%B8%8E%E5%8D%8E%E7%A1%95.jpg" alt="ubuntu与华硕" data-caption="ubuntu与华硕" loading="lazy"></p>
+<p>正当我沉浸在喜悦中时现实又给我当头一棒。</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="/images/life/VAM%E5%85%B3%E9%97%AD%E5%AF%BC%E8%87%B4win%E6%8A%A5%E9%94%99.jpg" alt="VAM关闭导致win报错" data-caption="VAM关闭导致win报错" loading="lazy"></p>
+<p>关闭VAM 导致win报错了。🥹</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="/images/life/%E5%AE%89%E5%85%A8%E6%A8%A1%E5%BC%8F.jpg" alt="安全模式" data-caption="安全模式" loading="lazy"></p>
+<p>喜提小蓝屏和玉玉症。😭</p>
+<p>经过我不懈的努力终于成功，然后有感写贴。愿世界再无小蓝屏。</p>
+<p>PS：还要在win关闭安全模式，再关VAM才可以回到我的Ubuntu。</p>
 </div>
-<h2 id="柔弱小人倒一片">柔弱小人倒一片</h2>
-<p>mujoco程序的模拟空间，真好玩</p>
-<div class="photo-grid">
-<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="/images/life/%E8%BF%98%E6%9C%89mujoco.png" alt="还有mujoco" data-caption="还有mujoco" loading="lazy"></p>
-<p>一堆人</p>
-</div>
-<h6 id="2026-03-20">2026-03-20</h6>
 
     
   </article>
@@ -372,7 +365,7 @@ window.MathJax = {
       
     <div class="nexmoe-post-copyright">
         <strong>本文作者：</strong>HSQ<br>
-        <strong>本文链接：</strong><a href="https://hsqhere.github.io/2026/03/21/%E5%85%A5%E5%9D%91linux%E4%B8%AD%EF%BC%8C%E8%BF%98%E6%9C%89mujoco/" title="https:&#x2F;&#x2F;hsqhere.github.io&#x2F;2026&#x2F;03&#x2F;21&#x2F;%E5%85%A5%E5%9D%91linux%E4%B8%AD%EF%BC%8C%E8%BF%98%E6%9C%89mujoco&#x2F;" target="_blank" rel="noopener">https:&#x2F;&#x2F;hsqhere.github.io&#x2F;2026&#x2F;03&#x2F;21&#x2F;%E5%85%A5%E5%9D%91linux%E4%B8%AD%EF%BC%8C%E8%BF%98%E6%9C%89mujoco&#x2F;</a><br>
+        <strong>本文链接：</strong><a href="https://hsqhere.github.io/2026/03/23/Linux%E7%9A%84%E8%83%86%E6%88%98%E5%BF%83%E6%83%8A%E4%B9%8B%E8%B7%AF/" title="https:&#x2F;&#x2F;hsqhere.github.io&#x2F;2026&#x2F;03&#x2F;23&#x2F;Linux%E7%9A%84%E8%83%86%E6%88%98%E5%BF%83%E6%83%8A%E4%B9%8B%E8%B7%AF&#x2F;" target="_blank" rel="noopener">https:&#x2F;&#x2F;hsqhere.github.io&#x2F;2026&#x2F;03&#x2F;23&#x2F;Linux%E7%9A%84%E8%83%86%E6%88%98%E5%BF%83%E6%83%8A%E4%B9%8B%E8%B7%AF&#x2F;</a><br>
         
             # <strong>版权声明：</strong>本文采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/cn/deed.zh" target="_blank">CC BY-NC-SA 3.0 CN</a> 协议进行许可
 
@@ -385,7 +378,7 @@ window.MathJax = {
   <div class="nexmoe-post-meta nexmoe-rainbow">
    
     
-        <a class="nexmoefont icon-tag-fill -none-link" href="/tags/Linux/" rel="tag">Linux</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E4%BB%BF%E7%9C%9F/" rel="tag">仿真</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="tag">操作系统</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E6%97%A5%E8%AE%B0/" rel="tag">日记</a>
+        <a class="nexmoefont icon-tag-fill -none-link" href="/tags/Linux/" rel="tag">Linux</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E6%8A%A5%E9%94%99/" rel="tag">报错</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="tag">操作系统</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E6%97%A5%E8%AE%B0/" rel="tag">日记</a>
     
 </div>
   
@@ -408,7 +401,7 @@ window.MathJax = {
             <button class="mdui-fab catalog" style="overflow:unset;">
                 <i class="nexmoefont icon-i-catalog"></i>
                 <div class="nexmoe-toc">
-                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">萌新入门中</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE%E7%9A%84%E7%97%9B%E8%8B%A6%E6%8A%A5%E9%94%99"><span class="toc-number">1.1.</span> <span class="toc-text">环境配置的痛苦报错</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9F%94%E5%BC%B1%E5%B0%8F%E4%BA%BA%E5%80%92%E4%B8%80%E7%89%87"><span class="toc-number">1.2.</span> <span class="toc-text">柔弱小人倒一片</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#2026-03-20"><span class="toc-number">1.2.1.</span> <span class="toc-text">2026-03-20</span></a></li></ol></li></ol></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">初试Ubuntu</span></a></li></ol>
                 </div>
             </button>
             
