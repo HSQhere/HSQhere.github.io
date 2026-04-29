@@ -237,3 +237,21 @@
 #tcomment {
     margin: 30px 0;
 }
+
+/* 针对 Hexo 默认生成的 .highlight 容器进行定制 */
+/* 针对代码框整体容器的样式 */
+.highlight {
+    background-color: #f4f4f4 !important; /* 灰色背景 */
+    border: 1px solid #ddd !important;     /* 浅灰色边框 */
+    padding: 10px !important;               /* 内边距 */
+    border-radius: 5px !important;          /* 圆角 */
+    margin: 20px 0 !important;
+    overflow: auto;                         /* 溢出滚动 */
+}
+
+/* 确保内部代码文字背景透明，防止遮挡外层灰色 */
+.highlight pre, .highlight .code, .highlight .gutter {
+    background: transparent !important;
+    border: none !important;
+}
+

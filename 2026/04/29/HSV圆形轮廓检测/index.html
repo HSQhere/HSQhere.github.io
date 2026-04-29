@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="zh"><head>
+<title>HSV圆形轮廓检测 - HSQ 的个人博客</title>
+<meta charset="UTF-8">
+<meta name="keywords" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+
+<link rel="shortcut icon" href="/hexo_init/images/avatar.jpg" type="image/jpg" />
+<meta name="description" content="Before we transition to the HSV color space, it is crucial to establish a solid foundation within the RGB model.  颜色极化 (Color Polarization)： 不使用常规灰度化，而是利用色差公式提取特定颜色： 红色增强图：$r &#x3D; \max(0, 2R - B - G">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HSV圆形轮廓检测">
+<meta property="og:url" content="https://hsqhere.github.io/2026/04/29/HSV%E5%9C%86%E5%BD%A2%E8%BD%AE%E5%BB%93%E6%A3%80%E6%B5%8B/index.html">
+<meta property="og:site_name" content="HSQ 的个人博客">
+<meta property="og:description" content="Before we transition to the HSV color space, it is crucial to establish a solid foundation within the RGB model.  颜色极化 (Color Polarization)： 不使用常规灰度化，而是利用色差公式提取特定颜色： 红色增强图：$r &#x3D; \max(0, 2R - B - G">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-04-29T07:44:09.000Z">
+<meta property="article:modified_time" content="2026-04-29T16:40:43.754Z">
+<meta property="article:author" content="HSQ">
+<meta property="article:tag" content="Hough圆">
+<meta property="article:tag" content="cv">
+<meta property="article:tag" content="掩膜">
+<meta property="article:tag" content="日记">
+<meta property="article:tag" content="视觉">
+<meta name="twitter:card" content="summary">
+
+<link rel="stylesheet" href="/lib/fancybox/fancybox.css">
+<link rel="stylesheet" href="/lib/mdui_043tiny/mdui.css">
+
+
+<link rel="stylesheet" href="/lib/iconfont/iconfont.css?v=1777482665548">
+
+<link rel="stylesheet" href="/css/style.css?v=1777482665548">
+
+
+
+
+    
+        <link rel="stylesheet" href="/custom.css?v=1777482665548">
+    
+
+
+
+<script src="/lib/mdui_043tiny/mdui.js" async></script>
+<script src="/lib/fancybox/fancybox.umd.js" async></script>
+<script src="/lib/lax.min.js" async></script>
+
+
+<script async src="/js/app.js?v=1777482665548"></script>
+
+ 
+
+<!-- highlight.js CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<!-- APlayer 音乐播放器 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+<!-- Twikoo 评论系统 -->
+<script src="https://cdn.jsdelivr.net/npm/twikoo@1.6.39/dist/twikoo.all.min.js"></script>
+<!-- MathJax 数学公式渲染 -->
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true,
+    processEnvironments: true
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<!-- APlayer 音乐播放器 JS -->
+<script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+
+
+<link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+<meta name="generator" content="Hexo 8.1.1"></head><body class="nexmoe mdui-drawer-body-left"><div id="nexmoe-background"><div class="nexmoe-bg" style="background-image: url(/hexo_init/images/background_mainpage.png)"></div><div class="mdui-appbar mdui-shadow-0"><div class="mdui-toolbar"><a class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: &#039;#drawer&#039;, swipe: true}" title="menu"><i class="mdui-icon nexmoefont icon-menu"></i></a><div class="mdui-toolbar-spacer"></div><a class="mdui-btn mdui-btn-icon" href="/" title="HSQ"><img src="/hexo_init/images/avatar.jpg" alt="HSQ"></a></div></div></div><div id="nexmoe-header"><div class="nexmoe-drawer mdui-drawer" id="drawer">
+    <div class="nexmoe-avatar mdui-ripple">
+        <a href="/" title="HSQ">
+            <img src="/hexo_init/images/avatar.jpg" alt="HSQ" alt="HSQ">
+        </a>
+    </div>
+    <div class="nexmoe-count">
+        <div><span>文章</span>17</div>
+        <div><span>标签</span>37</div>
+        <div><span>分类</span>10</div>
+    </div>
+    <div class="nexmoe-list mdui-list" mdui-collapse="{accordion: true}">
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/" title="首页">
+            <i class="mdui-list-item-icon nexmoefont icon-home"></i>
+            <div class="mdui-list-item-content">
+                首页
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/archive.html" title="文章归档">
+            <i class="mdui-list-item-icon nexmoefont icon-container"></i>
+            <div class="mdui-list-item-content">
+                文章归档
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/gallery/" title="图库">
+            <i class="mdui-list-item-icon nexmoefont icon-gallery"></i>
+            <div class="mdui-list-item-content">
+                图库
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/plan/" title="规划">
+            <i class="mdui-list-item-icon nexmoefont icon-chart"></i>
+            <div class="mdui-list-item-content">
+                规划
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/friends/" title="朋友们">
+            <i class="mdui-list-item-icon nexmoefont icon-friends"></i>
+            <div class="mdui-list-item-content">
+                朋友们
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/about/" title="关于">
+            <i class="mdui-list-item-icon nexmoefont icon-info-circle"></i>
+            <div class="mdui-list-item-content">
+                关于
+            </div>
+        </a>
+        
+    </div>
+    
+    
+        
+        <div class="nexmoe-widget-wrap">
+    <div class="nexmoe-widget nexmoe-search">
+        
+            <form id="search_form">
+                <label><input class="st-default-search-input" id="search_value" name="q" type="search" placeholder="搜索" style="
+                    font-size: 15px !important;
+                    height: 56px !important;
+                    background-image: none;
+                "></label>
+            </form>
+         
+    </div>
+</div>
+
+
+	<script async src="/js/search.js?v=1777482665549"></script>
+
+
+
+    
+        
+        <div class="nexmoe-widget-wrap">
+	<div class="nexmoe-widget nexmoe-social">
+		<a
+			class="mdui-ripple"
+			href="https://space.bilibili.com/1382035035?spm_id_from=333.1007.0.0"
+			target="_blank"
+			mdui-tooltip="{content: '哔哩哔哩'}"
+			style="
+				color: rgb(231, 106, 141);
+				background-color: rgba(231, 106, 141, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-bilibili"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://github.com/HSQhere"
+			target="_blank"
+			mdui-tooltip="{content: 'GitHub'}"
+			style="
+				color: rgb(25, 23, 23);
+				background-color: rgba(25, 23, 23, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-github"
+			></i> </a
+		>
+	</div>
+</div>
+
+    
+        
+        <!-- 一言 -->
+<div class="nexmoe-widget-wrap">
+  <h3 class="nexmoe-widget-title">
+    一言
+  </h3>
+  <div class="nexmoe-widget">
+    <ul class="hitokoto-box">
+      <li id="hitokoto_text_parent" class="hitokoto-text" hitokotoCategory="">
+        <a href="#" id="hitokoto_text">
+          
+        </a>
+        <a href="#" id="hitokoto_error_text" style="display: none;">
+          
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  let hitokotoText = document.getElementById('hitokoto_text')
+  let hitokotoErroText = document.getElementById('hitokoto_error_text')
+  let hitokotoCategory = document.getElementById('hitokoto_text_parent').getAttribute('hitokotoCategory')
+  window.addEventListener('load', function () {
+    let url = 'https://v1.hitokoto.cn'
+    if (hitokotoCategory) {
+      url += '?c=' + hitokotoCategory
+    }
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        hitokotoText.innerText = "「 " + data.hitokoto + " 」 from " + data.from
+        hitokotoText.href = 'https://hitokoto.cn/?uuid=' + data.uuid
+      })
+      .catch((reason) => {
+        console.error(11, reason)
+        hitokotoText.style.display = 'none'
+        hitokotoErroText.style.display = 'block'
+      })
+  })
+</script>
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章分类</h3>
+    <div class="nexmoe-widget">
+
+      <ul class="category-list">
+
+        
+
+
+        
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/Linux/">Linux</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/感情/">感情</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/日记/">日记</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/机器人/">机器人</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/机械/">机械</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/树洞/">树洞</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/电控/">电控</a>
+          <span class="category-list-count">4</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/目标/">目标</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/计算机/">计算机</a>
+          <span class="category-list-count">4</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/车辆/">车辆</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+      </ul>
+
+    </div>
+  </div>
+
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <div id="randomtagcloud" class="nexmoe-widget tagcloud nexmoe-rainbow">
+      <a href="/tags/Hough%E5%9C%86/" style="font-size: 10px;">Hough圆</a> <a href="/tags/Linux/" style="font-size: 12.5px;">Linux</a> <a href="/tags/cv/" style="font-size: 12.5px;">cv</a> <a href="/tags/foc/" style="font-size: 10px;">foc</a> <a href="/tags/keysking/" style="font-size: 10px;">keysking</a> <a href="/tags/pbc/" style="font-size: 10px;">pbc</a> <a href="/tags/pnp/" style="font-size: 10px;">pnp</a> <a href="/tags/stm32/" style="font-size: 10px;">stm32</a> <a href="/tags/%E4%BA%92%E5%8A%A8/" style="font-size: 10px;">互动</a> <a href="/tags/%E4%BB%BF%E7%9C%9F/" style="font-size: 10px;">仿真</a> <a href="/tags/%E5%88%B6%E5%9B%BE/" style="font-size: 10px;">制图</a> <a href="/tags/%E5%8A%A0%E9%80%9F%E5%BA%A6%E8%AE%A1/" style="font-size: 10px;">加速度计</a> <a href="/tags/%E5%8F%8D%E6%80%9D/" style="font-size: 10px;">反思</a> <a href="/tags/%E5%98%89%E7%AB%8B%E5%88%9B/" style="font-size: 10px;">嘉立创</a> <a href="/tags/%E6%84%9F%E6%83%85/" style="font-size: 15px;">感情</a> <a href="/tags/%E6%8A%A5%E9%94%99/" style="font-size: 12.5px;">报错</a> <a href="/tags/%E6%8E%A9%E8%86%9C/" style="font-size: 10px;">掩膜</a> <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" style="font-size: 15px;">操作系统</a> <a href="/tags/%E6%95%99%E7%A8%8B/" style="font-size: 10px;">教程</a> <a href="/tags/%E6%97%A0%E5%88%B7%E7%94%B5%E6%9C%BA/" style="font-size: 10px;">无刷电机</a> <a href="/tags/%E6%97%A5%E8%AE%B0/" style="font-size: 20px;">日记</a> <a href="/tags/%E6%9C%BA%E5%99%A8%E4%BA%BA/" style="font-size: 10px;">机器人</a> <a href="/tags/%E6%9C%BA%E6%A2%B0/" style="font-size: 12.5px;">机械</a> <a href="/tags/%E6%A0%91%E6%B4%9E/" style="font-size: 10px;">树洞</a> <a href="/tags/%E6%A0%91%E8%8E%93%E6%B4%BE/" style="font-size: 10px;">树莓派</a> <a href="/tags/%E7%88%B1%E6%83%85/" style="font-size: 10px;">爱情</a> <a href="/tags/%E7%94%9F%E6%B4%BB/" style="font-size: 10px;">生活</a> <a href="/tags/%E7%94%B5%E6%8E%A7/" style="font-size: 17.5px;">电控</a> <a href="/tags/%E7%9B%AE%E6%A0%87/" style="font-size: 12.5px;">目标</a> <a href="/tags/%E7%BC%96%E7%A8%8B/" style="font-size: 10px;">编程</a> <a href="/tags/%E8%A7%84%E5%88%92/" style="font-size: 10px;">规划</a> <a href="/tags/%E8%A7%86%E8%A7%89/" style="font-size: 12.5px;">视觉</a> <a href="/tags/%E8%AF%84%E8%AE%BA%E5%8C%BA/" style="font-size: 10px;">评论区</a> <a href="/tags/%E8%AF%BB%E4%B9%A6/" style="font-size: 10px;">读书</a> <a href="/tags/%E8%BD%A6%E8%BE%86/" style="font-size: 10px;">车辆</a> <a href="/tags/%E9%97%AE%E9%A2%98/" style="font-size: 10px;">问题</a> <a href="/tags/%E9%99%80%E8%9E%BA%E4%BB%AA/" style="font-size: 10px;">陀螺仪</a>
+    </div>
+    
+      <script>
+        var maxTagcloud = parseInt(17);
+        var tags_length = parseInt(37);
+        var tags_arr = [];
+        for(var i = 0; i < tags_length; i++){
+          tags_arr.push(i);
+        }
+        tags_arr.sort(function (l, r) {
+          return Math.random() > 0.5 ? -1 : 1;
+        });
+        tags_arr = tags_arr.slice(0, maxTagcloud < tags_length ? tags_length - maxTagcloud : 0);
+        for(var tag_i = 0; tag_i < tags_arr.length; tag_i++){
+          document.getElementById("randomtagcloud").children[tags_arr[tag_i]].style.display = 'none';
+        }
+      </script>
+    
+  </div>
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章归档</h3>
+    <div class="nexmoe-widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/">2026</a><span class="archive-list-count">17</span></li></ul>
+    </div>
+  </div>
+
+
+
+    
+        
+   
+    <div class="nexmoe-copyright">
+        &copy; 2026 HSQ
+        Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+        & <a href="https://github.com/theme-nexmoe/hexo-theme-nexmoe" target="_blank">Nexmoe</a>
+        
+    </div>
+</div><!-- .nexmoe-drawer --></div><div id="nexmoe-content"><div class="nexmoe-primary"><div class="nexmoe-post">
+  <article>
+    
+        <div class="nexmoe-post-cover absolute" style="padding-top: NaN%;"> 
+            <img src="/images/tech/program/hough圆检测.png" alt="HSV圆形轮廓检测" loading="lazy">
+            <h1>HSV圆形轮廓检测</h1>
+        </div>
+    
+    
+    <div class="nexmoe-post-meta">
+    <div class="nexmoe-rainbow">
+        <a class="nexmoefont icon-calendar-fill">2026年04月29日</a>
+        
+            <a class="nexmoefont icon-appstore-fill -link" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/">计算机</a>
+        
+        
+    <a><i class="nexmoefont icon-areachart"></i>约1.1k字</a>
+    <a><i class="nexmoefont icon-time-circle-fill"></i>预计需要5分钟</a>
+
+    </div>
+    
+    
+    
+    
+    
+</div>
+
+    <p>Before we transition to the HSV color space, it is crucial to establish a solid foundation within the RGB model.</p>
+<ol>
+<li><strong>颜色极化 (Color Polarization)</strong>：<ul>
+<li>不使用常规灰度化，而是利用色差公式提取特定颜色：<ul>
+<li><strong>红色增强图</strong>：$r &#x3D; \max(0, 2R - B - G)$</li>
+<li><strong>绿色增强图</strong>：$g &#x3D; \max(0, 2G - R - B)$</li>
+<li><strong>蓝色增强图</strong>：$b &#x3D; \max(0, 2B - G - R)$</li>
+</ul>
+</li>
+<li><strong>目的</strong>：极大化目标颜色与背景的对比度，消除杂色干扰。</li>
+</ul>
+</li>
+<li><strong>双重降噪 (Two-stage Blurring)</strong>：<ul>
+<li><strong>中值滤波</strong> (<code>medianBlur</code>)：去除椒盐噪声（孤立的噪点）。</li>
+<li><strong>高斯滤波</strong> (<code>GaussianBlur</code>)：平滑边缘，防止霍夫变换对细小纹理产生误报。</li>
+</ul>
+</li>
+<li><strong>霍夫圆检测 (Hough Circle Transform)</strong>：<ul>
+<li>在极化后的单色图中寻找几何圆。</li>
+<li>通过 <code>param2</code>（累加器阈值）控制检测的严苛程度。</li>
+</ul>
+</li>
+<li><strong>分色标记 (Color-coded Labeling)</strong>：<ul>
+<li>根据检测来源图的不同，使用对应的 <code>colorset</code>（红&#x2F;绿&#x2F;蓝）在原始彩色帧上绘制圆圈和圆心。<br><strong>Hough Circle Transform:</strong></li>
+</ul>
+</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">hough_circle</span>(<span class="hljs-params">frame, gray, color</span>):  <br>    img = cv2.medianBlur(gray, <span class="hljs-number">3</span>)  <span class="hljs-comment"># 中值滤波  </span><br>    img = cv2.GaussianBlur(img, (<span class="hljs-number">17</span>, <span class="hljs-number">19</span>), <span class="hljs-number">0</span>)  <span class="hljs-comment"># 高斯滤波  </span><br>    <span class="hljs-keyword">try</span>:  <span class="hljs-comment"># try语法保证在找到圆的前提下才进行绘制  </span><br>        circles = cv2.HoughCircles(img, cv2.HOUGH_GRADIENT, <span class="hljs-number">1</span>, <span class="hljs-number">200</span>, param1=<span class="hljs-number">100</span>, param2=<span class="hljs-number">50</span>,  <br>                                       minRadius=<span class="hljs-number">50</span>, maxRadius=<span class="hljs-number">360</span>)  <br>        circles = np.uint16(np.around(circles))  <span class="hljs-comment"># 取整  </span><br>    <span class="hljs-keyword">except</span>:  <br>        <span class="hljs-keyword">pass</span>  <br>    <span class="hljs-keyword">else</span>:  <br>        <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> circles[<span class="hljs-number">0</span>, :]:  <br>            <span class="hljs-comment"># 描绘圆形  </span><br>            cv2.circle(frame, (k[<span class="hljs-number">0</span>], k[<span class="hljs-number">1</span>]), k[<span class="hljs-number">2</span>], colorset[color], <span class="hljs-number">2</span>)  <br>            <span class="hljs-comment"># 描绘圆心  </span><br>            cv2.circle(frame, (k[<span class="hljs-number">0</span>], k[<span class="hljs-number">1</span>]), <span class="hljs-number">2</span>, colorset[color], <span class="hljs-number">3</span>)<br></code></pre></td></tr></table></figure>
+<p><strong>Color Polarization:</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs python">b_, g_, r_ = cv2.split(frame)  <br>r_ = np.int16(r_)  <br>b_ = np.int16(b_)  <br>g_ = np.int16(g_)  <br>r = r_ + r_ - b_ - g_  <br>g = g_ + g_ - r_ - b_  <br>b = b_ + b_ - g_ - r_  <br>r = (r + <span class="hljs-built_in">abs</span>(r)) / <span class="hljs-number">2</span>  <br>b = (b + <span class="hljs-built_in">abs</span>(b)) / <span class="hljs-number">2</span>  <br>g = (g + <span class="hljs-built_in">abs</span>(g)) / <span class="hljs-number">2</span>  <br>r = np.uint8(r)  <br>g = np.uint8(g)  <br>b = np.uint8(b)<br></code></pre></td></tr></table></figure>
+
+<p>OK ! That sounds great. you finish the basic knowledge absording, and the next is HSV lessons. Awesome!</p>
+<h4 id="第一阶段：图像预处理-Image-Preprocessing"><a href="#第一阶段：图像预处理-Image-Preprocessing" class="headerlink" title="第一阶段：图像预处理 (Image Preprocessing)"></a><strong>第一阶段：图像预处理 (Image Preprocessing)</strong></h4><ul>
+<li><p><strong>高斯模糊 (Gaussian Blur)</strong>：减少图像中的电子噪声和纹理干扰。</p>
+</li>
+<li><p><strong>空间转换 (Color Space Conversion)</strong>：将图像从 <strong>BGR</strong>（对光照敏感）转换为 <strong>HSV</strong>（色调、饱和度、亮度）。</p>
+<ul>
+<li><em>原因</em>：在 HSV 空间中，颜色（Hue）是一个独立的维度，更容易通过设定阈值来锁定特定颜色。</li>
+</ul>
+</li>
+</ul>
+<h4 id="第二阶段：掩膜生成与优化-Masking-Morphological-Ops"><a href="#第二阶段：掩膜生成与优化-Masking-Morphological-Ops" class="headerlink" title="第二阶段：掩膜生成与优化 (Masking &amp; Morphological Ops)"></a><strong>第二阶段：掩膜生成与优化 (Masking &amp; Morphological Ops)</strong></h4><ul>
+<li><p><strong>阈值分割 (Thresholding)</strong>：利用 <code>cv2.inRange</code> 生成二值掩膜（Mask）。目标颜色变为纯白（255），其余区域变为纯黑（0）。</p>
+</li>
+<li><p><strong>红色特殊处理</strong>：由于红色在 HSV 圆环中跨越了 $0^{\circ}$ 度，所以程序分别提取了低角度和高角度的红色区域并进行了合并。</p>
+</li>
+<li><p><strong>形态学操作 (Morphology)</strong>：</p>
+<ul>
+<li><p><strong>开运算 (Open)</strong>：先腐蚀后膨胀，用于去除背景中的细小白色噪点。</p>
+</li>
+<li><p><strong>闭运算 (Close)</strong>：先膨胀后腐蚀，用于填补目标内部的小黑洞，使圆环更完整。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="第三阶段：几何检测-Circle-Detection"><a href="#第三阶段：几何检测-Circle-Detection" class="headerlink" title="第三阶段：几何检测 (Circle Detection)"></a><strong>第三阶段：几何检测 (Circle Detection)</strong></h4><ul>
+<li><p><strong>霍夫圆变换 (Hough Circle Transform)</strong>：</p>
+<ul>
+<li><p>这是算法的核心。它在掩膜图上寻找符合特定半径范围（<code>160-180</code> 像素）的圆形。</p>
+</li>
+<li><p><code>dp=1</code> 表示累加器分辨率，<code>minDist=200</code> 确保不会在同一个目标上重复检测多个圆。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="第四阶段：结果绘制-Visualization"><a href="#第四阶段：结果绘制-Visualization" class="headerlink" title="第四阶段：结果绘制 (Visualization)"></a><strong>第四阶段：结果绘制 (Visualization)</strong></h4><ul>
+<li><p><strong>坐标转换</strong>：将检测到的圆心 $(x, y)$ 和半径 $r$ 转换为整数。</p>
+</li>
+<li><p><strong>动态标注文案</strong>：计算标签位置（<code>label_y</code>），确保文字始终显示在圆环上方，并做边界检查防止文字溢出屏幕。</p>
+</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">get_color_mask</span>(<span class="hljs-params">hsv_frame, config</span>):  <br>    <span class="hljs-string">&quot;&quot;&quot;根据HSV配置生成掩膜&quot;&quot;&quot;</span>  <br>    h = config[<span class="hljs-string">&quot;hsv&quot;</span>]  <br>    <span class="hljs-keyword">if</span> config[<span class="hljs-string">&quot;name&quot;</span>] == <span class="hljs-string">&quot;red&quot;</span>:  <br>        mask1 = cv2.inRange(hsv_frame, np.array(h[<span class="hljs-number">0</span>]), np.array(h[<span class="hljs-number">1</span>]))  <br>        mask2 = cv2.inRange(hsv_frame, np.array(h[<span class="hljs-number">2</span>]), np.array(h[<span class="hljs-number">3</span>]))  <br>        <span class="hljs-keyword">return</span> mask1 + mask2  <br>    <span class="hljs-keyword">return</span> cv2.inRange(hsv_frame, np.array(h[<span class="hljs-number">0</span>]), np.array(h[<span class="hljs-number">1</span>]))<br>    <br><span class="hljs-keyword">def</span> <span class="hljs-title function_">clean_mask</span>(<span class="hljs-params">mask</span>):  <br>    <span class="hljs-string">&quot;&quot;&quot;形态学降噪&quot;&quot;&quot;</span>  <br>    kernel = np.ones((<span class="hljs-number">5</span>, <span class="hljs-number">5</span>), np.uint8)  <br>    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)  <br>    <span class="hljs-keyword">return</span> cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)<br> <br><span class="hljs-keyword">def</span> <span class="hljs-title function_">detect_and_draw</span>(<span class="hljs-params">mask, frame, config</span>):  <br>    <span class="hljs-string">&quot;&quot;&quot;检测圆环并绘制结果&quot;&quot;&quot;</span>  <br>    blurred = cv2.medianBlur(cv2.GaussianBlur(mask, (<span class="hljs-number">9</span>, <span class="hljs-number">9</span>), <span class="hljs-number">2.2</span>), <span class="hljs-number">5</span>)  <br>  <br>    circles = cv2.HoughCircles(blurred, cv2.HOUGH_GRADIENT, **HOUGH_PARAMS)  <br>  <br>    <span class="hljs-keyword">if</span> circles <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:  <br>        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> np.uint16(np.around(circles[<span class="hljs-number">0</span>, :])):  <br>            cx, cy, r = <span class="hljs-built_in">map</span>(<span class="hljs-built_in">int</span>, i)  <br>            <span class="hljs-comment"># 绘制圆  </span><br>            cv2.circle(frame, (cx, cy), r, config[<span class="hljs-string">&quot;bgr&quot;</span>], <span class="hljs-number">3</span>)  <br>            cv2.circle(frame, (cx, cy), <span class="hljs-number">3</span>, config[<span class="hljs-string">&quot;bgr&quot;</span>], -<span class="hljs-number">1</span>)  <br>            <span class="hljs-comment"># 标签位置计算  </span><br>            lx, ly = <span class="hljs-built_in">max</span>(<span class="hljs-number">10</span>, cx - <span class="hljs-number">20</span>), <span class="hljs-built_in">max</span>(<span class="hljs-number">25</span>, cy - r - <span class="hljs-number">15</span>)  <br>            cv2.putText(frame, config[<span class="hljs-string">&quot;name&quot;</span>], (lx, ly), cv2.FONT_HERSHEY_SIMPLEX, <span class="hljs-number">0</span><br><br><span class="hljs-comment"># --- 参数配置区 ---COLOR_CONFIG = [  </span><br>    &#123;<span class="hljs-string">&quot;name&quot;</span>: <span class="hljs-string">&quot;blue&quot;</span>, <span class="hljs-string">&quot;bgr&quot;</span>: (<span class="hljs-number">255</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>), <span class="hljs-string">&quot;hsv&quot;</span>: [(<span class="hljs-number">100</span>, <span class="hljs-number">43</span>, <span class="hljs-number">46</span>), (<span class="hljs-number">124</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>)]&#125;,  <br>    &#123;<span class="hljs-string">&quot;name&quot;</span>: <span class="hljs-string">&quot;green&quot;</span>, <span class="hljs-string">&quot;bgr&quot;</span>: (<span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>), <span class="hljs-string">&quot;hsv&quot;</span>: [(<span class="hljs-number">35</span>, <span class="hljs-number">43</span>, <span class="hljs-number">46</span>), (<span class="hljs-number">77</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>)]&#125;,  <br>    &#123;<span class="hljs-string">&quot;name&quot;</span>: <span class="hljs-string">&quot;red&quot;</span>, <span class="hljs-string">&quot;bgr&quot;</span>: (<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>), <span class="hljs-string">&quot;hsv&quot;</span>: [(<span class="hljs-number">0</span>, <span class="hljs-number">120</span>, <span class="hljs-number">30</span>), (<span class="hljs-number">20</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>), (<span class="hljs-number">150</span>, <span class="hljs-number">120</span>, <span class="hljs-number">30</span>), (<span class="hljs-number">179</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>)]&#125;  <br>]  <br>  <br>HOUGH_PARAMS = &#123;  <br>    <span class="hljs-string">&quot;dp&quot;</span>: <span class="hljs-number">1</span>, <span class="hljs-string">&quot;minDist&quot;</span>: <span class="hljs-number">200</span>, <span class="hljs-string">&quot;param1&quot;</span>: <span class="hljs-number">100</span>, <span class="hljs-string">&quot;param2&quot;</span>: <span class="hljs-number">50</span>, <span class="hljs-string">&quot;minRadius&quot;</span>: <span class="hljs-number">160</span>, <span class="hljs-string">&quot;maxRadius&quot;</span>: <span class="hljs-number">180</span>  <br>&#125;<br></code></pre></td></tr></table></figure>
+
+    
+  </article>
+
+  
+      
+    <div class="nexmoe-post-copyright">
+        <strong>本文作者：</strong>HSQ<br>
+        <strong>本文链接：</strong><a href="https://hsqhere.github.io/2026/04/29/HSV%E5%9C%86%E5%BD%A2%E8%BD%AE%E5%BB%93%E6%A3%80%E6%B5%8B/" title="https:&#x2F;&#x2F;hsqhere.github.io&#x2F;2026&#x2F;04&#x2F;29&#x2F;HSV%E5%9C%86%E5%BD%A2%E8%BD%AE%E5%BB%93%E6%A3%80%E6%B5%8B&#x2F;" target="_blank" rel="noopener">https:&#x2F;&#x2F;hsqhere.github.io&#x2F;2026&#x2F;04&#x2F;29&#x2F;HSV%E5%9C%86%E5%BD%A2%E8%BD%AE%E5%BB%93%E6%A3%80%E6%B5%8B&#x2F;</a><br>
+        
+            # <strong>版权声明：</strong>本文采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/cn/deed.zh" target="_blank">CC BY-NC-SA 3.0 CN</a> 协议进行许可
+
+        
+    </div>
+
+
+  
+  
+  <div class="nexmoe-post-meta nexmoe-rainbow">
+   
+    
+        <a class="nexmoefont icon-tag-fill -none-link" href="/tags/Hough%E5%9C%86/" rel="tag">Hough圆</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/cv/" rel="tag">cv</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E6%8E%A9%E8%86%9C/" rel="tag">掩膜</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E6%97%A5%E8%AE%B0/" rel="tag">日记</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E8%A7%86%E8%A7%89/" rel="tag">视觉</a>
+    
+</div>
+  
+  
+    <script async src="/js/copy-codeblock.js?v=1777482665440"></script>
+  
+
+  
+      <div class="nexmoe-post-footer">
+          
+      </div>
+  
+</div></div><div class="nexmoe-post-right">    <div class="nexmoe-fixed">
+        <div class="nexmoe-tool">
+
+            
+
+            
+            
+            <button class="mdui-fab catalog" style="overflow:unset;">
+                <i class="nexmoefont icon-i-catalog"></i>
+                <div class="nexmoe-toc">
+                    <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E9%98%B6%E6%AE%B5%EF%BC%9A%E5%9B%BE%E5%83%8F%E9%A2%84%E5%A4%84%E7%90%86-Image-Preprocessing"><span class="toc-number">1.</span> <span class="toc-text">第一阶段：图像预处理 (Image Preprocessing)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E9%98%B6%E6%AE%B5%EF%BC%9A%E6%8E%A9%E8%86%9C%E7%94%9F%E6%88%90%E4%B8%8E%E4%BC%98%E5%8C%96-Masking-Morphological-Ops"><span class="toc-number">2.</span> <span class="toc-text">第二阶段：掩膜生成与优化 (Masking &amp; Morphological Ops)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E9%98%B6%E6%AE%B5%EF%BC%9A%E5%87%A0%E4%BD%95%E6%A3%80%E6%B5%8B-Circle-Detection"><span class="toc-number">3.</span> <span class="toc-text">第三阶段：几何检测 (Circle Detection)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AC%AC%E5%9B%9B%E9%98%B6%E6%AE%B5%EF%BC%9A%E7%BB%93%E6%9E%9C%E7%BB%98%E5%88%B6-Visualization"><span class="toc-number">4.</span> <span class="toc-text">第四阶段：结果绘制 (Visualization)</span></a></li></ol>
+                </div>
+            </button>
+            
+
+            
+
+            <a href="#nexmoe-content" class="backtop toc-link" aria-label="Back To Top" title="top"><button class="mdui-fab mdui-ripple"><i class="nexmoefont icon-caret-top"></i></button></a>
+        </div>
+    </div>
+</div></div><div id="nexmoe-footer"><!--!--></div><div id="nexmoe-search-space"><div class="search-container"><div class="search-header"><div class="search-input-container"><input class="search-input" type="text" placeholder="搜索" onInput="sinput();"></div><a class="search-close" onclick="sclose();">×</a></div><div class="search-body"></div></div></div><div><div id="aplayer" style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;"></div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // --- APlayer 音乐播放器部分 ---
+    const ap = new APlayer({
+      container: document.getElementById('aplayer'),
+      fixed: true,
+      autoplay: false,
+      theme: '#22d9df',
+      loop: 'all',
+      order: 'random',
+      preload: 'auto',
+      volume: 0.2,
+      mutex: true,
+      lrcType: 0,
+      audio: [
+        {
+          name: '那么骄傲',
+          artist: '茜茜',
+          url: '/music/那么骄傲 - 茜茜.mp3', 
+          cover: '/music/cover茜茜.jpg',
+          lrc: '[00:00.00]暂无歌词'
+        }
+      ]
+    });
+
+    // --- Twikoo 评论系统部分 ---
+    if (window.location.pathname.match(/\/\d{4}\/\d{2}\/\d{2}\//) || 
+        document.querySelector('article.post') || 
+        document.body.classList.contains('post-template')) {
+      
+      let talkContainer = document.getElementById('tcomment');
+      if (!talkContainer) {
+        const article = document.querySelector('article') || 
+                        document.querySelector('.nexmoe-post') || 
+                        document.querySelector('.post-content') ||
+                        document.querySelector('main');
+        if (article) {
+          talkContainer = document.createElement('div');
+          talkContainer.id = 'tcomment';
+          article.insertAdjacentElement('afterend', talkContainer);
+        }
+      }
+      
+      if (talkContainer && typeof twikoo !== 'undefined') {
+        twikoo.init({
+          envId: 'https://hsqblog.netlify.app/.netlify/functions/twikoo',
+          el: '#tcomment',
+          path: window.location.pathname,
+          lang: 'zh-CN'
+        });
+      }
+    }
+  });
+
+  // --- 朋友卡片解锁逻辑 ---
+  async function unlock(id, correctHash) {
+    const input = document.getElementById('input-' + id).value;
+    const msgUint8 = new TextEncoder().encode(input);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+    if (hashHex === correctHash) {
+        document.getElementById('lock-' + id).style.display = 'none';
+        const imgDiv = document.getElementById('img-' + id);
+        imgDiv.style.display = 'block';
+        setTimeout(() => imgDiv.style.opacity = "1", 10);
+    } else {
+        const err = document.getElementById('err-' + id);
+        err.style.display = 'block';
+        setTimeout(() => err.style.display = 'none', 2000);
+    }
+  }
+</script>
+</div></body></html>
