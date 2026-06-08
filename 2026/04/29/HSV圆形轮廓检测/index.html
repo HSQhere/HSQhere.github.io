@@ -6,12 +6,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
 
 <link rel="shortcut icon" href="/hexo_init/images/avatar.jpg" type="image/jpg" />
-<meta name="description" content="Before we transition to the HSV color space, it is crucial to establish a solid foundation within the RGB model.  颜色极化 (Color Polarization)：  不使用常规灰度化，而是利用色差公式提取特定颜色：  红色增强图：                   #mjx-d9">
+<meta name="description" content="Before we transition to the HSV color space, it is crucial to establish a solid foundation within the RGB model.  颜色极化 (Color Polarization)：  不使用常规灰度化，而是利用色差公式提取特定颜色：  红色增强图：                   #mjx-d7">
 <meta property="og:type" content="article">
 <meta property="og:title" content="HSV圆形轮廓检测">
 <meta property="og:url" content="https://hsqhere.github.io/2026/04/29/HSV%E5%9C%86%E5%BD%A2%E8%BD%AE%E5%BB%93%E6%A3%80%E6%B5%8B/index.html">
 <meta property="og:site_name" content="HSQ 的个人博客">
-<meta property="og:description" content="Before we transition to the HSV color space, it is crucial to establish a solid foundation within the RGB model.  颜色极化 (Color Polarization)：  不使用常规灰度化，而是利用色差公式提取特定颜色：  红色增强图：                   #mjx-d9">
+<meta property="og:description" content="Before we transition to the HSV color space, it is crucial to establish a solid foundation within the RGB model.  颜色极化 (Color Polarization)：  不使用常规灰度化，而是利用色差公式提取特定颜色：  红色增强图：                   #mjx-d7">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-04-29T07:44:09.000Z">
 <meta property="article:modified_time" content="2026-04-29T16:40:43.754Z">
@@ -27,15 +27,15 @@
 <link rel="stylesheet" href="/lib/mdui_043tiny/mdui.css">
 
 
-<link rel="stylesheet" href="/lib/iconfont/iconfont.css?v=1779037203683">
+<link rel="stylesheet" href="/lib/iconfont/iconfont.css?v=1780921242592">
 
-<link rel="stylesheet" href="/css/style.css?v=1779037203683">
+<link rel="stylesheet" href="/css/style.css?v=1780921242593">
 
 
 
 
     
-        <link rel="stylesheet" href="/custom.css?v=1779037203683">
+        <link rel="stylesheet" href="/custom.css?v=1780921242593">
     
 
 
@@ -45,7 +45,7 @@
 <script src="/lib/lax.min.js" async></script>
 
 
-<script async src="/js/app.js?v=1779037203683"></script>
+<script async src="/js/app.js?v=1780921242593"></script>
 
  
 
@@ -85,8 +85,8 @@ window.MathJax = {
         </a>
     </div>
     <div class="nexmoe-count">
-        <div><span>文章</span>20</div>
-        <div><span>标签</span>41</div>
+        <div><span>文章</span>22</div>
+        <div><span>标签</span>44</div>
         <div><span>分类</span>11</div>
     </div>
     <div class="nexmoe-list mdui-list" mdui-collapse="{accordion: true}">
@@ -152,7 +152,7 @@ window.MathJax = {
 </div>
 
 
-	<script async src="/js/search.js?v=1779037203683"></script>
+	<script async src="/js/search.js?v=1780921242593"></script>
 
 
 
@@ -272,7 +272,7 @@ window.MathJax = {
 
         <li class="category-list-item">
           <a class="category-list-link" href="/categories/日记/">日记</a>
-          <span class="category-list-count">2</span>
+          <span class="category-list-count">3</span>
         </li>
 
         
@@ -300,7 +300,7 @@ window.MathJax = {
 
         <li class="category-list-item">
           <a class="category-list-link" href="/categories/电控/">电控</a>
-          <span class="category-list-count">4</span>
+          <span class="category-list-count">5</span>
         </li>
 
         
@@ -336,12 +336,12 @@ window.MathJax = {
         
   <div class="nexmoe-widget-wrap">
     <div id="randomtagcloud" class="nexmoe-widget tagcloud nexmoe-rainbow">
-      <a href="/tags/CAD/" style="font-size: 10px;">CAD</a> <a href="/tags/Hough%E5%9C%86/" style="font-size: 10px;">Hough圆</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/cv/" style="font-size: 12px;">cv</a> <a href="/tags/foc/" style="font-size: 10px;">foc</a> <a href="/tags/keysking/" style="font-size: 10px;">keysking</a> <a href="/tags/pbc/" style="font-size: 10px;">pbc</a> <a href="/tags/pnp/" style="font-size: 10px;">pnp</a> <a href="/tags/stm32/" style="font-size: 10px;">stm32</a> <a href="/tags/%E4%BA%92%E5%8A%A8/" style="font-size: 10px;">互动</a> <a href="/tags/%E4%BB%BF%E7%9C%9F/" style="font-size: 12px;">仿真</a> <a href="/tags/%E5%88%B6%E5%9B%BE/" style="font-size: 12px;">制图</a> <a href="/tags/%E5%8A%A0%E9%80%9F%E5%BA%A6%E8%AE%A1/" style="font-size: 10px;">加速度计</a> <a href="/tags/%E5%8F%8D%E6%80%9D/" style="font-size: 10px;">反思</a> <a href="/tags/%E5%98%89%E7%AB%8B%E5%88%9B/" style="font-size: 10px;">嘉立创</a> <a href="/tags/%E5%BB%BA%E6%A8%A1/" style="font-size: 10px;">建模</a> <a href="/tags/%E6%84%9F%E6%83%85/" style="font-size: 14px;">感情</a> <a href="/tags/%E6%8A%A5%E9%94%99/" style="font-size: 14px;">报错</a> <a href="/tags/%E6%8E%A9%E8%86%9C/" style="font-size: 10px;">掩膜</a> <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" style="font-size: 16px;">操作系统</a> <a href="/tags/%E6%95%99%E7%A8%8B/" style="font-size: 10px;">教程</a> <a href="/tags/%E6%97%A0%E5%88%B7%E7%94%B5%E6%9C%BA/" style="font-size: 10px;">无刷电机</a> <a href="/tags/%E6%97%A5%E8%AE%B0/" style="font-size: 20px;">日记</a> <a href="/tags/%E6%9C%BA%E5%99%A8%E4%BA%BA/" style="font-size: 10px;">机器人</a> <a href="/tags/%E6%9C%BA%E6%A2%B0/" style="font-size: 14px;">机械</a> <a href="/tags/%E6%A0%91%E6%B4%9E/" style="font-size: 10px;">树洞</a> <a href="/tags/%E6%A0%91%E8%8E%93%E6%B4%BE/" style="font-size: 10px;">树莓派</a> <a href="/tags/%E7%88%B1%E6%83%85/" style="font-size: 10px;">爱情</a> <a href="/tags/%E7%94%9F%E6%B4%BB/" style="font-size: 10px;">生活</a> <a href="/tags/%E7%94%B5%E6%8E%A7/" style="font-size: 18px;">电控</a> <a href="/tags/%E7%9B%AE%E6%A0%87/" style="font-size: 12px;">目标</a> <a href="/tags/%E7%BC%96%E7%A8%8B/" style="font-size: 10px;">编程</a> <a href="/tags/%E8%A7%84%E5%88%92/" style="font-size: 10px;">规划</a> <a href="/tags/%E8%A7%86%E8%A7%89/" style="font-size: 12px;">视觉</a> <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/" style="font-size: 10px;">计算机</a> <a href="/tags/%E8%AF%84%E8%AE%BA%E5%8C%BA/" style="font-size: 10px;">评论区</a> <a href="/tags/%E8%AF%BB%E4%B9%A6/" style="font-size: 10px;">读书</a> <a href="/tags/%E8%BD%A6%E8%BE%86/" style="font-size: 10px;">车辆</a> <a href="/tags/%E9%97%AE%E9%A2%98/" style="font-size: 10px;">问题</a> <a href="/tags/%E9%99%80%E8%9E%BA%E4%BB%AA/" style="font-size: 10px;">陀螺仪</a> <a href="/tags/%E9%A6%99%E6%A9%99%E6%B4%BE/" style="font-size: 10px;">香橙派</a>
+      <a href="/tags/CAD/" style="font-size: 10px;">CAD</a> <a href="/tags/Hough%E5%9C%86/" style="font-size: 10px;">Hough圆</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/PID/" style="font-size: 10px;">PID</a> <a href="/tags/cv/" style="font-size: 12px;">cv</a> <a href="/tags/foc/" style="font-size: 10px;">foc</a> <a href="/tags/keysking/" style="font-size: 10px;">keysking</a> <a href="/tags/pbc/" style="font-size: 10px;">pbc</a> <a href="/tags/pnp/" style="font-size: 10px;">pnp</a> <a href="/tags/stm32/" style="font-size: 10px;">stm32</a> <a href="/tags/%E4%BA%92%E5%8A%A8/" style="font-size: 10px;">互动</a> <a href="/tags/%E4%BB%BF%E7%9C%9F/" style="font-size: 12px;">仿真</a> <a href="/tags/%E5%88%B6%E5%9B%BE/" style="font-size: 12px;">制图</a> <a href="/tags/%E5%8A%A0%E9%80%9F%E5%BA%A6%E8%AE%A1/" style="font-size: 10px;">加速度计</a> <a href="/tags/%E5%8F%8D%E6%80%9D/" style="font-size: 10px;">反思</a> <a href="/tags/%E5%98%89%E7%AB%8B%E5%88%9B/" style="font-size: 10px;">嘉立创</a> <a href="/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/" style="font-size: 10px;">嵌入式</a> <a href="/tags/%E5%BB%BA%E6%A8%A1/" style="font-size: 10px;">建模</a> <a href="/tags/%E6%84%9F%E6%83%85/" style="font-size: 16px;">感情</a> <a href="/tags/%E6%8A%A5%E9%94%99/" style="font-size: 14px;">报错</a> <a href="/tags/%E6%8E%A7%E5%88%B6%E7%AE%97%E6%B3%95/" style="font-size: 10px;">控制算法</a> <a href="/tags/%E6%8E%A9%E8%86%9C/" style="font-size: 10px;">掩膜</a> <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" style="font-size: 16px;">操作系统</a> <a href="/tags/%E6%95%99%E7%A8%8B/" style="font-size: 10px;">教程</a> <a href="/tags/%E6%97%A0%E5%88%B7%E7%94%B5%E6%9C%BA/" style="font-size: 10px;">无刷电机</a> <a href="/tags/%E6%97%A5%E8%AE%B0/" style="font-size: 20px;">日记</a> <a href="/tags/%E6%9C%BA%E5%99%A8%E4%BA%BA/" style="font-size: 10px;">机器人</a> <a href="/tags/%E6%9C%BA%E6%A2%B0/" style="font-size: 14px;">机械</a> <a href="/tags/%E6%A0%91%E6%B4%9E/" style="font-size: 10px;">树洞</a> <a href="/tags/%E6%A0%91%E8%8E%93%E6%B4%BE/" style="font-size: 10px;">树莓派</a> <a href="/tags/%E7%88%B1%E6%83%85/" style="font-size: 10px;">爱情</a> <a href="/tags/%E7%94%9F%E6%B4%BB/" style="font-size: 12px;">生活</a> <a href="/tags/%E7%94%B5%E6%8E%A7/" style="font-size: 18px;">电控</a> <a href="/tags/%E7%9B%AE%E6%A0%87/" style="font-size: 12px;">目标</a> <a href="/tags/%E7%BC%96%E7%A8%8B/" style="font-size: 10px;">编程</a> <a href="/tags/%E8%A7%84%E5%88%92/" style="font-size: 10px;">规划</a> <a href="/tags/%E8%A7%86%E8%A7%89/" style="font-size: 12px;">视觉</a> <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/" style="font-size: 10px;">计算机</a> <a href="/tags/%E8%AF%84%E8%AE%BA%E5%8C%BA/" style="font-size: 10px;">评论区</a> <a href="/tags/%E8%AF%BB%E4%B9%A6/" style="font-size: 10px;">读书</a> <a href="/tags/%E8%BD%A6%E8%BE%86/" style="font-size: 10px;">车辆</a> <a href="/tags/%E9%97%AE%E9%A2%98/" style="font-size: 10px;">问题</a> <a href="/tags/%E9%99%80%E8%9E%BA%E4%BB%AA/" style="font-size: 10px;">陀螺仪</a> <a href="/tags/%E9%A6%99%E6%A9%99%E6%B4%BE/" style="font-size: 10px;">香橙派</a>
     </div>
     
       <script>
         var maxTagcloud = parseInt(17);
-        var tags_length = parseInt(41);
+        var tags_length = parseInt(44);
         var tags_arr = [];
         for(var i = 0; i < tags_length; i++){
           tags_arr.push(i);
@@ -363,7 +363,7 @@ window.MathJax = {
   <div class="nexmoe-widget-wrap">
     <h3 class="nexmoe-widget-title">文章归档</h3>
     <div class="nexmoe-widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/">2026</a><span class="archive-list-count">20</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/">2026</a><span class="archive-list-count">22</span></li></ul>
     </div>
   </div>
 
@@ -412,9 +412,9 @@ window.MathJax = {
 <li>不使用常规灰度化，而是利用色差公式提取特定颜色：
 <ul>
 <li><strong>红色增强图</strong>：
-    <span id="mjx-d9254cc8">
+    <span id="mjx-d7d40ff">
       <style>
-      #mjx-d9254cc8{
+      #mjx-d7d40ff{
         display:contents;
         mjx-assistive-mml {
           user-select: text !important;
@@ -574,9 +574,9 @@ g[data-mml-node="xypic"] path {
     </span>
   </li>
 <li><strong>绿色增强图</strong>：
-    <span id="mjx-d215e3f8">
+    <span id="mjx-3a5737e8">
       <style>
-      #mjx-d215e3f8{
+      #mjx-3a5737e8{
         display:contents;
         mjx-assistive-mml {
           user-select: text !important;
@@ -736,9 +736,9 @@ g[data-mml-node="xypic"] path {
     </span>
   </li>
 <li><strong>蓝色增强图</strong>：
-    <span id="mjx-adec209">
+    <span id="mjx-2d392e88">
       <style>
-      #mjx-adec209{
+      #mjx-2d392e88{
         display:contents;
         mjx-assistive-mml {
           user-select: text !important;
@@ -944,9 +944,9 @@ g[data-mml-node="xypic"] path {
 </li>
 <li>
 <p><strong>红色特殊处理</strong>：由于红色在 HSV 圆环中跨越了 
-    <span id="mjx-fd65a988">
+    <span id="mjx-feb6807">
       <style>
-      #mjx-fd65a988{
+      #mjx-feb6807{
         display:contents;
         mjx-assistive-mml {
           user-select: text !important;
@@ -1136,9 +1136,9 @@ g[data-mml-node="xypic"] path {
 <ul>
 <li>
 <p><strong>坐标转换</strong>：将检测到的圆心 
-    <span id="mjx-54c95f6">
+    <span id="mjx-283284e">
       <style>
-      #mjx-54c95f6{
+      #mjx-283284e{
         display:contents;
         mjx-assistive-mml {
           user-select: text !important;
@@ -1297,9 +1297,9 @@ g[data-mml-node="xypic"] path {
       <mjx-container class="MathJax" jax="SVG" style="position: relative;"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="5.169ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2284.7 1000" aria-hidden="true"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mo"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(389,0)"><path data-c="1D465" d="M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z"></path></g><g data-mml-node="mo" transform="translate(961,0)"><path data-c="2C" d="M78 35T78 60T94 103T137 121Q165 121 187 96T210 8Q210 -27 201 -60T180 -117T154 -158T130 -185T117 -194Q113 -194 104 -185T95 -172Q95 -168 106 -156T131 -126T157 -76T173 -3V9L172 8Q170 7 167 6T161 3T152 1T140 0Q113 0 96 17Z"></path></g><g data-mml-node="mi" transform="translate(1405.7,0)"><path data-c="1D466" d="M21 287Q21 301 36 335T84 406T158 442Q199 442 224 419T250 355Q248 336 247 334Q247 331 231 288T198 191T182 105Q182 62 196 45T238 27Q261 27 281 38T312 61T339 94Q339 95 344 114T358 173T377 247Q415 397 419 404Q432 431 462 431Q475 431 483 424T494 412T496 403Q496 390 447 193T391 -23Q363 -106 294 -155T156 -205Q111 -205 77 -183T43 -117Q43 -95 50 -80T69 -58T89 -48T106 -45Q150 -45 150 -87Q150 -107 138 -122T115 -142T102 -147L99 -148Q101 -153 118 -160T152 -167H160Q177 -167 186 -165Q219 -156 247 -127T290 -65T313 -9T321 21L315 17Q309 13 296 6T270 -6Q250 -11 231 -11Q185 -11 150 11T104 82Q103 89 103 113Q103 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Z"></path></g><g data-mml-node="mo" transform="translate(1895.7,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mo stretchy="false">(</mo><mi>x</mi><mo>,</mo><mi>y</mi><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container>
     </span>
    和半径 
-    <span id="mjx-501a88d">
+    <span id="mjx-4478a698">
       <style>
-      #mjx-501a88d{
+      #mjx-4478a698{
         display:contents;
         mjx-assistive-mml {
           user-select: text !important;
@@ -1490,7 +1490,7 @@ g[data-mml-node="xypic"] path {
 </div>
   
   
-    <script async src="/js/copy-codeblock.js?v=1779037203587"></script>
+    <script async src="/js/copy-codeblock.js?v=1780921242375"></script>
   
 
   
