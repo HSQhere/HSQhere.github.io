@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="zh"><head>
+<title>Jetson NX (JetPack 6) 部署 ROS2 Humble 踩坑与实战 - HSQ 的个人博客</title>
+<meta charset="UTF-8">
+<meta name="keywords" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+
+<link rel="shortcut icon" href="/hexo_init/images/avatar.jpg" type="image/jpg" />
+<meta name="description" content="一、 安装 DockerJetPack 6 默认通常已预装 Docker，但在开始前建议确保环境最新并配置免 sudo 权限：  更新软件源并补充安装 Docker 基础组件： 1sudo apt update &amp;&amp; sudo apt install -y docker.io 设置开机自启并立即启动： 1sudo systemctl enable --now docker 将当前用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Jetson NX (JetPack 6) 部署 ROS2 Humble 踩坑与实战">
+<meta property="og:url" content="https://hsqhere.github.io/2026/06/28/Jetson-NX-JetPack-6-%E9%83%A8%E7%BD%B2-ROS2-Humble-%E8%B8%A9%E5%9D%91%E4%B8%8E%E5%AE%9E%E6%88%98/index.html">
+<meta property="og:site_name" content="HSQ 的个人博客">
+<meta property="og:description" content="一、 安装 DockerJetPack 6 默认通常已预装 Docker，但在开始前建议确保环境最新并配置免 sudo 权限：  更新软件源并补充安装 Docker 基础组件： 1sudo apt update &amp;&amp; sudo apt install -y docker.io 设置开机自启并立即启动： 1sudo systemctl enable --now docker 将当前用">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-06-28T04:43:29.000Z">
+<meta property="article:modified_time" content="2026-06-28T05:20:01.975Z">
+<meta property="article:author" content="HSQ">
+<meta property="article:tag" content="GPU">
+<meta property="article:tag" content="docker">
+<meta property="article:tag" content="jetson">
+<meta property="article:tag" content="ros2">
+<meta property="article:tag" content="日记">
+<meta name="twitter:card" content="summary">
+
+<link rel="stylesheet" href="/lib/fancybox/fancybox.css">
+<link rel="stylesheet" href="/lib/mdui_043tiny/mdui.css">
+
+
+<link rel="stylesheet" href="/lib/iconfont/iconfont.css?v=1782624021682">
+
+<link rel="stylesheet" href="/css/style.css?v=1782624021682">
+
+
+
+
+    
+        <link rel="stylesheet" href="/custom.css?v=1782624021682">
+    
+
+
+
+<script src="/lib/mdui_043tiny/mdui.js" async></script>
+<script src="/lib/fancybox/fancybox.umd.js" async></script>
+<script src="/lib/lax.min.js" async></script>
+
+
+<script async src="/js/app.js?v=1782624021682"></script>
+
+ 
+
+<!-- highlight.js CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<!-- APlayer 音乐播放器 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+<!-- Twikoo 评论系统 -->
+<script src="https://cdn.jsdelivr.net/npm/twikoo@1.6.39/dist/twikoo.all.min.js"></script>
+<!-- MathJax 数学公式渲染 -->
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true,
+    processEnvironments: true
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<!-- APlayer 音乐播放器 JS -->
+<script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+
+
+<link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+<meta name="generator" content="Hexo 8.1.1"></head><body class="nexmoe mdui-drawer-body-left"><div id="nexmoe-background"><div class="nexmoe-bg" style="background-image: url(/hexo_init/images/background_mainpage.png)"></div><div class="mdui-appbar mdui-shadow-0"><div class="mdui-toolbar"><a class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: &#039;#drawer&#039;, swipe: true}" title="menu"><i class="mdui-icon nexmoefont icon-menu"></i></a><div class="mdui-toolbar-spacer"></div><a class="mdui-btn mdui-btn-icon" href="/" title="HSQ"><img src="/hexo_init/images/avatar.jpg" alt="HSQ"></a></div></div></div><div id="nexmoe-header"><div class="nexmoe-drawer mdui-drawer" id="drawer">
+    <div class="nexmoe-avatar mdui-ripple">
+        <a href="/" title="HSQ">
+            <img src="/hexo_init/images/avatar.jpg" alt="HSQ" alt="HSQ">
+        </a>
+    </div>
+    <div class="nexmoe-count">
+        <div><span>文章</span>23</div>
+        <div><span>标签</span>48</div>
+        <div><span>分类</span>11</div>
+    </div>
+    <div class="nexmoe-list mdui-list" mdui-collapse="{accordion: true}">
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/" title="首页">
+            <i class="mdui-list-item-icon nexmoefont icon-home"></i>
+            <div class="mdui-list-item-content">
+                首页
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/archive.html" title="文章归档">
+            <i class="mdui-list-item-icon nexmoefont icon-container"></i>
+            <div class="mdui-list-item-content">
+                文章归档
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/gallery/" title="图库">
+            <i class="mdui-list-item-icon nexmoefont icon-gallery"></i>
+            <div class="mdui-list-item-content">
+                图库
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/plan/" title="规划">
+            <i class="mdui-list-item-icon nexmoefont icon-chart"></i>
+            <div class="mdui-list-item-content">
+                规划
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/friends/" title="朋友们">
+            <i class="mdui-list-item-icon nexmoefont icon-friends"></i>
+            <div class="mdui-list-item-content">
+                朋友们
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/about/" title="关于">
+            <i class="mdui-list-item-icon nexmoefont icon-info-circle"></i>
+            <div class="mdui-list-item-content">
+                关于
+            </div>
+        </a>
+        
+    </div>
+    
+    
+        
+        <div class="nexmoe-widget-wrap">
+    <div class="nexmoe-widget nexmoe-search">
+        
+            <form id="search_form">
+                <label><input class="st-default-search-input" id="search_value" name="q" type="search" placeholder="搜索" style="
+                    font-size: 15px !important;
+                    height: 56px !important;
+                    background-image: none;
+                "></label>
+            </form>
+         
+    </div>
+</div>
+
+
+	<script async src="/js/search.js?v=1782624021683"></script>
+
+
+
+    
+        
+        <div class="nexmoe-widget-wrap">
+	<div class="nexmoe-widget nexmoe-social">
+		<a
+			class="mdui-ripple"
+			href="https://space.bilibili.com/1382035035?spm_id_from=333.1007.0.0"
+			target="_blank"
+			mdui-tooltip="{content: '哔哩哔哩'}"
+			style="
+				color: rgb(231, 106, 141);
+				background-color: rgba(231, 106, 141, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-bilibili"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://github.com/HSQhere"
+			target="_blank"
+			mdui-tooltip="{content: 'GitHub'}"
+			style="
+				color: rgb(25, 23, 23);
+				background-color: rgba(25, 23, 23, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-github"
+			></i> </a
+		>
+	</div>
+</div>
+
+    
+        
+        <!-- 一言 -->
+<div class="nexmoe-widget-wrap">
+  <h3 class="nexmoe-widget-title">
+    一言
+  </h3>
+  <div class="nexmoe-widget">
+    <ul class="hitokoto-box">
+      <li id="hitokoto_text_parent" class="hitokoto-text" hitokotoCategory="">
+        <a href="#" id="hitokoto_text">
+          
+        </a>
+        <a href="#" id="hitokoto_error_text" style="display: none;">
+          
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  let hitokotoText = document.getElementById('hitokoto_text')
+  let hitokotoErroText = document.getElementById('hitokoto_error_text')
+  let hitokotoCategory = document.getElementById('hitokoto_text_parent').getAttribute('hitokotoCategory')
+  window.addEventListener('load', function () {
+    let url = 'https://v1.hitokoto.cn'
+    if (hitokotoCategory) {
+      url += '?c=' + hitokotoCategory
+    }
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        hitokotoText.innerText = "「 " + data.hitokoto + " 」 from " + data.from
+        hitokotoText.href = 'https://hitokoto.cn/?uuid=' + data.uuid
+      })
+      .catch((reason) => {
+        console.error(11, reason)
+        hitokotoText.style.display = 'none'
+        hitokotoErroText.style.display = 'block'
+      })
+  })
+</script>
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章分类</h3>
+    <div class="nexmoe-widget">
+
+      <ul class="category-list">
+
+        
+
+
+        
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/Linux/">Linux</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/仿真/">仿真</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/感情/">感情</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/日记/">日记</a>
+          <span class="category-list-count">3</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/机器人/">机器人</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/机械/">机械</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/树洞/">树洞</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/电控/">电控</a>
+          <span class="category-list-count">5</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/目标/">目标</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/计算机/">计算机</a>
+          <span class="category-list-count">6</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/车辆/">车辆</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+      </ul>
+
+    </div>
+  </div>
+
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <div id="randomtagcloud" class="nexmoe-widget tagcloud nexmoe-rainbow">
+      <a href="/tags/CAD/" style="font-size: 10px;">CAD</a> <a href="/tags/GPU/" style="font-size: 10px;">GPU</a> <a href="/tags/Hough%E5%9C%86/" style="font-size: 10px;">Hough圆</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/PID/" style="font-size: 10px;">PID</a> <a href="/tags/cv/" style="font-size: 12px;">cv</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/foc/" style="font-size: 10px;">foc</a> <a href="/tags/jetson/" style="font-size: 10px;">jetson</a> <a href="/tags/keysking/" style="font-size: 10px;">keysking</a> <a href="/tags/pbc/" style="font-size: 10px;">pbc</a> <a href="/tags/pnp/" style="font-size: 10px;">pnp</a> <a href="/tags/ros2/" style="font-size: 10px;">ros2</a> <a href="/tags/stm32/" style="font-size: 10px;">stm32</a> <a href="/tags/%E4%BA%92%E5%8A%A8/" style="font-size: 10px;">互动</a> <a href="/tags/%E4%BB%BF%E7%9C%9F/" style="font-size: 12px;">仿真</a> <a href="/tags/%E5%88%B6%E5%9B%BE/" style="font-size: 12px;">制图</a> <a href="/tags/%E5%8A%A0%E9%80%9F%E5%BA%A6%E8%AE%A1/" style="font-size: 10px;">加速度计</a> <a href="/tags/%E5%8F%8D%E6%80%9D/" style="font-size: 10px;">反思</a> <a href="/tags/%E5%98%89%E7%AB%8B%E5%88%9B/" style="font-size: 10px;">嘉立创</a> <a href="/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/" style="font-size: 10px;">嵌入式</a> <a href="/tags/%E5%BB%BA%E6%A8%A1/" style="font-size: 10px;">建模</a> <a href="/tags/%E6%84%9F%E6%83%85/" style="font-size: 16px;">感情</a> <a href="/tags/%E6%8A%A5%E9%94%99/" style="font-size: 14px;">报错</a> <a href="/tags/%E6%8E%A7%E5%88%B6%E7%AE%97%E6%B3%95/" style="font-size: 10px;">控制算法</a> <a href="/tags/%E6%8E%A9%E8%86%9C/" style="font-size: 10px;">掩膜</a> <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" style="font-size: 16px;">操作系统</a> <a href="/tags/%E6%95%99%E7%A8%8B/" style="font-size: 10px;">教程</a> <a href="/tags/%E6%97%A0%E5%88%B7%E7%94%B5%E6%9C%BA/" style="font-size: 10px;">无刷电机</a> <a href="/tags/%E6%97%A5%E8%AE%B0/" style="font-size: 20px;">日记</a> <a href="/tags/%E6%9C%BA%E5%99%A8%E4%BA%BA/" style="font-size: 10px;">机器人</a> <a href="/tags/%E6%9C%BA%E6%A2%B0/" style="font-size: 14px;">机械</a> <a href="/tags/%E6%A0%91%E6%B4%9E/" style="font-size: 10px;">树洞</a> <a href="/tags/%E6%A0%91%E8%8E%93%E6%B4%BE/" style="font-size: 10px;">树莓派</a> <a href="/tags/%E7%88%B1%E6%83%85/" style="font-size: 10px;">爱情</a> <a href="/tags/%E7%94%9F%E6%B4%BB/" style="font-size: 12px;">生活</a> <a href="/tags/%E7%94%B5%E6%8E%A7/" style="font-size: 18px;">电控</a> <a href="/tags/%E7%9B%AE%E6%A0%87/" style="font-size: 12px;">目标</a> <a href="/tags/%E7%BC%96%E7%A8%8B/" style="font-size: 10px;">编程</a> <a href="/tags/%E8%A7%84%E5%88%92/" style="font-size: 10px;">规划</a> <a href="/tags/%E8%A7%86%E8%A7%89/" style="font-size: 12px;">视觉</a> <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/" style="font-size: 10px;">计算机</a> <a href="/tags/%E8%AF%84%E8%AE%BA%E5%8C%BA/" style="font-size: 10px;">评论区</a> <a href="/tags/%E8%AF%BB%E4%B9%A6/" style="font-size: 10px;">读书</a> <a href="/tags/%E8%BD%A6%E8%BE%86/" style="font-size: 10px;">车辆</a> <a href="/tags/%E9%97%AE%E9%A2%98/" style="font-size: 10px;">问题</a> <a href="/tags/%E9%99%80%E8%9E%BA%E4%BB%AA/" style="font-size: 10px;">陀螺仪</a> <a href="/tags/%E9%A6%99%E6%A9%99%E6%B4%BE/" style="font-size: 10px;">香橙派</a>
+    </div>
+    
+      <script>
+        var maxTagcloud = parseInt(17);
+        var tags_length = parseInt(48);
+        var tags_arr = [];
+        for(var i = 0; i < tags_length; i++){
+          tags_arr.push(i);
+        }
+        tags_arr.sort(function (l, r) {
+          return Math.random() > 0.5 ? -1 : 1;
+        });
+        tags_arr = tags_arr.slice(0, maxTagcloud < tags_length ? tags_length - maxTagcloud : 0);
+        for(var tag_i = 0; tag_i < tags_arr.length; tag_i++){
+          document.getElementById("randomtagcloud").children[tags_arr[tag_i]].style.display = 'none';
+        }
+      </script>
+    
+  </div>
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章归档</h3>
+    <div class="nexmoe-widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/">2026</a><span class="archive-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+
+    
+        
+   
+    <div class="nexmoe-copyright">
+        &copy; 2026 HSQ
+        Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+        & <a href="https://github.com/theme-nexmoe/hexo-theme-nexmoe" target="_blank">Nexmoe</a>
+        
+    </div>
+</div><!-- .nexmoe-drawer --></div><div id="nexmoe-content"><div class="nexmoe-primary"><div class="nexmoe-post">
+  <article>
+    
+        <div class="nexmoe-post-cover absolute" style="padding-top: NaN%;"> 
+            <img src="/images/tech/program/docker上的ros2网页vnc.png" alt="Jetson NX (JetPack 6) 部署 ROS2 Humble 踩坑与实战" loading="lazy">
+            <h1>Jetson NX (JetPack 6) 部署 ROS2 Humble 踩坑与实战</h1>
+        </div>
+    
+    
+    <div class="nexmoe-post-meta">
+    <div class="nexmoe-rainbow">
+        <a class="nexmoefont icon-calendar-fill">2026年06月28日</a>
+        
+            <a class="nexmoefont icon-appstore-fill -link" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/">计算机</a>
+        
+        
+    <a><i class="nexmoefont icon-areachart"></i>约3.3k字</a>
+    <a><i class="nexmoefont icon-time-circle-fill"></i>预计需要13分钟</a>
+
+    </div>
+    
+    
+    
+    
+    
+</div>
+
+    <h2 id="一、-安装-Docker"><a href="#一、-安装-Docker" class="headerlink" title="一、 安装 Docker"></a>一、 安装 Docker</h2><p>JetPack 6 默认通常已预装 Docker，但在开始前建议确保环境最新并配置免 <code>sudo</code> 权限：</p>
+<ol>
+<li><strong>更新软件源并补充安装 Docker 基础组件</strong>： <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">sudo</span> apt update &amp;&amp; <span class="hljs-built_in">sudo</span> apt install -y docker.io<br></code></pre></td></tr></table></figure></li>
+<li><strong>设置开机自启并立即启动</strong>： <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">sudo</span> systemctl <span class="hljs-built_in">enable</span> --now docker<br></code></pre></td></tr></table></figure></li>
+<li><strong>将当前用户加入 docker 用户组（避免每次都敲 <code>sudo</code>）</strong>： <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">sudo</span> usermod -aG docker <span class="hljs-variable">$USER</span><br></code></pre></td></tr></table></figure>
+<blockquote>
+<p>⚠️ <strong>注意</strong>：执行完此命令后，必须<strong>重启系统</strong>或<strong>注销当前用户重新登录</strong>，组权限才会生效。</p>
+</blockquote>
+</li>
+<li><strong>验证当前状态</strong>： <figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs gradle">docker info | <span class="hljs-keyword">grep</span> -i <span class="hljs-keyword">runtime</span><br></code></pre></td></tr></table></figure>
+ <em>预期输出</em>：此时在输出中应该只能看到 Linux 原生的 <code>runc</code> 运行时。</li>
+</ol>
+<h2 id="二、-避坑：JetPack-6-的-NVIDIA-Runtime-配置策略"><a href="#二、-避坑：JetPack-6-的-NVIDIA-Runtime-配置策略" class="headerlink" title="二、 避坑：JetPack 6 的 NVIDIA Runtime 配置策略"></a>二、 避坑：JetPack 6 的 NVIDIA Runtime 配置策略</h2><p>💡 <strong>硬核原理补充（为什么不配置 <code>--runtime=nvidia</code>？）</strong><br>在旧的 JetPack 5 时代，官方要求在 <code>/etc/docker/daemon.json</code> 中注册 <code>&quot;nvidia&quot;</code> 运行时，并在启动时添加 <code>--runtime nvidia</code> 参数。<br>但在 <strong>JetPack 6 (L4T R36.x)</strong> 架构中，英伟达最新的通用厚镜像（如 <code>dustynv/ros:humble-desktop-l4t-r36.4.0</code>）内部已经集成了显卡驱动和 Vulkan 图形加速文件。<br>如果在 JetPack 6 上强行注册并调用 <code>--runtime nvidia</code>，宿主机会触发挂载钩子去覆盖容器内的同名文件，从而引爆底层死锁冲突（报错：<code>failed to remove existing file: .../nvidia_icd.json: device or resource busy</code>）导致<strong>容器秒级闪退</strong>。<br>✨ <strong>完美替代方案</strong>：保持 Docker 默认的 <code>runc</code> 运行时，在启动时通过显式映射物理显卡设备（<code>--device /dev/nvgpu-gpu</code> 等）将硬件通道递给容器。此方法完美兼顾了 GPU 显卡加速与图形化（Rviz2）输出，且绝不闪退。</p>
+<h2 id="三、-配置国内镜像加速（必做，2026年最新亲测可用）"><a href="#三、-配置国内镜像加速（必做，2026年最新亲测可用）" class="headerlink" title="三、 配置国内镜像加速（必做，2026年最新亲测可用）"></a>三、 配置国内镜像加速（必做，2026年最新亲测可用）</h2><p>由于国内直连 Docker Hub 经常超时，编辑（或创建）<code>/etc/docker/daemon.json</code>，配置最新的通用高速镜像加速源：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">sudo</span> <span class="hljs-built_in">tee</span> /etc/docker/daemon.json &lt;&lt;<span class="hljs-string">&#x27;EOF&#x27;</span><br>&#123;<br>    <span class="hljs-string">&quot;registry-mirrors&quot;</span>: [<br>        <span class="hljs-string">&quot;https://docker.skk.moe&quot;</span>,<br>        <span class="hljs-string">&quot;https://docker.1ms.run&quot;</span>,<br>        <span class="hljs-string">&quot;https://docker.xuanyuan.me&quot;</span><br>    ]<br>&#125;<br>EOF<br></code></pre></td></tr></table></figure>
+<p>重启 Docker 引擎使加速器和纯净运行时生效：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">sudo</span> systemctl restart docker<br></code></pre></td></tr></table></figure>
+<blockquote>
+<p>📌 <strong>注意</strong>：国内镜像加速器的可用性经常变化。如果上述地址失效，可搜索 “Docker 国内镜像加速 2026” 获取最新可用地址替换即可。</p>
+</blockquote>
+<h2 id="四、-确认系统-L4T-版本"><a href="#四、-确认系统-L4T-版本" class="headerlink" title="四、 确认系统 L4T 版本"></a>四、 确认系统 L4T 版本</h2><p>在拉取镜像前，必须确认你的 Jetson NX 宿主机系统确实是 JetPack 6 系列（R36.x）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">cat</span> /etc/nv_tegra_release<br></code></pre></td></tr></table></figure>
+<p><em>预期输出示例</em>：<code># R36 (release), REVISION: 4.0, ...</code>（代表当前为 L4T R36.4.0，必须匹配 r36 的镜像标签）。<br>也可以通过以下命令交叉确认：</p>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c">dpkg <span class="hljs-punctuation">-</span>l <span class="hljs-string">| grep nvidia-l4t-core</span><br></code></pre></td></tr></table></figure>
+<h2 id="五、-拉取-ROS-2-Humble-专属镜像"><a href="#五、-拉取-ROS-2-Humble-专属镜像" class="headerlink" title="五、 拉取 ROS 2 Humble 专属镜像"></a>五、 拉取 ROS 2 Humble 专属镜像</h2><ol>
+<li>GPU 显卡加速版镜像（英伟达官方 Dusty 维护）<br>英伟达官方核心开发者 Dusty Franklin 维护了专为 Jetson 优化的镜像仓库。由于我们的系统是 JetPack 6，必须选择带 <code>r36.x</code> 标签的全新镜像。</li>
+</ol>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># 完整桌面版（包含 rviz2、rqt、Gazebo 以及已调优的 GPU 版 PyTorch，体积约 13.9GB）</span><br><span class="hljs-attribute">docker</span> pull docker.skk.moe/dustynv/ros:humble-desktop-l4t-r36.<span class="hljs-number">4</span>.<span class="hljs-number">0</span><br><br><span class="hljs-comment"># 基础版（仅含底层核心组件，无 GUI，体积较小）</span><br><span class="hljs-attribute">docker</span> pull docker.skk.moe/dustynv/ros:humble-ros-base-l4t-r36.<span class="hljs-number">4</span>.<span class="hljs-number">0</span><br></code></pre></td></tr></table></figure>
+<ol start="2">
+<li>CPU 通用网页 VNC 版镜像（开源社区 Tiryoh 维护）</li>
+</ol>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs awk"><span class="hljs-comment"># 自带无头浏览器桌面与 VNC 服务，不需要任何显卡配置，体积适中</span><br>docker pull docker.skk.moe<span class="hljs-regexp">/tiryoh/</span>ros2-desktop-vnc:humble<br></code></pre></td></tr></table></figure>
+<p>💾 <strong>存储提醒</strong>：JetPack 6 的 Desktop 镜像非常庞大，解压后会吞掉 20GB+ 的磁盘空间。请确保你的 Jetson NX 系统已经迁移到外部 NVMe 固态硬盘上。如果根分区在自带的 eMMC（通常只有 16GB）上，极易因空间不足卡死。</p>
+<h2 id="六、-启动容器（核心实战脚本）"><a href="#六、-启动容器（核心实战脚本）" class="headerlink" title="六、 启动容器（核心实战脚本）"></a>六、 启动容器（核心实战脚本）</h2><h3 id="6-1-【版本-A】NVIDIA-GPU-显卡加速本地版启动脚本："><a href="#6-1-【版本-A】NVIDIA-GPU-显卡加速本地版启动脚本：" class="headerlink" title="6.1 【版本 A】NVIDIA GPU 显卡加速本地版启动脚本："></a>6.1 【版本 A】NVIDIA GPU 显卡加速本地版启动脚本：</h3><p>在本地创建工作空间：<code>mkdir -p ~/hsq_ws/ros2_humble_ws</code>，然后编写并运行以下自动化脚本：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-meta">#!/bin/bash</span><br><br><span class="hljs-comment"># 1. 允许容器向宿主机的 X11 窗口服务器请求弹窗画面的权限</span><br>xhost +<span class="hljs-built_in">local</span>:root<br><br><span class="hljs-comment"># 2. 清理可能卡在后台的同名旧容器躯壳（一般不用可能会删除额外安装的包）</span><br><span class="hljs-comment"># docker rm -f ros2_humble 2&gt;/dev/null</span><br><br><span class="hljs-comment"># 3. 运行新容器（普通 runc 模式 + Tegra 集成显卡内核直挂通道）</span><br>docker run -it \<br>    --name ros2_humble \<br>    --network=host \<br>    --privileged \<br>    --device /dev/nvhost-ctrl \<br>    --device /dev/nvhost-ctrl-gpu \<br>    --device /dev/nvhost-prof-gpu \<br>    --device /dev/nvmap \<br>    --device /dev/nvgpu-gpu \<br>    -v /dev:/dev \<br>    -v /home/jetson/hsq_ws/ros2_humble_ws:/workspace/ros2_humble_ws \<br>    -v /tmp/.X11-unix:/tmp/.X11-unix \<br>    -e DISPLAY=<span class="hljs-variable">$DISPLAY</span> \<br>    -e ROS_DOMAIN_ID=0 \<br>    dustynv/ros:humble-desktop-l4t-r36.4.0 \<br>    /bin/bash<br><br><span class="hljs-comment"># 4. 当用户输入 exit 正常退出容器后，安全关闭图形权限</span><br>xhost -<span class="hljs-built_in">local</span>:root<br></code></pre></td></tr></table></figure>
+<h3 id="6-2-【版本-B】CPU-通用网页-VNC-独立版启动脚本："><a href="#6-2-【版本-B】CPU-通用网页-VNC-独立版启动脚本：" class="headerlink" title="6.2 【版本 B】CPU 通用网页 VNC 独立版启动脚本："></a>6.2 【版本 B】CPU 通用网页 VNC 独立版启动脚本：</h3><p>同样的挂载目录下，编写适用于 CPU&#x2F;远程 场景的自动化脚本：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-meta">#!/bin/bash</span><br><br><span class="hljs-comment"># 1. 打开图形权限（向下兼容）</span><br>xhost +<span class="hljs-built_in">local</span>:root<br><br><span class="hljs-comment"># 2. 清理可能残留在后台的同名旧容器躯壳</span><br><span class="hljs-comment"># docker rm -f jetson_ros2_humble 2&gt;/dev/null</span><br><br><span class="hljs-comment"># 3. 运行新容器（核心在于端口映射 -p 6080:80，退出时自动通过 --rm 销毁临时层）</span><br>docker run -it \<br>  --name jetson_ros2_humble \<br>  --privileged \<br>  --security-opt seccomp=unconfined \<br>  -p 6080:80 \<br>  -v /home/jetson/hsq_ws/ros2_humble_ws:/workspace/ros2_humble_ws \<br>  tiryoh/ros2-desktop-vnc:humble<br><br><span class="hljs-comment"># 4. 退出后关闭权限</span><br>xhost -<span class="hljs-built_in">local</span>:root<br></code></pre></td></tr></table></figure>
+<p>容器成功运行后，在 Jetson 本机或局域网电脑的浏览器中输入： 👉 <code>http://localhost:6080</code> （或 <code>http://&lt;Jetson的IP地址&gt;:6080</code>） 即可在浏览器里看到一个完整的 Linux 桌面，在里面的终端可以直接输入 <code>rviz2</code> 打开图形界面，且绝对不会和宿主机的显卡驱动发生任何冲突。</p>
+<h3 id="6-3-启动参数在-JetPack-6-下的深度演进与详解"><a href="#6-3-启动参数在-JetPack-6-下的深度演进与详解" class="headerlink" title="6.3 启动参数在 JetPack 6 下的深度演进与详解"></a>6.3 启动参数在 JetPack 6 下的深度演进与详解</h3><table>
+<thead>
+<tr>
+<th><strong>参数 &#x2F; 配置</strong></th>
+<th><strong>作用与深度演进</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>去掉 <code>--runtime nvidia</code></strong></td>
+<td><strong>在 JetPack 6 下必做</strong>。彻底避免了驱动与 Vulkan 配置文件引起的 <code>device or resource busy</code> 冲突死锁。</td>
+</tr>
+<tr>
+<td><strong><code>--device /dev/nvgpu-gpu</code> 等 5 个映射</strong></td>
+<td><strong>替代方案精髓</strong>。将 Jetson NX 的核心集成显卡节点、显存映射文件直接呈递给容器，保障 CUDA 硬件加速和本地 Rviz2 图形弹窗的绝对平稳。</td>
+</tr>
+<tr>
+<td><strong><code>-it</code></strong></td>
+<td><code>-i</code>（保持标准输入打开）+ <code>-t</code>（分配伪终端），两者合用才能在容器内正常交互。</td>
+</tr>
+<tr>
+<td><strong><code>--name ros2_humble</code></strong></td>
+<td>给容器命名，便于后续通过名称管理。不加则 Docker 会随机生成无规则名称。</td>
+</tr>
+<tr>
+<td><strong><code>--network=host</code></strong></td>
+<td>容器直接使用宿主机网络栈，不做网络隔离。ROS 2 的 DDS 通信依赖组播发现机制，必须使用 host 网络，否则多节点之间无法互相发现。</td>
+</tr>
+<tr>
+<td><strong><code>--privileged</code></strong></td>
+<td>赋予容器几乎所有内核权限，允许访问宿主机硬件设备。访问嵌入式板载传感器时必须开启。</td>
+</tr>
+<tr>
+<td><strong><code>-v /dev:/dev</code></strong></td>
+<td>将宿主机 <code>/dev</code> 挂载到容器内，使容器能访问串口（如 TTL、USB 转串口）、USB 摄像头（<code>/dev/video*</code>）、IMU、激光雷达等硬件设备。</td>
+</tr>
+<tr>
+<td><strong><code>-v ~/hsq_ws/...:/workspace/...</code></strong></td>
+<td><strong>磁盘卷挂载（极为关键）</strong>。建立了物理映射通道。你在容器该目录下编写的任何源码，<strong>全部直接保存在物理固态硬盘上</strong>。即使执行 <code>docker rm</code> 销毁容器临时沙盒，你的核心源码雷打不动，数据永远安全。</td>
+</tr>
+<tr>
+<td><strong><code>-v /tmp/.X11-unix:/tmp/.X11-unix</code></strong></td>
+<td>挂载 X11 的 Unix socket，让容器内的 GUI 程序（rviz2、rqt 等）能通过宿主机的 X Server 显示窗口。</td>
+</tr>
+<tr>
+<td><strong><code>-e DISPLAY=$DISPLAY</code></strong></td>
+<td>传递显示环境变量，告诉 GUI 程序往哪个显示器输出。</td>
+</tr>
+<tr>
+<td><strong><code>-e ROS_DOMAIN_ID=0</code></strong></td>
+<td>设置 ROS 2 的 Domain ID，相同 ID 的节点才能互相发现。默认为 0，多套 ROS 2 系统共存时用不同数字隔离。</td>
+</tr>
+</tbody></table>
+<h3 id="6-3-验证环境"><a href="#6-3-验证环境" class="headerlink" title="6.3 验证环境"></a>6.3 验证环境</h3><p>当你成功进入容器，终端前缀变为 <code>root@hsq:/#</code> 后，执行以下测试：</p>
+<ol>
+<li><strong>验证图形化与显卡性能</strong>：输入 <code>rviz2</code>，宿主机桌面上会立刻秒弹科幻的 Rviz2 蓝色网格大窗，代表图形通路完美畅通。</li>
+<li><strong>验证 GPU 加速是否到位</strong>： <figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs llvm">python<span class="hljs-number">3</span> -<span class="hljs-keyword">c</span> <span class="hljs-string">&quot;import torch; print(&#x27;GPU 是否完全可用:&#x27;, torch.cuda.is_available())&quot;</span><br></code></pre></td></tr></table></figure>
+ <em>预期输出</em>：<code>GPU 是否完全可用: True</code>，代表显卡深度学习与 AI 视觉加速完全就绪。</li>
+<li><strong>验证 ROS 2 通信基础</strong>： <figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs lsl">ros2 topic <span class="hljs-type">list</span><br></code></pre></td></tr></table></figure>
+ <em>预期输出</em>：能够识别出 <code>/parameter_events</code> 与 <code>/rosout</code>，即表示环境完全就绪。</li>
+</ol>
+<h2 id="七、-日常高频操作与高级生命周期管理"><a href="#七、-日常高频操作与高级生命周期管理" class="headerlink" title="七、 日常高频操作与高级生命周期管理"></a>七、 日常高频操作与高级生命周期管理</h2><h3 id="7-1-默认退出行为"><a href="#7-1-默认退出行为" class="headerlink" title="7.1 默认退出行为"></a>7.1 默认退出行为</h3><p>在容器终端中输入 <code>exit</code> 或按 <code>Ctrl + D</code>。由于创建时没有加 <code>--rm</code>，容器退出后不会被物理删除，只是停止运行并释放内存。下次重新运行你的 <code>run_ros2.sh</code> 脚本时，它会自动清理（<code>rm</code>）上一次留下的旧躯壳并为你生成一个全新的、干净的运行环境，由于工作空间已挂载，代码绝不会丢失。</p>
+<h3 id="7-2-一劳永逸解决多窗口-command-not-found"><a href="#7-2-一劳永逸解决多窗口-command-not-found" class="headerlink" title="7.2 一劳永逸解决多窗口 command not found"></a>7.2 一劳永逸解决多窗口 <code>command not found</code></h3><p>当容器已经在运行，你想开第二个终端窗口进入同一个容器协同开发：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker <span class="hljs-built_in">exec</span> -it ros2_humble /bin/bash<br></code></pre></td></tr></table></figure>
+<p>为了防止新窗口找不到 <code>ros2</code> 命令，<strong>在第一次进入容器时，强烈建议直接执行以下命令，将环境变量永久注入容器的“老家”：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;source /opt/ros/humble/install/setup.bash&quot;</span> &gt;&gt; ~/.bashrc<br><span class="hljs-built_in">source</span> ~/.bashrc<br></code></pre></td></tr></table></figure>
+<p>从此以后，无论是第几个辅助窗口，一钻进去即可直接敲击 <code>ros2 run</code> 开启多节点通信测试（例如：窗口 A 跑海龟仿真器，窗口 B 跑键盘控制节点）。</p>
+<h3 id="7-3-玩法-A：常驻系统流（不关闭-不销毁容器，保留临时软件）"><a href="#7-3-玩法-A：常驻系统流（不关闭-不销毁容器，保留临时软件）" class="headerlink" title="7.3 玩法 A：常驻系统流（不关闭&#x2F;不销毁容器，保留临时软件）"></a>7.3 玩法 A：常驻系统流（不关闭&#x2F;不销毁容器，保留临时软件）</h3><p>如果你除了编写代码，还在容器内部通过 <code>apt-get install</code> 安装了临时的调试工具或第三方依赖库，且<strong>不希望每次启动都被脚本 <code>rm</code> 清理掉</strong>，你应该放弃每次运行 <code>run_ros2.sh</code> 脚本，改为以下两步复用旧容器：</p>
+<ol>
+<li><strong>退出容器时</strong>：直接输入 <code>exit</code> 或 <code>Ctrl + D</code>。此时容器进入休眠（Exited 状态），即使宿主机关机重启，内部增删的软件也不会丢失。</li>
+<li><strong>下次开机重新进入时</strong>：在 Jetson 本地终端直接敲击： <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 1. 重新唤醒睡着的旧容器</span><br>docker start ros2_humble<br><span class="hljs-comment"># 2. 重新连接进该容器的命令行</span><br>docker <span class="hljs-built_in">exec</span> -it ros2_humble /bin/bash<br></code></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="7-4-玩法-B：镜像打包存档流（使用-commit-永久固化环境）"><a href="#7-4-玩法-B：镜像打包存档流（使用-commit-永久固化环境）" class="headerlink" title="7.4 玩法 B：镜像打包存档流（使用 commit 永久固化环境）"></a>7.4 玩法 B：镜像打包存档流（使用 <code>commit</code> 永久固化环境）</h3><p>如果你在容器里配置了极为复杂的底层环境，为了防止误操作、误删容器导致心血白费，可以在<strong>容器运行状态下</strong>，利用 <strong>Commit 机制</strong> 将临时沙盒直接固化铸造成一个永久本地静态镜像。</p>
+<ul>
+<li><strong>操作步骤</strong>：<ol>
+<li>保持当前容器运行，在 Jetson 本地桌面上<strong>新开一个宿主机终端</strong>。</li>
+<li>输入以下命令进行打包（将运行中的 <code>ros2_humble</code> 固化为本地新镜像 <code>my_ros2_humble:v1.0</code>）： <figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">docker</span> commit ros2_humble my_ros2_humble:v1.<span class="hljs-number">0</span><br></code></pre></td></tr></table></figure></li>
+<li><em>后续复用</em>：打包成功后，你就可以放心地使用脚本清理旧容器了。只需将启动脚本（6.1节）最后一行的镜像名 <code>dustynv/ros:...</code> 替换为你打包的 <code>my_ros2_humble:v1.0</code>，未来每次开辟出的新环境都将直接自带你固化的所有软件。</li>
+</ol>
+</li>
+</ul>
+<h2 id="八、-常见问题及排雷利器-FAQ"><a href="#八、-常见问题及排雷利器-FAQ" class="headerlink" title="八、 常见问题及排雷利器 (FAQ)"></a>八、 常见问题及排雷利器 (FAQ)</h2><ul>
+<li><strong>Q1: 容器启动或运行 GUI 程序报错：<code>cannot open display</code></strong><ul>
+<li><strong>A</strong>：这是 X11 权限关闭导致的。在宿主机终端（不是容器内）执行 <code>xhost +local:root</code>。如果需要开机自动生效，可将此命令加入宿主机的 <code>~/.bashrc</code>。</li>
+</ul>
+</li>
+<li><strong>Q2: 接入新的 USB 激光雷达或摄像头，但在容器里找不到 <code>/dev/ttyUSB0</code> 或 <code>/dev/video0</code></strong><ul>
+<li><strong>A</strong>：Linux 设备的挂载在容器启动的瞬间就固定了。如果是中途新插拔的物理硬件，必须输入 <code>exit</code> 退出容器，再重新运行一次脚本或执行 <code>docker start</code> 即可重新刷入最新的硬件树。</li>
+</ul>
+</li>
+<li><strong>Q3: ROS 2 多节点之间无法通信，互相找不到</strong><ul>
+<li><strong>A</strong>：首先检查启动时是否使用了 <code>--network=host</code> 共享宿主机网络栈。其次确认所有节点在容器内外的 <code>ROS_DOMAIN_ID</code> 环境变量数值保持完全一致。</li>
+</ul>
+</li>
+<li><strong>Q4: 拉取镜像速度很慢、经常卡死断流或超时</strong><ul>
+<li><strong>A</strong>：确认已配置国内镜像加速（见第三节）。如果 Jetson 硬件网络断流卡在最后两个 Layer，不要轻易 prune，直接按下 <code>Ctrl + C</code> 强行掐断并再次输入 <code>docker pull</code>，利用 Docker 强大的<strong>断点续传</strong>机制重新拉取，会直接秒刷闪现已经下载好的层，集中火力死磕残缺层。</li>
+</ul>
+</li>
+<li><strong>Q5: 频繁开发或拉取镜像导致系统磁盘满了，如何安全清理？</strong><ul>
+<li><strong>A</strong>：⚠️ <strong>警告</strong>：千万不要直接手动去删除 <code>/var/lib/docker</code> 目录。使用以下标准安全命令，可以安全地一键清理已经停止的无用容器躯壳、未打标签的碎片悬空镜像层（Dangling layers），释放被压榨的系统盘空间：  <figure class="highlight clean"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs clean">docker <span class="hljs-keyword">system</span> prune -f<br></code></pre></td></tr></table></figure>
+  清理未使用的容器<ul>
+<li>删除所有已停止的容器：<br>  docker container prune<br>  清理未使用的系统资源</li>
+<li>删除未使用的镜像、卷和网络：<br>  docker system prune -a<br>  列出所有容器（包括已停止的容器）：<br>  docker ps -a</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+    
+  </article>
+
+  
+      
+    <div class="nexmoe-post-copyright">
+        <strong>本文作者：</strong>HSQ<br>
+        <strong>本文链接：</strong><a href="https://hsqhere.github.io/2026/06/28/Jetson-NX-JetPack-6-%E9%83%A8%E7%BD%B2-ROS2-Humble-%E8%B8%A9%E5%9D%91%E4%B8%8E%E5%AE%9E%E6%88%98/" title="https:&#x2F;&#x2F;hsqhere.github.io&#x2F;2026&#x2F;06&#x2F;28&#x2F;Jetson-NX-JetPack-6-%E9%83%A8%E7%BD%B2-ROS2-Humble-%E8%B8%A9%E5%9D%91%E4%B8%8E%E5%AE%9E%E6%88%98&#x2F;" target="_blank" rel="noopener">https:&#x2F;&#x2F;hsqhere.github.io&#x2F;2026&#x2F;06&#x2F;28&#x2F;Jetson-NX-JetPack-6-%E9%83%A8%E7%BD%B2-ROS2-Humble-%E8%B8%A9%E5%9D%91%E4%B8%8E%E5%AE%9E%E6%88%98&#x2F;</a><br>
+        
+            # <strong>版权声明：</strong>本文采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/cn/deed.zh" target="_blank">CC BY-NC-SA 3.0 CN</a> 协议进行许可
+
+        
+    </div>
+
+
+  
+  
+  <div class="nexmoe-post-meta nexmoe-rainbow">
+   
+    
+        <a class="nexmoefont icon-tag-fill -none-link" href="/tags/GPU/" rel="tag">GPU</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/docker/" rel="tag">docker</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/jetson/" rel="tag">jetson</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/ros2/" rel="tag">ros2</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E6%97%A5%E8%AE%B0/" rel="tag">日记</a>
+    
+</div>
+  
+  
+    <script async src="/js/copy-codeblock.js?v=1782624021537"></script>
+  
+
+  
+      <div class="nexmoe-post-footer">
+          
+      </div>
+  
+</div></div><div class="nexmoe-post-right">    <div class="nexmoe-fixed">
+        <div class="nexmoe-tool">
+
+            
+
+            
+            
+            <button class="mdui-fab catalog" style="overflow:unset;">
+                <i class="nexmoefont icon-i-catalog"></i>
+                <div class="nexmoe-toc">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81-%E5%AE%89%E8%A3%85-Docker"><span class="toc-number">1.</span> <span class="toc-text">一、 安装 Docker</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81-%E9%81%BF%E5%9D%91%EF%BC%9AJetPack-6-%E7%9A%84-NVIDIA-Runtime-%E9%85%8D%E7%BD%AE%E7%AD%96%E7%95%A5"><span class="toc-number">2.</span> <span class="toc-text">二、 避坑：JetPack 6 的 NVIDIA Runtime 配置策略</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81-%E9%85%8D%E7%BD%AE%E5%9B%BD%E5%86%85%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%EF%BC%88%E5%BF%85%E5%81%9A%EF%BC%8C2026%E5%B9%B4%E6%9C%80%E6%96%B0%E4%BA%B2%E6%B5%8B%E5%8F%AF%E7%94%A8%EF%BC%89"><span class="toc-number">3.</span> <span class="toc-text">三、 配置国内镜像加速（必做，2026年最新亲测可用）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81-%E7%A1%AE%E8%AE%A4%E7%B3%BB%E7%BB%9F-L4T-%E7%89%88%E6%9C%AC"><span class="toc-number">4.</span> <span class="toc-text">四、 确认系统 L4T 版本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81-%E6%8B%89%E5%8F%96-ROS-2-Humble-%E4%B8%93%E5%B1%9E%E9%95%9C%E5%83%8F"><span class="toc-number">5.</span> <span class="toc-text">五、 拉取 ROS 2 Humble 专属镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81-%E5%90%AF%E5%8A%A8%E5%AE%B9%E5%99%A8%EF%BC%88%E6%A0%B8%E5%BF%83%E5%AE%9E%E6%88%98%E8%84%9A%E6%9C%AC%EF%BC%89"><span class="toc-number">6.</span> <span class="toc-text">六、 启动容器（核心实战脚本）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-%E3%80%90%E7%89%88%E6%9C%AC-A%E3%80%91NVIDIA-GPU-%E6%98%BE%E5%8D%A1%E5%8A%A0%E9%80%9F%E6%9C%AC%E5%9C%B0%E7%89%88%E5%90%AF%E5%8A%A8%E8%84%9A%E6%9C%AC%EF%BC%9A"><span class="toc-number">6.1.</span> <span class="toc-text">6.1 【版本 A】NVIDIA GPU 显卡加速本地版启动脚本：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-%E3%80%90%E7%89%88%E6%9C%AC-B%E3%80%91CPU-%E9%80%9A%E7%94%A8%E7%BD%91%E9%A1%B5-VNC-%E7%8B%AC%E7%AB%8B%E7%89%88%E5%90%AF%E5%8A%A8%E8%84%9A%E6%9C%AC%EF%BC%9A"><span class="toc-number">6.2.</span> <span class="toc-text">6.2 【版本 B】CPU 通用网页 VNC 独立版启动脚本：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-%E5%90%AF%E5%8A%A8%E5%8F%82%E6%95%B0%E5%9C%A8-JetPack-6-%E4%B8%8B%E7%9A%84%E6%B7%B1%E5%BA%A6%E6%BC%94%E8%BF%9B%E4%B8%8E%E8%AF%A6%E8%A7%A3"><span class="toc-number">6.3.</span> <span class="toc-text">6.3 启动参数在 JetPack 6 下的深度演进与详解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-%E9%AA%8C%E8%AF%81%E7%8E%AF%E5%A2%83"><span class="toc-number">6.4.</span> <span class="toc-text">6.3 验证环境</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81-%E6%97%A5%E5%B8%B8%E9%AB%98%E9%A2%91%E6%93%8D%E4%BD%9C%E4%B8%8E%E9%AB%98%E7%BA%A7%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E7%AE%A1%E7%90%86"><span class="toc-number">7.</span> <span class="toc-text">七、 日常高频操作与高级生命周期管理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-%E9%BB%98%E8%AE%A4%E9%80%80%E5%87%BA%E8%A1%8C%E4%B8%BA"><span class="toc-number">7.1.</span> <span class="toc-text">7.1 默认退出行为</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-%E4%B8%80%E5%8A%B3%E6%B0%B8%E9%80%B8%E8%A7%A3%E5%86%B3%E5%A4%9A%E7%AA%97%E5%8F%A3-command-not-found"><span class="toc-number">7.2.</span> <span class="toc-text">7.2 一劳永逸解决多窗口 command not found</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-%E7%8E%A9%E6%B3%95-A%EF%BC%9A%E5%B8%B8%E9%A9%BB%E7%B3%BB%E7%BB%9F%E6%B5%81%EF%BC%88%E4%B8%8D%E5%85%B3%E9%97%AD-%E4%B8%8D%E9%94%80%E6%AF%81%E5%AE%B9%E5%99%A8%EF%BC%8C%E4%BF%9D%E7%95%99%E4%B8%B4%E6%97%B6%E8%BD%AF%E4%BB%B6%EF%BC%89"><span class="toc-number">7.3.</span> <span class="toc-text">7.3 玩法 A：常驻系统流（不关闭&#x2F;不销毁容器，保留临时软件）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-4-%E7%8E%A9%E6%B3%95-B%EF%BC%9A%E9%95%9C%E5%83%8F%E6%89%93%E5%8C%85%E5%AD%98%E6%A1%A3%E6%B5%81%EF%BC%88%E4%BD%BF%E7%94%A8-commit-%E6%B0%B8%E4%B9%85%E5%9B%BA%E5%8C%96%E7%8E%AF%E5%A2%83%EF%BC%89"><span class="toc-number">7.4.</span> <span class="toc-text">7.4 玩法 B：镜像打包存档流（使用 commit 永久固化环境）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E5%8F%8A%E6%8E%92%E9%9B%B7%E5%88%A9%E5%99%A8-FAQ"><span class="toc-number">8.</span> <span class="toc-text">八、 常见问题及排雷利器 (FAQ)</span></a></li></ol>
+                </div>
+            </button>
+            
+
+            
+
+            <a href="#nexmoe-content" class="backtop toc-link" aria-label="Back To Top" title="top"><button class="mdui-fab mdui-ripple"><i class="nexmoefont icon-caret-top"></i></button></a>
+        </div>
+    </div>
+</div></div><div id="nexmoe-footer"><!--!--></div><div id="nexmoe-search-space"><div class="search-container"><div class="search-header"><div class="search-input-container"><input class="search-input" type="text" placeholder="搜索" onInput="sinput();"></div><a class="search-close" onclick="sclose();">×</a></div><div class="search-body"></div></div></div><div><div id="aplayer" style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;"></div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // --- APlayer 音乐播放器部分 ---
+    const ap = new APlayer({
+      container: document.getElementById('aplayer'),
+      fixed: true,
+      autoplay: false,
+      theme: '#22d9df',
+      loop: 'all',
+      order: 'random',
+      preload: 'auto',
+      volume: 0.2,
+      mutex: true,
+      lrcType: 0,
+      audio: [
+        {
+          name: '那么骄傲',
+          artist: '茜茜',
+          url: '/music/那么骄傲 - 茜茜.mp3', 
+          cover: '/music/cover茜茜.jpg',
+          lrc: '[00:00.00]暂无歌词'
+        }
+      ]
+    });
+
+    // --- Twikoo 评论系统部分 ---
+    if (window.location.pathname.match(/\/\d{4}\/\d{2}\/\d{2}\//) || 
+        document.querySelector('article.post') || 
+        document.body.classList.contains('post-template')) {
+      
+      let talkContainer = document.getElementById('tcomment');
+      if (!talkContainer) {
+        const article = document.querySelector('article') || 
+                        document.querySelector('.nexmoe-post') || 
+                        document.querySelector('.post-content') ||
+                        document.querySelector('main');
+        if (article) {
+          talkContainer = document.createElement('div');
+          talkContainer.id = 'tcomment';
+          article.insertAdjacentElement('afterend', talkContainer);
+        }
+      }
+      
+      if (talkContainer && typeof twikoo !== 'undefined') {
+        twikoo.init({
+          envId: 'https://hsqblog.netlify.app/.netlify/functions/twikoo',
+          el: '#tcomment',
+          path: window.location.pathname,
+          lang: 'zh-CN'
+        });
+      }
+    }
+  });
+
+  // --- 朋友卡片解锁逻辑 ---
+  async function unlock(id, correctHash) {
+    const input = document.getElementById('input-' + id).value;
+    const msgUint8 = new TextEncoder().encode(input);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+    if (hashHex === correctHash) {
+        document.getElementById('lock-' + id).style.display = 'none';
+        const imgDiv = document.getElementById('img-' + id);
+        imgDiv.style.display = 'block';
+        setTimeout(() => imgDiv.style.opacity = "1", 10);
+    } else {
+        const err = document.getElementById('err-' + id);
+        err.style.display = 'block';
+        setTimeout(() => err.style.display = 'none', 2000);
+    }
+  }
+</script>
+</div></body></html>
