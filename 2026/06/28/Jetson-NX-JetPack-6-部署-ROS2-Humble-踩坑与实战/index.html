@@ -14,28 +14,27 @@
 <meta property="og:description" content="一、 安装 DockerJetPack 6 默认通常已预装 Docker，但在开始前建议确保环境最新并配置免 sudo 权限：  更新软件源并补充安装 Docker 基础组件： 1sudo apt update &amp;&amp; sudo apt install -y docker.io 设置开机自启并立即启动： 1sudo systemctl enable --now docker 将当前用">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-06-28T04:43:29.000Z">
-<meta property="article:modified_time" content="2026-06-28T05:20:01.975Z">
+<meta property="article:modified_time" content="2026-06-28T11:58:53.985Z">
 <meta property="article:author" content="HSQ">
 <meta property="article:tag" content="GPU">
 <meta property="article:tag" content="docker">
 <meta property="article:tag" content="jetson">
 <meta property="article:tag" content="ros2">
-<meta property="article:tag" content="日记">
 <meta name="twitter:card" content="summary">
 
 <link rel="stylesheet" href="/lib/fancybox/fancybox.css">
 <link rel="stylesheet" href="/lib/mdui_043tiny/mdui.css">
 
 
-<link rel="stylesheet" href="/lib/iconfont/iconfont.css?v=1782624021682">
+<link rel="stylesheet" href="/lib/iconfont/iconfont.css?v=1782705698771">
 
-<link rel="stylesheet" href="/css/style.css?v=1782624021682">
+<link rel="stylesheet" href="/css/style.css?v=1782705698771">
 
 
 
 
     
-        <link rel="stylesheet" href="/custom.css?v=1782624021682">
+        <link rel="stylesheet" href="/custom.css?v=1782705698771">
     
 
 
@@ -45,7 +44,7 @@
 <script src="/lib/lax.min.js" async></script>
 
 
-<script async src="/js/app.js?v=1782624021682"></script>
+<script async src="/js/app.js?v=1782705698771"></script>
 
  
 
@@ -85,8 +84,8 @@ window.MathJax = {
         </a>
     </div>
     <div class="nexmoe-count">
-        <div><span>文章</span>23</div>
-        <div><span>标签</span>48</div>
+        <div><span>文章</span>25</div>
+        <div><span>标签</span>55</div>
         <div><span>分类</span>11</div>
     </div>
     <div class="nexmoe-list mdui-list" mdui-collapse="{accordion: true}">
@@ -152,7 +151,7 @@ window.MathJax = {
 </div>
 
 
-	<script async src="/js/search.js?v=1782624021683"></script>
+	<script async src="/js/search.js?v=1782705698772"></script>
 
 
 
@@ -314,14 +313,14 @@ window.MathJax = {
 
         <li class="category-list-item">
           <a class="category-list-link" href="/categories/计算机/">计算机</a>
-          <span class="category-list-count">6</span>
+          <span class="category-list-count">7</span>
         </li>
 
         
 
         <li class="category-list-item">
           <a class="category-list-link" href="/categories/车辆/">车辆</a>
-          <span class="category-list-count">1</span>
+          <span class="category-list-count">2</span>
         </li>
 
         
@@ -336,12 +335,12 @@ window.MathJax = {
         
   <div class="nexmoe-widget-wrap">
     <div id="randomtagcloud" class="nexmoe-widget tagcloud nexmoe-rainbow">
-      <a href="/tags/CAD/" style="font-size: 10px;">CAD</a> <a href="/tags/GPU/" style="font-size: 10px;">GPU</a> <a href="/tags/Hough%E5%9C%86/" style="font-size: 10px;">Hough圆</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/PID/" style="font-size: 10px;">PID</a> <a href="/tags/cv/" style="font-size: 12px;">cv</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/foc/" style="font-size: 10px;">foc</a> <a href="/tags/jetson/" style="font-size: 10px;">jetson</a> <a href="/tags/keysking/" style="font-size: 10px;">keysking</a> <a href="/tags/pbc/" style="font-size: 10px;">pbc</a> <a href="/tags/pnp/" style="font-size: 10px;">pnp</a> <a href="/tags/ros2/" style="font-size: 10px;">ros2</a> <a href="/tags/stm32/" style="font-size: 10px;">stm32</a> <a href="/tags/%E4%BA%92%E5%8A%A8/" style="font-size: 10px;">互动</a> <a href="/tags/%E4%BB%BF%E7%9C%9F/" style="font-size: 12px;">仿真</a> <a href="/tags/%E5%88%B6%E5%9B%BE/" style="font-size: 12px;">制图</a> <a href="/tags/%E5%8A%A0%E9%80%9F%E5%BA%A6%E8%AE%A1/" style="font-size: 10px;">加速度计</a> <a href="/tags/%E5%8F%8D%E6%80%9D/" style="font-size: 10px;">反思</a> <a href="/tags/%E5%98%89%E7%AB%8B%E5%88%9B/" style="font-size: 10px;">嘉立创</a> <a href="/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/" style="font-size: 10px;">嵌入式</a> <a href="/tags/%E5%BB%BA%E6%A8%A1/" style="font-size: 10px;">建模</a> <a href="/tags/%E6%84%9F%E6%83%85/" style="font-size: 16px;">感情</a> <a href="/tags/%E6%8A%A5%E9%94%99/" style="font-size: 14px;">报错</a> <a href="/tags/%E6%8E%A7%E5%88%B6%E7%AE%97%E6%B3%95/" style="font-size: 10px;">控制算法</a> <a href="/tags/%E6%8E%A9%E8%86%9C/" style="font-size: 10px;">掩膜</a> <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" style="font-size: 16px;">操作系统</a> <a href="/tags/%E6%95%99%E7%A8%8B/" style="font-size: 10px;">教程</a> <a href="/tags/%E6%97%A0%E5%88%B7%E7%94%B5%E6%9C%BA/" style="font-size: 10px;">无刷电机</a> <a href="/tags/%E6%97%A5%E8%AE%B0/" style="font-size: 20px;">日记</a> <a href="/tags/%E6%9C%BA%E5%99%A8%E4%BA%BA/" style="font-size: 10px;">机器人</a> <a href="/tags/%E6%9C%BA%E6%A2%B0/" style="font-size: 14px;">机械</a> <a href="/tags/%E6%A0%91%E6%B4%9E/" style="font-size: 10px;">树洞</a> <a href="/tags/%E6%A0%91%E8%8E%93%E6%B4%BE/" style="font-size: 10px;">树莓派</a> <a href="/tags/%E7%88%B1%E6%83%85/" style="font-size: 10px;">爱情</a> <a href="/tags/%E7%94%9F%E6%B4%BB/" style="font-size: 12px;">生活</a> <a href="/tags/%E7%94%B5%E6%8E%A7/" style="font-size: 18px;">电控</a> <a href="/tags/%E7%9B%AE%E6%A0%87/" style="font-size: 12px;">目标</a> <a href="/tags/%E7%BC%96%E7%A8%8B/" style="font-size: 10px;">编程</a> <a href="/tags/%E8%A7%84%E5%88%92/" style="font-size: 10px;">规划</a> <a href="/tags/%E8%A7%86%E8%A7%89/" style="font-size: 12px;">视觉</a> <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/" style="font-size: 10px;">计算机</a> <a href="/tags/%E8%AF%84%E8%AE%BA%E5%8C%BA/" style="font-size: 10px;">评论区</a> <a href="/tags/%E8%AF%BB%E4%B9%A6/" style="font-size: 10px;">读书</a> <a href="/tags/%E8%BD%A6%E8%BE%86/" style="font-size: 10px;">车辆</a> <a href="/tags/%E9%97%AE%E9%A2%98/" style="font-size: 10px;">问题</a> <a href="/tags/%E9%99%80%E8%9E%BA%E4%BB%AA/" style="font-size: 10px;">陀螺仪</a> <a href="/tags/%E9%A6%99%E6%A9%99%E6%B4%BE/" style="font-size: 10px;">香橙派</a>
+      <a href="/tags/ANSYS/" style="font-size: 10px;">ANSYS</a> <a href="/tags/CAD/" style="font-size: 10px;">CAD</a> <a href="/tags/GPU/" style="font-size: 10px;">GPU</a> <a href="/tags/Hough%E5%9C%86/" style="font-size: 10px;">Hough圆</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/PID/" style="font-size: 10px;">PID</a> <a href="/tags/STAR-CCM/" style="font-size: 10px;">STAR-CCM</a> <a href="/tags/cv/" style="font-size: 12px;">cv</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/foc/" style="font-size: 10px;">foc</a> <a href="/tags/jetson/" style="font-size: 12px;">jetson</a> <a href="/tags/keysking/" style="font-size: 10px;">keysking</a> <a href="/tags/pbc/" style="font-size: 10px;">pbc</a> <a href="/tags/pnp/" style="font-size: 10px;">pnp</a> <a href="/tags/ros2/" style="font-size: 10px;">ros2</a> <a href="/tags/stm32/" style="font-size: 10px;">stm32</a> <a href="/tags/%E4%BA%92%E5%8A%A8/" style="font-size: 10px;">互动</a> <a href="/tags/%E4%BB%BF%E7%9C%9F/" style="font-size: 14px;">仿真</a> <a href="/tags/%E5%88%B6%E5%9B%BE/" style="font-size: 12px;">制图</a> <a href="/tags/%E5%88%B7%E6%9C%BA/" style="font-size: 10px;">刷机</a> <a href="/tags/%E5%8A%A0%E9%80%9F%E5%BA%A6%E8%AE%A1/" style="font-size: 10px;">加速度计</a> <a href="/tags/%E5%8F%8D%E6%80%9D/" style="font-size: 10px;">反思</a> <a href="/tags/%E5%98%89%E7%AB%8B%E5%88%9B/" style="font-size: 10px;">嘉立创</a> <a href="/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/" style="font-size: 10px;">嵌入式</a> <a href="/tags/%E5%BB%BA%E6%A8%A1/" style="font-size: 12px;">建模</a> <a href="/tags/%E6%84%9F%E6%83%85/" style="font-size: 16px;">感情</a> <a href="/tags/%E6%8A%A5%E9%94%99/" style="font-size: 14px;">报错</a> <a href="/tags/%E6%8E%A7%E5%88%B6%E7%AE%97%E6%B3%95/" style="font-size: 10px;">控制算法</a> <a href="/tags/%E6%8E%A9%E8%86%9C/" style="font-size: 10px;">掩膜</a> <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" style="font-size: 16px;">操作系统</a> <a href="/tags/%E6%95%99%E7%A8%8B/" style="font-size: 10px;">教程</a> <a href="/tags/%E6%97%A0%E5%88%B7%E7%94%B5%E6%9C%BA/" style="font-size: 10px;">无刷电机</a> <a href="/tags/%E6%97%A5%E8%AE%B0/" style="font-size: 20px;">日记</a> <a href="/tags/%E6%9B%B4%E6%96%B0/" style="font-size: 10px;">更新</a> <a href="/tags/%E6%9C%BA%E5%99%A8%E4%BA%BA/" style="font-size: 10px;">机器人</a> <a href="/tags/%E6%9C%BA%E6%A2%B0/" style="font-size: 14px;">机械</a> <a href="/tags/%E6%A0%91%E6%B4%9E/" style="font-size: 10px;">树洞</a> <a href="/tags/%E6%A0%91%E8%8E%93%E6%B4%BE/" style="font-size: 10px;">树莓派</a> <a href="/tags/%E6%B0%B4%E5%86%B7/" style="font-size: 10px;">水冷</a> <a href="/tags/%E6%B5%81%E5%9C%BA/" style="font-size: 10px;">流场</a> <a href="/tags/%E7%88%B1%E6%83%85/" style="font-size: 10px;">爱情</a> <a href="/tags/%E7%94%9F%E6%B4%BB/" style="font-size: 12px;">生活</a> <a href="/tags/%E7%94%B5%E6%8E%A7/" style="font-size: 18px;">电控</a> <a href="/tags/%E7%9B%AE%E6%A0%87/" style="font-size: 12px;">目标</a> <a href="/tags/%E7%A9%BA%E6%B0%94%E5%8A%A8%E5%8A%9B%E5%AD%A6/" style="font-size: 10px;">空气动力学</a> <a href="/tags/%E7%BC%96%E7%A8%8B/" style="font-size: 10px;">编程</a> <a href="/tags/%E8%A7%84%E5%88%92/" style="font-size: 10px;">规划</a> <a href="/tags/%E8%A7%86%E8%A7%89/" style="font-size: 12px;">视觉</a> <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/" style="font-size: 10px;">计算机</a> <a href="/tags/%E8%AF%84%E8%AE%BA%E5%8C%BA/" style="font-size: 10px;">评论区</a> <a href="/tags/%E8%AF%BB%E4%B9%A6/" style="font-size: 10px;">读书</a> <a href="/tags/%E8%BD%A6%E8%BE%86/" style="font-size: 12px;">车辆</a> <a href="/tags/%E9%97%AE%E9%A2%98/" style="font-size: 10px;">问题</a> <a href="/tags/%E9%99%80%E8%9E%BA%E4%BB%AA/" style="font-size: 10px;">陀螺仪</a> <a href="/tags/%E9%A6%99%E6%A9%99%E6%B4%BE/" style="font-size: 10px;">香橙派</a>
     </div>
     
       <script>
         var maxTagcloud = parseInt(17);
-        var tags_length = parseInt(48);
+        var tags_length = parseInt(55);
         var tags_arr = [];
         for(var i = 0; i < tags_length; i++){
           tags_arr.push(i);
@@ -363,7 +362,7 @@ window.MathJax = {
   <div class="nexmoe-widget-wrap">
     <h3 class="nexmoe-widget-title">文章归档</h3>
     <div class="nexmoe-widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/">2026</a><span class="archive-list-count">23</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/">2026</a><span class="archive-list-count">25</span></li></ul>
     </div>
   </div>
 
@@ -395,7 +394,7 @@ window.MathJax = {
         
         
     <a><i class="nexmoefont icon-areachart"></i>约3.3k字</a>
-    <a><i class="nexmoefont icon-time-circle-fill"></i>预计需要13分钟</a>
+    <a><i class="nexmoefont icon-time-circle-fill"></i>预计需要12分钟</a>
 
     </div>
     
@@ -419,7 +418,7 @@ window.MathJax = {
 </ol>
 <h2 id="二、-避坑：JetPack-6-的-NVIDIA-Runtime-配置策略"><a href="#二、-避坑：JetPack-6-的-NVIDIA-Runtime-配置策略" class="headerlink" title="二、 避坑：JetPack 6 的 NVIDIA Runtime 配置策略"></a>二、 避坑：JetPack 6 的 NVIDIA Runtime 配置策略</h2><p>💡 <strong>硬核原理补充（为什么不配置 <code>--runtime=nvidia</code>？）</strong><br>在旧的 JetPack 5 时代，官方要求在 <code>/etc/docker/daemon.json</code> 中注册 <code>&quot;nvidia&quot;</code> 运行时，并在启动时添加 <code>--runtime nvidia</code> 参数。<br>但在 <strong>JetPack 6 (L4T R36.x)</strong> 架构中，英伟达最新的通用厚镜像（如 <code>dustynv/ros:humble-desktop-l4t-r36.4.0</code>）内部已经集成了显卡驱动和 Vulkan 图形加速文件。<br>如果在 JetPack 6 上强行注册并调用 <code>--runtime nvidia</code>，宿主机会触发挂载钩子去覆盖容器内的同名文件，从而引爆底层死锁冲突（报错：<code>failed to remove existing file: .../nvidia_icd.json: device or resource busy</code>）导致<strong>容器秒级闪退</strong>。<br>✨ <strong>完美替代方案</strong>：保持 Docker 默认的 <code>runc</code> 运行时，在启动时通过显式映射物理显卡设备（<code>--device /dev/nvgpu-gpu</code> 等）将硬件通道递给容器。此方法完美兼顾了 GPU 显卡加速与图形化（Rviz2）输出，且绝不闪退。</p>
 <h2 id="三、-配置国内镜像加速（必做，2026年最新亲测可用）"><a href="#三、-配置国内镜像加速（必做，2026年最新亲测可用）" class="headerlink" title="三、 配置国内镜像加速（必做，2026年最新亲测可用）"></a>三、 配置国内镜像加速（必做，2026年最新亲测可用）</h2><p>由于国内直连 Docker Hub 经常超时，编辑（或创建）<code>/etc/docker/daemon.json</code>，配置最新的通用高速镜像加速源：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">sudo</span> <span class="hljs-built_in">tee</span> /etc/docker/daemon.json &lt;&lt;<span class="hljs-string">&#x27;EOF&#x27;</span><br>&#123;<br>    <span class="hljs-string">&quot;registry-mirrors&quot;</span>: [<br>        <span class="hljs-string">&quot;https://docker.skk.moe&quot;</span>,<br>        <span class="hljs-string">&quot;https://docker.1ms.run&quot;</span>,<br>        <span class="hljs-string">&quot;https://docker.xuanyuan.me&quot;</span><br>    ]<br>&#125;<br>EOF<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">sudo</span> <span class="hljs-built_in">tee</span> /etc/docker/daemon.json &lt;&lt;<span class="hljs-string">&#x27;EOF&#x27;</span><br>&#123;<br>    <span class="hljs-string">&quot;runtimes&quot;</span>: &#123;<br>        <span class="hljs-string">&quot;nvidia&quot;</span>: &#123;<br>            <span class="hljs-string">&quot;args&quot;</span>: [],<br>            <span class="hljs-string">&quot;path&quot;</span>: <span class="hljs-string">&quot;nvidia-container-runtime&quot;</span><br>        &#125;<br>    &#125;,<br>    <span class="hljs-string">&quot;registry-mirrors&quot;</span>: [<br>        <span class="hljs-string">&quot;https://docker.1ms.run&quot;</span>,<br>        <span class="hljs-string">&quot;https://docker.xuanyuan.me&quot;</span>,<br>        <span class="hljs-string">&quot;https://docker.skk.moe&quot;</span><br>    ]    <br>&#125;<br>EOF<br></code></pre></td></tr></table></figure>
 <p>重启 Docker 引擎使加速器和纯净运行时生效：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">sudo</span> systemctl restart docker<br></code></pre></td></tr></table></figure>
 <blockquote>
@@ -432,11 +431,11 @@ window.MathJax = {
 <h2 id="五、-拉取-ROS-2-Humble-专属镜像"><a href="#五、-拉取-ROS-2-Humble-专属镜像" class="headerlink" title="五、 拉取 ROS 2 Humble 专属镜像"></a>五、 拉取 ROS 2 Humble 专属镜像</h2><ol>
 <li>GPU 显卡加速版镜像（英伟达官方 Dusty 维护）<br>英伟达官方核心开发者 Dusty Franklin 维护了专为 Jetson 优化的镜像仓库。由于我们的系统是 JetPack 6，必须选择带 <code>r36.x</code> 标签的全新镜像。</li>
 </ol>
-<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># 完整桌面版（包含 rviz2、rqt、Gazebo 以及已调优的 GPU 版 PyTorch，体积约 13.9GB）</span><br><span class="hljs-attribute">docker</span> pull docker.skk.moe/dustynv/ros:humble-desktop-l4t-r36.<span class="hljs-number">4</span>.<span class="hljs-number">0</span><br><br><span class="hljs-comment"># 基础版（仅含底层核心组件，无 GUI，体积较小）</span><br><span class="hljs-attribute">docker</span> pull docker.skk.moe/dustynv/ros:humble-ros-base-l4t-r36.<span class="hljs-number">4</span>.<span class="hljs-number">0</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># 完整桌面版（包含 rviz2、rqt、Gazebo 以及已调优的 GPU 版 PyTorch，体积约 13.9GB）</span><br><span class="hljs-attribute">docker</span> pull dustynv/ros:humble-desktop-l4t-r36.<span class="hljs-number">4</span>.<span class="hljs-number">0</span><br><br><span class="hljs-comment"># 基础版（仅含底层核心组件，无 GUI，体积较小）</span><br><span class="hljs-attribute">docker</span> pull dustynv/ros:humble-ros-base-l4t-r36.<span class="hljs-number">4</span>.<span class="hljs-number">0</span><br></code></pre></td></tr></table></figure>
 <ol start="2">
 <li>CPU 通用网页 VNC 版镜像（开源社区 Tiryoh 维护）</li>
 </ol>
-<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs awk"><span class="hljs-comment"># 自带无头浏览器桌面与 VNC 服务，不需要任何显卡配置，体积适中</span><br>docker pull docker.skk.moe<span class="hljs-regexp">/tiryoh/</span>ros2-desktop-vnc:humble<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 自带无头浏览器桌面与 VNC 服务，不需要任何显卡配置，体积适中</span><br>docker pull tiryoh/ros2-desktop-vnc:humble<br></code></pre></td></tr></table></figure>
 <p>💾 <strong>存储提醒</strong>：JetPack 6 的 Desktop 镜像非常庞大，解压后会吞掉 20GB+ 的磁盘空间。请确保你的 Jetson NX 系统已经迁移到外部 NVMe 固态硬盘上。如果根分区在自带的 eMMC（通常只有 16GB）上，极易因空间不足卡死。</p>
 <h2 id="六、-启动容器（核心实战脚本）"><a href="#六、-启动容器（核心实战脚本）" class="headerlink" title="六、 启动容器（核心实战脚本）"></a>六、 启动容器（核心实战脚本）</h2><h3 id="6-1-【版本-A】NVIDIA-GPU-显卡加速本地版启动脚本："><a href="#6-1-【版本-A】NVIDIA-GPU-显卡加速本地版启动脚本：" class="headerlink" title="6.1 【版本 A】NVIDIA GPU 显卡加速本地版启动脚本："></a>6.1 【版本 A】NVIDIA GPU 显卡加速本地版启动脚本：</h3><p>在本地创建工作空间：<code>mkdir -p ~/hsq_ws/ros2_humble_ws</code>，然后编写并运行以下自动化脚本：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-meta">#!/bin/bash</span><br><br><span class="hljs-comment"># 1. 允许容器向宿主机的 X11 窗口服务器请求弹窗画面的权限</span><br>xhost +<span class="hljs-built_in">local</span>:root<br><br><span class="hljs-comment"># 2. 清理可能卡在后台的同名旧容器躯壳（一般不用可能会删除额外安装的包）</span><br><span class="hljs-comment"># docker rm -f ros2_humble 2&gt;/dev/null</span><br><br><span class="hljs-comment"># 3. 运行新容器（普通 runc 模式 + Tegra 集成显卡内核直挂通道）</span><br>docker run -it \<br>    --name ros2_humble \<br>    --network=host \<br>    --privileged \<br>    --device /dev/nvhost-ctrl \<br>    --device /dev/nvhost-ctrl-gpu \<br>    --device /dev/nvhost-prof-gpu \<br>    --device /dev/nvmap \<br>    --device /dev/nvgpu-gpu \<br>    -v /dev:/dev \<br>    -v /home/jetson/hsq_ws/ros2_humble_ws:/workspace/ros2_humble_ws \<br>    -v /tmp/.X11-unix:/tmp/.X11-unix \<br>    -e DISPLAY=<span class="hljs-variable">$DISPLAY</span> \<br>    -e ROS_DOMAIN_ID=0 \<br>    dustynv/ros:humble-desktop-l4t-r36.4.0 \<br>    /bin/bash<br><br><span class="hljs-comment"># 4. 当用户输入 exit 正常退出容器后，安全关闭图形权限</span><br>xhost -<span class="hljs-built_in">local</span>:root<br></code></pre></td></tr></table></figure>
@@ -498,8 +497,8 @@ window.MathJax = {
 <h3 id="6-3-验证环境"><a href="#6-3-验证环境" class="headerlink" title="6.3 验证环境"></a>6.3 验证环境</h3><p>当你成功进入容器，终端前缀变为 <code>root@hsq:/#</code> 后，执行以下测试：</p>
 <ol>
 <li><strong>验证图形化与显卡性能</strong>：输入 <code>rviz2</code>，宿主机桌面上会立刻秒弹科幻的 Rviz2 蓝色网格大窗，代表图形通路完美畅通。</li>
-<li><strong>验证 GPU 加速是否到位</strong>： <figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs llvm">python<span class="hljs-number">3</span> -<span class="hljs-keyword">c</span> <span class="hljs-string">&quot;import torch; print(&#x27;GPU 是否完全可用:&#x27;, torch.cuda.is_available())&quot;</span><br></code></pre></td></tr></table></figure>
- <em>预期输出</em>：<code>GPU 是否完全可用: True</code>，代表显卡深度学习与 AI 视觉加速完全就绪。</li>
+<li><strong>验证 GPU 加速是否到位</strong>： <figure class="highlight ada"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ada">nvcc <span class="hljs-comment">--version</span><br></code></pre></td></tr></table></figure>
+ <em>预期输出</em>：<code>CUDA版本</code>，代表显卡深度学习与 AI 视觉加速完全就绪。</li>
 <li><strong>验证 ROS 2 通信基础</strong>： <figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs lsl">ros2 topic <span class="hljs-type">list</span><br></code></pre></td></tr></table></figure>
  <em>预期输出</em>：能够识别出 <code>/parameter_events</code> 与 <code>/rosout</code>，即表示环境完全就绪。</li>
 </ol>
@@ -571,12 +570,12 @@ window.MathJax = {
   <div class="nexmoe-post-meta nexmoe-rainbow">
    
     
-        <a class="nexmoefont icon-tag-fill -none-link" href="/tags/GPU/" rel="tag">GPU</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/docker/" rel="tag">docker</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/jetson/" rel="tag">jetson</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/ros2/" rel="tag">ros2</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E6%97%A5%E8%AE%B0/" rel="tag">日记</a>
+        <a class="nexmoefont icon-tag-fill -none-link" href="/tags/GPU/" rel="tag">GPU</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/docker/" rel="tag">docker</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/jetson/" rel="tag">jetson</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/ros2/" rel="tag">ros2</a>
     
 </div>
   
   
-    <script async src="/js/copy-codeblock.js?v=1782624021537"></script>
+    <script async src="/js/copy-codeblock.js?v=1782705698637"></script>
   
 
   
