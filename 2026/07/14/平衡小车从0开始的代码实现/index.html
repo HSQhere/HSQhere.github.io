@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="zh"><head>
+<title>平衡小车从0开始的代码实现 - HSQ 的个人博客</title>
+<meta charset="UTF-8">
+<meta name="keywords" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+
+<link rel="shortcut icon" href="/hexo_init/images/avatar.jpg" type="image/jpg" />
+<meta name="description" content="一、 系统程序架构与文件逻辑关系工程采用了非常清晰的分层架构。各文件夹之间的依赖与数据流向如下：   System&#x2F;Hardware（硬件驱动层）：只负责将底层硬件信息转化为标准物理量。例如 mpu6050.c 只输出角度和陀螺仪值，不参与任何控制计算。 Control（控制层）：整个小车的大脑。control.c 从驱动层拿数据，传给 pid.c 计算，最后把计算结果通过 motor.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="平衡小车从0开始的代码实现">
+<meta property="og:url" content="https://hsqhere.github.io/2026/07/14/%E5%B9%B3%E8%A1%A1%E5%B0%8F%E8%BD%A6%E4%BB%8E0%E5%BC%80%E5%A7%8B%E7%9A%84%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/index.html">
+<meta property="og:site_name" content="HSQ 的个人博客">
+<meta property="og:description" content="一、 系统程序架构与文件逻辑关系工程采用了非常清晰的分层架构。各文件夹之间的依赖与数据流向如下：   System&#x2F;Hardware（硬件驱动层）：只负责将底层硬件信息转化为标准物理量。例如 mpu6050.c 只输出角度和陀螺仪值，不参与任何控制计算。 Control（控制层）：整个小车的大脑。control.c 从驱动层拿数据，传给 pid.c 计算，最后把计算结果通过 motor.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hsqhere.github.io/images/tech/electrical/%E5%B9%B3%E8%A1%A1%E5%B0%8F%E8%BD%A6%E7%9A%84%E8%BD%AF%E4%BB%B6%E6%A1%86%E6%9E%B6.jpg">
+<meta property="og:image" content="https://hsqhere.github.io/images/tech/electrical/%E5%B9%B3%E8%A1%A1%E5%B0%8F%E8%BD%A6%E5%8E%9F%E7%90%86%E5%9B%BE.jpg">
+<meta property="article:published_time" content="2026-07-14T05:28:13.000Z">
+<meta property="article:modified_time" content="2026-08-18T09:18:56.478Z">
+<meta property="article:author" content="HSQ">
+<meta property="article:tag" content="pid">
+<meta property="article:tag" content="stm32">
+<meta property="article:tag" content="嵌入式">
+<meta property="article:tag" content="平衡小车">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hsqhere.github.io/images/tech/electrical/%E5%B9%B3%E8%A1%A1%E5%B0%8F%E8%BD%A6%E7%9A%84%E8%BD%AF%E4%BB%B6%E6%A1%86%E6%9E%B6.jpg">
+
+<link rel="stylesheet" href="/lib/fancybox/fancybox.css">
+<link rel="stylesheet" href="/lib/mdui_043tiny/mdui.css">
+
+
+<link rel="stylesheet" href="/lib/iconfont/iconfont.css?v=1787046489676">
+
+<link rel="stylesheet" href="/css/style.css?v=1787046489676">
+
+
+
+
+    
+        <link rel="stylesheet" href="/custom.css?v=1787046489676">
+    
+
+
+
+<script src="/lib/mdui_043tiny/mdui.js" async></script>
+<script src="/lib/fancybox/fancybox.umd.js" async></script>
+<script src="/lib/lax.min.js" async></script>
+
+
+<script async src="/js/app.js?v=1787046489676"></script>
+
+ 
+
+<!-- highlight.js CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<!-- APlayer 音乐播放器 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+<!-- Twikoo 评论系统 -->
+<script src="https://cdn.jsdelivr.net/npm/twikoo@1.6.39/dist/twikoo.all.min.js"></script>
+<!-- MathJax 数学公式渲染 -->
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true,
+    processEnvironments: true
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<!-- APlayer 音乐播放器 JS -->
+<script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+
+
+<link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+<meta name="generator" content="Hexo 8.1.1"></head><body class="nexmoe mdui-drawer-body-left"><div id="nexmoe-background"><div class="nexmoe-bg" style="background-image: url(/hexo_init/images/background_mainpage.png)"></div><div class="mdui-appbar mdui-shadow-0"><div class="mdui-toolbar"><a class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: &#039;#drawer&#039;, swipe: true}" title="menu"><i class="mdui-icon nexmoefont icon-menu"></i></a><div class="mdui-toolbar-spacer"></div><a class="mdui-btn mdui-btn-icon" href="/" title="HSQ"><img src="/hexo_init/images/avatar.jpg" alt="HSQ"></a></div></div></div><div id="nexmoe-header"><div class="nexmoe-drawer mdui-drawer" id="drawer">
+    <div class="nexmoe-avatar mdui-ripple">
+        <a href="/" title="HSQ">
+            <img src="/hexo_init/images/avatar.jpg" alt="HSQ" alt="HSQ">
+        </a>
+    </div>
+    <div class="nexmoe-count">
+        <div><span>文章</span>37</div>
+        <div><span>标签</span>82</div>
+        <div><span>分类</span>20</div>
+    </div>
+    <div class="nexmoe-list mdui-list" mdui-collapse="{accordion: true}">
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/" title="首页">
+            <i class="mdui-list-item-icon nexmoefont icon-home"></i>
+            <div class="mdui-list-item-content">
+                首页
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/archive.html" title="文章归档">
+            <i class="mdui-list-item-icon nexmoefont icon-container"></i>
+            <div class="mdui-list-item-content">
+                文章归档
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/gallery/" title="图库">
+            <i class="mdui-list-item-icon nexmoefont icon-gallery"></i>
+            <div class="mdui-list-item-content">
+                图库
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/plan/" title="规划">
+            <i class="mdui-list-item-icon nexmoefont icon-chart"></i>
+            <div class="mdui-list-item-content">
+                规划
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/friends/" title="朋友们">
+            <i class="mdui-list-item-icon nexmoefont icon-friends"></i>
+            <div class="mdui-list-item-content">
+                朋友们
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/about/" title="关于">
+            <i class="mdui-list-item-icon nexmoefont icon-info-circle"></i>
+            <div class="mdui-list-item-content">
+                关于
+            </div>
+        </a>
+        
+    </div>
+    
+    
+        
+        <div class="nexmoe-widget-wrap">
+    <div class="nexmoe-widget nexmoe-search">
+        
+            <form id="search_form">
+                <label><input class="st-default-search-input" id="search_value" name="q" type="search" placeholder="搜索" style="
+                    font-size: 15px !important;
+                    height: 56px !important;
+                    background-image: none;
+                "></label>
+            </form>
+         
+    </div>
+</div>
+
+
+	<script async src="/js/search.js?v=1787046489677"></script>
+
+
+
+    
+        
+        <div class="nexmoe-widget-wrap">
+	<div class="nexmoe-widget nexmoe-social">
+		<a
+			class="mdui-ripple"
+			href="https://space.bilibili.com/1382035035?spm_id_from=333.1007.0.0"
+			target="_blank"
+			mdui-tooltip="{content: '哔哩哔哩'}"
+			style="
+				color: rgb(231, 106, 141);
+				background-color: rgba(231, 106, 141, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-bilibili"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://github.com/HSQhere"
+			target="_blank"
+			mdui-tooltip="{content: 'GitHub'}"
+			style="
+				color: rgb(25, 23, 23);
+				background-color: rgba(25, 23, 23, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-github"
+			></i> </a
+		>
+	</div>
+</div>
+
+    
+        
+        <!-- 一言 -->
+<div class="nexmoe-widget-wrap">
+  <h3 class="nexmoe-widget-title">
+    一言
+  </h3>
+  <div class="nexmoe-widget">
+    <ul class="hitokoto-box">
+      <li id="hitokoto_text_parent" class="hitokoto-text" hitokotoCategory="">
+        <a href="#" id="hitokoto_text">
+          
+        </a>
+        <a href="#" id="hitokoto_error_text" style="display: none;">
+          
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  let hitokotoText = document.getElementById('hitokoto_text')
+  let hitokotoErroText = document.getElementById('hitokoto_error_text')
+  let hitokotoCategory = document.getElementById('hitokoto_text_parent').getAttribute('hitokotoCategory')
+  window.addEventListener('load', function () {
+    let url = 'https://v1.hitokoto.cn'
+    if (hitokotoCategory) {
+      url += '?c=' + hitokotoCategory
+    }
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        hitokotoText.innerText = "「 " + data.hitokoto + " 」 from " + data.from
+        hitokotoText.href = 'https://hitokoto.cn/?uuid=' + data.uuid
+      })
+      .catch((reason) => {
+        console.error(11, reason)
+        hitokotoText.style.display = 'none'
+        hitokotoErroText.style.display = 'block'
+      })
+  })
+</script>
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章分类</h3>
+    <div class="nexmoe-widget">
+
+      <ul class="category-list">
+
+        
+
+
+        
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/CLIP/">CLIP</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/LQR/">LQR</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/ROS2/">ROS2</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/Transformer/">Transformer</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/ViT/">ViT</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/人脸算法/">人脸算法</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/仿真/">仿真</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/大模型/">大模型</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/嵌入式/">嵌入式</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/日记/">日记</a>
+          <span class="category-list-count">3</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/机器人/">机器人</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/机器学习/">机器学习</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/机械/">机械</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/树洞/">树洞</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/深度学习/">深度学习</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/电控/">电控</a>
+          <span class="category-list-count">6</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/目标/">目标</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/编程语言/">编程语言</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/计算机/">计算机</a>
+          <span class="category-list-count">8</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/车辆/">车辆</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+      </ul>
+
+    </div>
+  </div>
+
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <div id="randomtagcloud" class="nexmoe-widget tagcloud nexmoe-rainbow">
+      <a href="/tags/ANSYS/" style="font-size: 10px;">ANSYS</a> <a href="/tags/CAD/" style="font-size: 10px;">CAD</a> <a href="/tags/CLIP/" style="font-size: 11.43px;">CLIP</a> <a href="/tags/CNN/" style="font-size: 10px;">CNN</a> <a href="/tags/GPU/" style="font-size: 10px;">GPU</a> <a href="/tags/Hough%E5%9C%86/" style="font-size: 10px;">Hough圆</a> <a href="/tags/LLM/" style="font-size: 10px;">LLM</a> <a href="/tags/LQR/" style="font-size: 10px;">LQR</a> <a href="/tags/Linux/" style="font-size: 11.43px;">Linux</a> <a href="/tags/PID/" style="font-size: 10px;">PID</a> <a href="/tags/ROS2/" style="font-size: 10px;">ROS2</a> <a href="/tags/STAR-CCM/" style="font-size: 10px;">STAR-CCM</a> <a href="/tags/Transformer/" style="font-size: 10px;">Transformer</a> <a href="/tags/ViT/" style="font-size: 10px;">ViT</a> <a href="/tags/cv/" style="font-size: 11.43px;">cv</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/foc/" style="font-size: 11.43px;">foc</a> <a href="/tags/humble/" style="font-size: 10px;">humble</a> <a href="/tags/jetson/" style="font-size: 11.43px;">jetson</a> <a href="/tags/keysking/" style="font-size: 10px;">keysking</a> <a href="/tags/pbc/" style="font-size: 10px;">pbc</a> <a href="/tags/pid/" style="font-size: 10px;">pid</a> <a href="/tags/pnp/" style="font-size: 10px;">pnp</a> <a href="/tags/ros2/" style="font-size: 10px;">ros2</a> <a href="/tags/simulink/" style="font-size: 10px;">simulink</a> <a href="/tags/stm32/" style="font-size: 11.43px;">stm32</a> <a href="/tags/%E4%B8%96%E7%95%8C%E6%A8%A1%E5%9E%8B/" style="font-size: 10px;">世界模型</a> <a href="/tags/%E4%BA%92%E5%8A%A8/" style="font-size: 10px;">互动</a> <a href="/tags/%E4%BA%BA%E8%84%B8%E6%A3%80%E6%B5%8B/" style="font-size: 10px;">人脸检测</a> <a href="/tags/%E4%BA%BA%E8%84%B8%E8%AF%86%E5%88%AB/" style="font-size: 10px;">人脸识别</a> <a href="/tags/%E4%BB%BF%E7%9C%9F/" style="font-size: 14.29px;">仿真</a> <a href="/tags/%E5%85%B7%E8%BA%AB%E6%99%BA%E8%83%BD/" style="font-size: 10px;">具身智能</a> <a href="/tags/%E5%88%B6%E5%9B%BE/" style="font-size: 11.43px;">制图</a> <a href="/tags/%E5%88%B7%E6%9C%BA/" style="font-size: 10px;">刷机</a> <a href="/tags/%E5%8A%A0%E9%80%9F%E5%BA%A6%E8%AE%A1/" style="font-size: 10px;">加速度计</a> <a href="/tags/%E5%8F%8D%E6%80%9D/" style="font-size: 10px;">反思</a> <a href="/tags/%E5%98%89%E7%AB%8B%E5%88%9B/" style="font-size: 10px;">嘉立创</a> <a href="/tags/%E5%A4%9A%E6%A8%A1%E6%80%81/" style="font-size: 14.29px;">多模态</a> <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/" style="font-size: 14.29px;">大模型</a> <a href="/tags/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B/" style="font-size: 10px;">大语言模型</a> <a href="/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/" style="font-size: 11.43px;">嵌入式</a> <a href="/tags/%E5%B9%B3%E8%A1%A1%E5%B0%8F%E8%BD%A6/" style="font-size: 11.43px;">平衡小车</a> <a href="/tags/%E5%BB%BA%E6%A8%A1/" style="font-size: 11.43px;">建模</a> <a href="/tags/%E6%84%9F%E6%83%85/" style="font-size: 11.43px;">感情</a> <a href="/tags/%E6%8A%A5%E9%94%99/" style="font-size: 12.86px;">报错</a> <a href="/tags/%E6%8E%A7%E5%88%B6%E7%AE%97%E6%B3%95/" style="font-size: 14.29px;">控制算法</a> <a href="/tags/%E6%8E%A9%E8%86%9C/" style="font-size: 10px;">掩膜</a> <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" style="font-size: 14.29px;">操作系统</a> <a href="/tags/%E6%95%99%E7%A8%8B/" style="font-size: 10px;">教程</a> <a href="/tags/%E6%97%A0%E5%88%B7%E7%94%B5%E6%9C%BA/" style="font-size: 11.43px;">无刷电机</a> <a href="/tags/%E6%97%A5%E8%AE%B0/" style="font-size: 20px;">日记</a> <a href="/tags/%E6%99%BA%E8%83%BD%E4%BD%93/" style="font-size: 10px;">智能体</a> <a href="/tags/%E6%9B%B4%E6%96%B0/" style="font-size: 10px;">更新</a> <a href="/tags/%E6%9C%BA%E5%99%A8%E4%BA%BA/" style="font-size: 12.86px;">机器人</a> <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" style="font-size: 10px;">机器学习</a> <a href="/tags/%E6%9C%BA%E6%A2%B0/" style="font-size: 12.86px;">机械</a> <a href="/tags/%E6%A0%91%E6%B4%9E/" style="font-size: 10px;">树洞</a> <a href="/tags/%E6%A0%91%E8%8E%93%E6%B4%BE/" style="font-size: 10px;">树莓派</a> <a href="/tags/%E6%B0%B4%E5%86%B7/" style="font-size: 10px;">水冷</a> <a href="/tags/%E6%B5%81%E5%9C%BA/" style="font-size: 10px;">流场</a> <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" style="font-size: 10px;">深度学习</a> <a href="/tags/%E7%94%9F%E6%B4%BB/" style="font-size: 10px;">生活</a> <a href="/tags/%E7%94%B5%E6%8E%A7/" style="font-size: 17.14px;">电控</a> <a href="/tags/%E7%9B%AE%E6%A0%87/" style="font-size: 11.43px;">目标</a> <a href="/tags/%E7%A9%BA%E6%B0%94%E5%8A%A8%E5%8A%9B%E5%AD%A6/" style="font-size: 10px;">空气动力学</a> <a href="/tags/%E7%AE%80%E5%8F%B2/" style="font-size: 10px;">简史</a> <a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 18.57px;">算法</a> <a href="/tags/%E7%BC%96%E7%A8%8B/" style="font-size: 10px;">编程</a> <a href="/tags/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/" style="font-size: 10px;">编程语言</a> <a href="/tags/%E8%A7%84%E5%88%92/" style="font-size: 10px;">规划</a> <a href="/tags/%E8%A7%86%E8%A7%89/" style="font-size: 15.71px;">视觉</a> <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/" style="font-size: 11.43px;">计算机</a> <a href="/tags/%E8%AE%BA%E6%96%87/" style="font-size: 10px;">论文</a> <a href="/tags/%E8%AF%84%E8%AE%BA%E5%8C%BA/" style="font-size: 10px;">评论区</a> <a href="/tags/%E8%AF%BB%E4%B9%A6/" style="font-size: 10px;">读书</a> <a href="/tags/%E8%BD%A6%E8%BE%86/" style="font-size: 11.43px;">车辆</a> <a href="/tags/%E9%97%AE%E9%A2%98/" style="font-size: 10px;">问题</a> <a href="/tags/%E9%98%85%E8%AF%BB/" style="font-size: 11.43px;">阅读</a> <a href="/tags/%E9%99%80%E8%9E%BA%E4%BB%AA/" style="font-size: 10px;">陀螺仪</a> <a href="/tags/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1/" style="font-size: 10px;">面向对象</a> <a href="/tags/%E9%9D%A2%E5%90%91%E8%BF%87%E7%A8%8B/" style="font-size: 10px;">面向过程</a> <a href="/tags/%E9%A6%99%E6%A9%99%E6%B4%BE/" style="font-size: 10px;">香橙派</a>
+    </div>
+    
+      <script>
+        var maxTagcloud = parseInt(17);
+        var tags_length = parseInt(82);
+        var tags_arr = [];
+        for(var i = 0; i < tags_length; i++){
+          tags_arr.push(i);
+        }
+        tags_arr.sort(function (l, r) {
+          return Math.random() > 0.5 ? -1 : 1;
+        });
+        tags_arr = tags_arr.slice(0, maxTagcloud < tags_length ? tags_length - maxTagcloud : 0);
+        for(var tag_i = 0; tag_i < tags_arr.length; tag_i++){
+          document.getElementById("randomtagcloud").children[tags_arr[tag_i]].style.display = 'none';
+        }
+      </script>
+    
+  </div>
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章归档</h3>
+    <div class="nexmoe-widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/">2026</a><span class="archive-list-count">37</span></li></ul>
+    </div>
+  </div>
+
+
+
+    
+        
+   
+    <div class="nexmoe-copyright">
+        &copy; 2026 HSQ
+        Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+        & <a href="https://github.com/theme-nexmoe/hexo-theme-nexmoe" target="_blank">Nexmoe</a>
+        
+    </div>
+</div><!-- .nexmoe-drawer --></div><div id="nexmoe-content"><div class="nexmoe-primary"><div class="nexmoe-post">
+  <article>
+    
+        <div class="nexmoe-post-cover absolute" style="padding-top: NaN%;"> 
+            <img src="/images/tech/electrical/平衡小车.jpg" alt="平衡小车从0开始的代码实现" loading="lazy">
+            <h1>平衡小车从0开始的代码实现</h1>
+        </div>
+    
+    
+    <div class="nexmoe-post-meta">
+    <div class="nexmoe-rainbow">
+        <a class="nexmoefont icon-calendar-fill">2026年07月14日</a>
+        
+            <a class="nexmoefont icon-appstore-fill -link" href="/categories/%E5%B5%8C%E5%85%A5%E5%BC%8F/">嵌入式</a>
+        
+        
+    <a><i class="nexmoefont icon-areachart"></i>约2.5k字</a>
+    <a><i class="nexmoefont icon-time-circle-fill"></i>预计需要9分钟</a>
+
+    </div>
+    
+    
+    
+    
+    
+</div>
+
+    <h2 id="一、-系统程序架构与文件逻辑关系"><a href="#一、-系统程序架构与文件逻辑关系" class="headerlink" title="一、 系统程序架构与文件逻辑关系"></a>一、 系统程序架构与文件逻辑关系</h2><p>工程采用了非常清晰的<strong>分层架构</strong>。各文件夹之间的依赖与数据流向如下：</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="/../images/tech/electrical/%E5%B9%B3%E8%A1%A1%E5%B0%8F%E8%BD%A6%E7%9A%84%E8%BD%AF%E4%BB%B6%E6%A1%86%E6%9E%B6.jpg" alt="平衡小车的软件框架" data-caption="平衡小车的软件框架" loading="lazy"></p>
+<ul>
+<li><strong>System&#x2F;Hardware（硬件驱动层）</strong>：只负责将底层硬件信息转化为标准物理量。例如 <code>mpu6050.c</code> 只输出角度和陀螺仪值，不参与任何控制计算。</li>
+<li><strong>Control（控制层）</strong>：整个小车的大脑。<code>control.c</code> 从驱动层拿数据，传给 <code>pid.c</code> 计算，最后把计算结果通过 <code>motor.c</code> 打给硬件驱动。</li>
+<li><strong>Application（应用逻辑层）</strong>：负责最高级别的宏观调度，通过定时器中断维持系统运行的生命周期。</li>
+</ul>
+<h2 id="二、-硬件接口与单片机资源对照表"><a href="#二、-硬件接口与单片机资源对照表" class="headerlink" title="二、 硬件接口与单片机资源对照表"></a>二、 硬件接口与单片机资源对照表</h2><p>为了让软件顺利驱动硬件，STM32 内部资源（Timer&#x2F;USART&#x2F;I2C&#x2F;GPIO）的分配必须严格对照硬件引脚。以下为标准平衡车硬件接口映射表：</p>
+<table>
+<thead>
+<tr>
+<th><strong>模块名称</strong></th>
+<th><strong>物理引脚（示例）</strong></th>
+<th><strong>单片机内部资源</strong></th>
+<th><strong>配置要点 &#x2F; 避坑点</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>MPU6050软件 I2C</strong></td>
+<td><code>PB4(SCL)</code>, <code>PB3(SDA)</code></td>
+<td>普通 GPIO 开漏输出</td>
+<td>模拟 I2C，<code>IIC.c</code>中实现。不需要开启硬件I2C，方便移植。</td>
+</tr>
+<tr>
+<td><strong>MPU6050中断</strong></td>
+<td><code>PA4 (INT)</code></td>
+<td><code>EXTI4</code> 外部中断</td>
+<td>触发方式设为<strong>下降沿触发</strong>，以此作为控制循环的基准。因为是dmp库，看采样率100hz，所以中断10ms为周期。</td>
+</tr>
+<tr>
+<td><strong>电机 PWM</strong></td>
+<td><code>PA8</code>, <code>PA11</code></td>
+<td><code>TIM1_CH1</code>, <code>TIM1_CH4</code></td>
+<td>定时器配置为 <strong>PWM Generation</strong>，频率设为 $10\text{kHz}$，防止产生人耳能听到的电机啸叫声。</td>
+</tr>
+<tr>
+<td><strong>电机方向引脚</strong></td>
+<td><code>PB12</code>, <code>PB13</code>, <code>PB14</code>, <code>PB15</code></td>
+<td>普通 GPIO 推挽输出</td>
+<td>控制电机正反转。</td>
+</tr>
+<tr>
+<td><strong>左编码器</strong></td>
+<td><code>PA0</code>, <code>PA1</code></td>
+<td><code>TIM2</code> (Encoder Mode)</td>
+<td>开启<strong>编码器模式 (Combined Channels)</strong>，双沿计数以提高精度。</td>
+</tr>
+<tr>
+<td><strong>右编码器</strong></td>
+<td><code>PA6</code>, <code>PA7</code></td>
+<td><code>TIM3</code> (Encoder Mode)</td>
+<td>同上，注意方向正负的匹配。</td>
+</tr>
+<tr>
+<td><strong>OLED 屏幕</strong></td>
+<td><code>PB8(SCL)</code>, <code>PB9(SDA)</code></td>
+<td>硬件&#x2F;软件 I2C</td>
+<td><code>oled.c</code> 负责刷新。</td>
+</tr>
+<tr>
+<td><strong>超声波 SR04</strong></td>
+<td><code>PB3(Trig)</code>, <code>PB2(Echo)</code></td>
+<td>普通 GPIO + 定时器输入捕获</td>
+<td><code>Trig</code> 触发引脚，<code>Echo</code> 接收引脚（利用定时器测高电平时间）。</td>
+</tr>
+<tr>
+<td><strong>蓝牙通讯</strong></td>
+<td><code>PB10(TX)</code>, <code>PB11(RX)</code></td>
+<td><code>USART3</code> 异步串口</td>
+<td>开启<strong>串口接收中断</strong>，用于在线无线调参。</td>
+</tr>
+</tbody></table>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="/../images/tech/electrical/%E5%B9%B3%E8%A1%A1%E5%B0%8F%E8%BD%A6%E5%8E%9F%E7%90%86%E5%9B%BE.jpg" alt="平衡小车原理图" data-caption="平衡小车原理图" loading="lazy"><br><strong>PS:</strong><br><strong>一、电机转动配置（PWM）</strong><br><strong>1. 配置原理</strong><br>单片机通过定时器产生高频的方波（通常 $10\sim20\text{kHz}$）。通过改变方波中高电平所占的比例（即<strong>占空比</strong>），来控制电机两端的平均电压，从而控制转速。</p>
+<ul>
+<li><strong>方向控制</strong>：一般配合驱动芯片（如 TB6612 或 A4950），使用两个普通的 GPIO 引脚（例如 <code>AIN1</code>, <code>AIN2</code>）控制正反转：<ul>
+<li><code>AIN1 = 1, AIN2 = 0</code> $\rightarrow$ 正转</li>
+<li><code>AIN1 = 0, AIN2 = 1</code> $\rightarrow$ 反转</li>
+</ul>
+</li>
+<li><strong>速度控制</strong>：将 PWM 引脚接到驱动芯片的使能端（<code>PWMA</code>），占空比越大，转得越快。<br><strong>2. CubeMX 配置要点</strong></li>
+</ul>
+<ol>
+<li>选择一个定时器（例如 <code>TIM3</code>），将对应的通道（如 <code>Channel 1</code>, <code>Channel 2</code>）设置为 <strong>PWM Generation CHx</strong>。</li>
+<li><strong>频率计算</strong>：STM32F103 的定时器主频一般是 $72\text{MHz}$。<ul>
+<li>设定预分频系数（Prescaler, PSC）为 <code>0</code>（即 $1$ 分频：$72\text{MHz} &#x2F; 8 &#x3D; 9\text{MHz}$）。</li>
+<li>设定自动重装载值（Counter Period, ARR）为 <code>7199</code>（即计 $7200$ 个数）。</li>
+<li>最终 PWM 频率 &#x3D; $\frac{72000000}{1 \times 7200} &#x3D; 10000\text{Hz} &#x3D; 10\text{kHz}$。</li>
+</ul>
+</li>
+<li>在代码中控制速度： <figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs scss"><span class="hljs-comment">// 修改 TIM3 通道 1 的占空比为 3600（50% 速度）</span><br><span class="hljs-built_in">__HAL_TIM_SET_COMPARE</span>(&amp;htim3, TIM_CHANNEL_1, <span class="hljs-number">3600</span>); <br></code></pre></td></tr></table></figure>
+<strong>二、MPU6050配置</strong><br><strong>1. <code>PB3</code> (SDA) 和 <code>PB4</code> (SCL) —— 模拟 I2C 引脚</strong><br>在 CubeMX 中，这两个引脚都应当配置为普通的 <strong>GPIO 输出模式</strong>：</li>
+</ol>
+<ul>
+<li><strong>SCL (<code>PB4</code>) 配置</strong>：<ul>
+<li><strong>GPIO mode</strong>：<code>GPIO_Output</code>（输出模式）</li>
+<li><strong>GPIO Output Level</strong>：<code>low</code></li>
+<li><strong>Output speed</strong>：<code>low</code></li>
+<li><strong>GPIO Pull-up&#x2F;Pull-down</strong>：<code>No pull-up and no pull-down</code></li>
+</ul>
+</li>
+<li><strong>SDA (<code>PB3</code>) 配置</strong>：<ul>
+<li><strong>GPIO mode</strong>：<code>GPIO_Output</code>（因为模拟 I2C 需要软件控制引脚时而输出、时而读取输入，因此通常在代码中会通过寄存器动态切换该引脚的输入&#x2F;输出方向；或者直接将其配置为 <strong>开漏输出（Open-Drain）</strong>，这样就无需频繁切换方向，直接读取即可）</li>
+<li><strong>GPIO Output Level</strong>：<code>low</code> 程序里面可以改</li>
+<li><strong>GPIO Mode</strong>：<code>No pull-up and no pull-down</code><br>  SDA两种情况：<br>  1、配置成推挽输出–&gt;需要切换输入输出模式<br>  2、配置成开漏输出–&gt;不需要切换<br>  一定条件下：1.从机严格遵守iic协议，2.在读ack之前，主机设置为输入模式，3.无多主机iic的情况下。模拟iic是可以用推挽输出来实现的，也不会短路。<br>  当要考虑异常情况，比如数据没传完的时候主机复位了、主机和从机不是同一个电源，或者电容导致下电时间不一致实可能会短路。<br><strong>2. <code>PB5</code> (INT) —— 陀螺仪数据中断引脚</strong></li>
+</ul>
+</li>
+<li><strong>外部中断法</strong><ul>
+<li><strong>GPIO mode</strong>：<code>GPIO_EXTI5</code>（外部中断 5）</li>
+<li><strong>GPIO mode (EXTI)</strong>：<code>External Interrupt Mode with Falling edge trigger detection</code>（下降沿触发中断）</li>
+<li><strong>NVIC 中断使能</strong>：在 NVIC 选项卡中勾选 <code>EXTI line[9:5] interrupts</code>。</li>
+</ul>
+</li>
+</ul>
+<h2 id="三、-核心硬件模块构建与核心机制"><a href="#三、-核心硬件模块构建与核心机制" class="headerlink" title="三、 核心硬件模块构建与核心机制"></a>三、 核心硬件模块构建与核心机制</h2><h3 id="1-MPU6050-与软件-I2C-IIC-c-mpu6050-c-inv-mpu-c"><a href="#1-MPU6050-与软件-I2C-IIC-c-mpu6050-c-inv-mpu-c" class="headerlink" title="1. MPU6050 与软件 I2C (IIC.c, mpu6050.c, inv_mpu.c)"></a>1. MPU6050 与软件 I2C (<code>IIC.c</code>, <code>mpu6050.c</code>, <code>inv_mpu.c</code>)</h3><ul>
+<li><strong>核心机制</strong>：通过软件模拟 I2C 的时序读出 MPU6050 的原始加速度和角速度，再通过官方 DMP 固件库 (<code>inv_mpu.c</code>) 直接解算出平滑的 Pitch（俯仰角）和 Gyro（陀螺仪角速度）。</li>
+<li><strong>注意</strong>：<strong>机械中值 (<code>Middle_angle</code>) 手动校准</strong>。</li>
+</ul>
+<h3 id="2-电机控制-motor-c"><a href="#2-电机控制-motor-c" class="headerlink" title="2. 电机控制 (motor.c)"></a>2. 电机控制 (<code>motor.c</code>)</h3><ul>
+<li><strong>核心机制</strong>：通过修改定时器的比较寄存器（如 <code>__HAL_TIM_SET_COMPARE</code>）来改变 PWM 占空比，控制速度；通过控制 GPIO 的高低电平控制正反转。</li>
+<li><strong>注意（硬件保护）</strong>：<strong>做软件死区与硬限幅</strong>。STM32 的 PWM 最大计数值如果是 7200，当 PID 算出来的输出超过 7200 时，必须在 <code>motor.c</code> 的 <code>Limit()</code> 函数中强行截断到 $\pm 7000$。否则严重的过载会瞬间烧毁 TB6612 或 A4950 驱动芯片。</li>
+</ul>
+<h3 id="3-编码器速度捕获-encoder-c"><a href="#3-编码器速度捕获-encoder-c" class="headerlink" title="3. 编码器速度捕获 (encoder.c)"></a>3. 编码器速度捕获 (<code>encoder.c</code>)</h3><ul>
+<li><strong>核心机制</strong>：利用定时器的硬件编码器模式，在每个控制周期（10ms）去读取计数器的值，读完后<strong>立刻将计数器清零</strong>（<code>__HAL_TIM_SET_COUNTER(&amp;hadc, 0)</code>）。当前读取的值就是小车在这 10ms 内走过的物理距离（代表速度）。</li>
+<li><strong>注意</strong>：<strong>方向一致性</strong>。必须保证小车前行时，左右编码器读数<strong>同为正数</strong>；后退时，<strong>同为负数</strong>。如果右轮编码器反了，需要在软件里对读数乘以 <code>-1</code>。</li>
+</ul>
+<h3 id="4-OLED-刷新-oled-c-show-c"><a href="#4-OLED-刷新-oled-c-show-c" class="headerlink" title="4. OLED 刷新 (oled.c, show.c)"></a>4. OLED 刷新 (<code>oled.c</code>, <code>show.c</code>)</h3><ul>
+<li><strong>核心机制</strong>：将调参数据、电压数据转换为字符串并写入屏幕。</li>
+<li><strong>注意</strong>：<strong>绝对不要在 10ms 的控制中断里调用 OLED 刷新函数</strong>I2C 刷新屏幕的耗时极长（通常需要几毫秒甚至十几毫秒），如果在控制中断里刷新屏幕，会导致整个 PID 周期被严重拉长。</li>
+</ul>
+<h3 id="5-超声波测距-sr04-c"><a href="#5-超声波测距-sr04-c" class="headerlink" title="5. 超声波测距 (sr04.c)"></a>5. 超声波测距 (<code>sr04.c</code>)</h3><ul>
+<li><strong>核心机制</strong>：给 <code>Trig</code> 引脚一个 10us 的高电平脉冲，模块发出超声波。当 <code>Echo</code> 变高电平时开启定时器，变低电平时关闭定时器，根据高电平持续时间计算物理距离。</li>
+<li><strong>避坑点</strong>：超声波检测具有<strong>阻塞性</strong>（如果前面很远没有障碍物，<code>Echo</code> 会等待很久才返回低电平）。在平衡车中，建议采用<strong>定时器输入捕获中断</strong>或者<strong>非阻塞定时器计数</strong>的方式读取，避免死等待。</li>
+</ul>
+<h2 id="四、-控制算法逻辑与核心控制流程"><a href="#四、-控制算法逻辑与核心控制流程" class="headerlink" title="四、 控制算法逻辑与核心控制流程"></a>四、 控制算法逻辑与核心控制流程</h2><p>平衡车的算法（直立环、速度环、转向环）已经非常成熟，我们一笔带过其数学原理，<strong>重点剖析其精密的控制流程和嵌套结构</strong>。</p>
+<h3 id="1-核心控制总流程图（10ms-定时器中断-MPU6050-中断）"><a href="#1-核心控制总流程图（10ms-定时器中断-MPU6050-中断）" class="headerlink" title="1. 核心控制总流程图（10ms 定时器中断 &#x2F; MPU6050 中断）"></a>1. 核心控制总流程图（10ms 定时器中断 &#x2F; MPU6050 中断）</h3><p>整个平衡车的控制生命周期全部浓缩在 <code>control.c</code> 的 <code>Control()</code> 函数中，每 10ms 严格执行一次：</p>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><code class="hljs jboss-cli">[ 触发 10ms 中断 / EXTI中断 ]<br>           │<br>           ▼<br>┌──────────────────────────────────────┐<br>│ 1. 采集数据                           │ ◄─ 读取 MPU6050 角度/角速度<br>│    Read_MPU6050_Data<span class="hljs-params">()</span>;              │ ◄─ 读取 左右编码器原始脉冲值<br>└──────────────────────────────────────┘<br>           │<br>           ▼<br>┌──────────────────────────────────────┐<br>│ 2. 安全检查                           │<br>│    Pick_Up<span class="hljs-params">()</span>;  /  Put_Down<span class="hljs-params">()</span>;        │ ◄─ 判断小车是否悬空或倒地<br>└──────────────────────────────────────┘<br>           │<br>           ├─── [小车倒地/被提起 <span class="hljs-params">(<span class="hljs-attr">Flag_Stop</span> == 1)</span>] ──► 强行熄火: PWM = 0; 积分清零;<br>           │                                            <br>           └─── [正常站立状态 <span class="hljs-params">(<span class="hljs-attr">Flag_Stop</span> == 0)</span>]<br>                       │<br>                       ▼<br>          ┌──────────────────────────────────────┐<br>          │ 3. 速度环计算 <span class="hljs-params">(PI)</span>                    │<br>          │    Velocity_out = <span class="hljs-string">...</span>                │ ◄─ 采用一阶低通滤波减少机械噪声<br>          └──────────────────────────────────────┘<br>                       │<br>                       ▼<br>          ┌──────────────────────────────────────┐<br>          │ 4. 直立环计算 <span class="hljs-params">(PD)</span>                    │<br>          │    Vertical_out = <span class="hljs-string">...</span>                │ ◄─ 将速度环输出作为目标角度的输入<br>          └──────────────────────────────────────┘<br>                       │<br>                       ▼<br>          ┌──────────────────────────────────────┐<br>          │ 5. 转向环计算 <span class="hljs-params">(PD)</span>                    │<br>          │    Turn_out = <span class="hljs-string">...</span>                    │ ◄─ 结合遥控指令计算差速<br>          └──────────────────────────────────────┘<br>                       │<br>                       ▼<br>          ┌──────────────────────────────────────┐<br>          │ 6. 融合与物理输出                     │<br>          │    PWM_L = Vertical + Velocity - Turn│<br>          │    PWM_R = Vertical + Velocity + Turn│<br>          │    Limit<span class="hljs-params">()</span>;  ──►  Load_PWM<span class="hljs-params">()</span>;        │ ◄─ 安全限幅后，改写寄存器驱动电机<br>          └──────────────────────────────────────┘<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-串级pid嵌套的关键点"><a href="#2-串级pid嵌套的关键点" class="headerlink" title="2. 串级pid嵌套的关键点"></a>2. 串级pid嵌套的关键点</h3><ul>
+<li><strong>数据低通滤波</strong>：速度环的输入（左右编码器读数之和）<strong>必须经过一阶互补低通滤波</strong>：<br>  $$\text{Encoder_Filtered} &#x3D; 0.7 \times \text{Encoder_Last} + 0.3 \times \text{Encoder_Now}$$<br>  如果不加滤波，电机的机械抖动通过编码器直接传给速度环，速度环又瞬间改变 PWM，会引发整车的硬件共振，小车会发出刺耳的“嘎嘎”声并剧烈颤抖。</li>
+</ul>
+<h2 id="五、-串口蓝牙通讯与无线调参逻辑-usart3-c"><a href="#五、-串口蓝牙通讯与无线调参逻辑-usart3-c" class="headerlink" title="五、 串口蓝牙通讯与无线调参逻辑 (usart3.c)"></a>五、 串口蓝牙通讯与无线调参逻辑 (<code>usart3.c</code>)</h2><p>在线调参是平衡车调试成功与否的分水岭。通过蓝牙动态修改 <code>pid.c</code> 中的 $K_p, K_d$ 参数，效率比反复烧录代码高 100 倍。</p>
+<ol>
+<li><strong>注意app要求整型数据</strong>：在手机 APP 端发送数据时，记得把所有浮点数参数（如 <code>0.065</code>）统一<strong>乘以 1000 变成整数</strong>（<code>65</code>）再发出。单片机接收后通过 <code>Final_Param = Data / 1000.0f;</code> 还原。</li>
+<li><strong>防止缓存区数据溢出</strong>：由于乘以 1000 变成整数，多个数据可能导致缓冲区溢出，导致数据缺失。可以适当调整乘以倍数。</li>
+<li><strong>通信与中断优先级</strong>：串口接收中断的优先级<strong>必须低于</strong> MPU6050 外部中断或控制定时器中断。必须保证控制小车平衡的 10ms 中断永远拥有最高的执行优先级，否则蓝牙发送大流量数据时，一旦卡住控制中断，小车就会瞬间瘫痪跌倒。</li>
+</ol>
+
+    
+  </article>
+
+  
+      
+    <div class="nexmoe-post-copyright">
+        <strong>本文作者：</strong>HSQ<br>
+        <strong>本文链接：</strong><a href="https://hsqhere.github.io/2026/07/14/%E5%B9%B3%E8%A1%A1%E5%B0%8F%E8%BD%A6%E4%BB%8E0%E5%BC%80%E5%A7%8B%E7%9A%84%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/" title="https:&#x2F;&#x2F;hsqhere.github.io&#x2F;2026&#x2F;07&#x2F;14&#x2F;%E5%B9%B3%E8%A1%A1%E5%B0%8F%E8%BD%A6%E4%BB%8E0%E5%BC%80%E5%A7%8B%E7%9A%84%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0&#x2F;" target="_blank" rel="noopener">https:&#x2F;&#x2F;hsqhere.github.io&#x2F;2026&#x2F;07&#x2F;14&#x2F;%E5%B9%B3%E8%A1%A1%E5%B0%8F%E8%BD%A6%E4%BB%8E0%E5%BC%80%E5%A7%8B%E7%9A%84%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0&#x2F;</a><br>
+        
+            # <strong>版权声明：</strong>本文采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/cn/deed.zh" target="_blank">CC BY-NC-SA 3.0 CN</a> 协议进行许可
+
+        
+    </div>
+
+
+  
+  
+  <div class="nexmoe-post-meta nexmoe-rainbow">
+   
+    
+        <a class="nexmoefont icon-tag-fill -none-link" href="/tags/pid/" rel="tag">pid</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/stm32/" rel="tag">stm32</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/" rel="tag">嵌入式</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E5%B9%B3%E8%A1%A1%E5%B0%8F%E8%BD%A6/" rel="tag">平衡小车</a>
+    
+</div>
+  
+  
+    <script async src="/js/copy-codeblock.js?v=1787046489544"></script>
+  
+
+  
+      <div class="nexmoe-post-footer">
+          
+      </div>
+  
+</div></div><div class="nexmoe-post-right">    <div class="nexmoe-fixed">
+        <div class="nexmoe-tool">
+
+            
+
+            
+            
+            <button class="mdui-fab catalog" style="overflow:unset;">
+                <i class="nexmoefont icon-i-catalog"></i>
+                <div class="nexmoe-toc">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81-%E7%B3%BB%E7%BB%9F%E7%A8%8B%E5%BA%8F%E6%9E%B6%E6%9E%84%E4%B8%8E%E6%96%87%E4%BB%B6%E9%80%BB%E8%BE%91%E5%85%B3%E7%B3%BB"><span class="toc-number">1.</span> <span class="toc-text">一、 系统程序架构与文件逻辑关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81-%E7%A1%AC%E4%BB%B6%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%8D%95%E7%89%87%E6%9C%BA%E8%B5%84%E6%BA%90%E5%AF%B9%E7%85%A7%E8%A1%A8"><span class="toc-number">2.</span> <span class="toc-text">二、 硬件接口与单片机资源对照表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81-%E6%A0%B8%E5%BF%83%E7%A1%AC%E4%BB%B6%E6%A8%A1%E5%9D%97%E6%9E%84%E5%BB%BA%E4%B8%8E%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6"><span class="toc-number">3.</span> <span class="toc-text">三、 核心硬件模块构建与核心机制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-MPU6050-%E4%B8%8E%E8%BD%AF%E4%BB%B6-I2C-IIC-c-mpu6050-c-inv-mpu-c"><span class="toc-number">3.1.</span> <span class="toc-text">1. MPU6050 与软件 I2C (IIC.c, mpu6050.c, inv_mpu.c)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E7%94%B5%E6%9C%BA%E6%8E%A7%E5%88%B6-motor-c"><span class="toc-number">3.2.</span> <span class="toc-text">2. 电机控制 (motor.c)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E7%BC%96%E7%A0%81%E5%99%A8%E9%80%9F%E5%BA%A6%E6%8D%95%E8%8E%B7-encoder-c"><span class="toc-number">3.3.</span> <span class="toc-text">3. 编码器速度捕获 (encoder.c)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-OLED-%E5%88%B7%E6%96%B0-oled-c-show-c"><span class="toc-number">3.4.</span> <span class="toc-text">4. OLED 刷新 (oled.c, show.c)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E8%B6%85%E5%A3%B0%E6%B3%A2%E6%B5%8B%E8%B7%9D-sr04-c"><span class="toc-number">3.5.</span> <span class="toc-text">5. 超声波测距 (sr04.c)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81-%E6%8E%A7%E5%88%B6%E7%AE%97%E6%B3%95%E9%80%BB%E8%BE%91%E4%B8%8E%E6%A0%B8%E5%BF%83%E6%8E%A7%E5%88%B6%E6%B5%81%E7%A8%8B"><span class="toc-number">4.</span> <span class="toc-text">四、 控制算法逻辑与核心控制流程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A0%B8%E5%BF%83%E6%8E%A7%E5%88%B6%E6%80%BB%E6%B5%81%E7%A8%8B%E5%9B%BE%EF%BC%8810ms-%E5%AE%9A%E6%97%B6%E5%99%A8%E4%B8%AD%E6%96%AD-MPU6050-%E4%B8%AD%E6%96%AD%EF%BC%89"><span class="toc-number">4.1.</span> <span class="toc-text">1. 核心控制总流程图（10ms 定时器中断 &#x2F; MPU6050 中断）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E4%B8%B2%E7%BA%A7pid%E5%B5%8C%E5%A5%97%E7%9A%84%E5%85%B3%E9%94%AE%E7%82%B9"><span class="toc-number">4.2.</span> <span class="toc-text">2. 串级pid嵌套的关键点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81-%E4%B8%B2%E5%8F%A3%E8%93%9D%E7%89%99%E9%80%9A%E8%AE%AF%E4%B8%8E%E6%97%A0%E7%BA%BF%E8%B0%83%E5%8F%82%E9%80%BB%E8%BE%91-usart3-c"><span class="toc-number">5.</span> <span class="toc-text">五、 串口蓝牙通讯与无线调参逻辑 (usart3.c)</span></a></li></ol>
+                </div>
+            </button>
+            
+
+            
+
+            <a href="#nexmoe-content" class="backtop toc-link" aria-label="Back To Top" title="top"><button class="mdui-fab mdui-ripple"><i class="nexmoefont icon-caret-top"></i></button></a>
+        </div>
+    </div>
+</div></div><div id="nexmoe-footer"><!--!--></div><div id="nexmoe-search-space"><div class="search-container"><div class="search-header"><div class="search-input-container"><input class="search-input" type="text" placeholder="搜索" onInput="sinput();"></div><a class="search-close" onclick="sclose();">×</a></div><div class="search-body"></div></div></div><div><div id="aplayer" style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;"></div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // --- APlayer 音乐播放器部分 ---
+    const ap = new APlayer({
+      container: document.getElementById('aplayer'),
+      fixed: true,
+      autoplay: false,
+      theme: '#22d9df',
+      loop: 'all',
+      order: 'random',
+      preload: 'auto',
+      volume: 0.2,
+      mutex: true,
+      lrcType: 0,
+      audio: [
+        {
+          name: '那么骄傲',
+          artist: '茜茜',
+          url: '/music/那么骄傲 - 茜茜.mp3', 
+          cover: '/music/cover茜茜.jpg',
+          lrc: '[00:00.00]暂无歌词'
+        }
+      ]
+    });
+
+    // --- Twikoo 评论系统部分 ---
+    if (window.location.pathname.match(/\/\d{4}\/\d{2}\/\d{2}\//) || 
+        document.querySelector('article.post') || 
+        document.body.classList.contains('post-template')) {
+      
+      let talkContainer = document.getElementById('tcomment');
+      if (!talkContainer) {
+        const article = document.querySelector('article') || 
+                        document.querySelector('.nexmoe-post') || 
+                        document.querySelector('.post-content') ||
+                        document.querySelector('main');
+        if (article) {
+          talkContainer = document.createElement('div');
+          talkContainer.id = 'tcomment';
+          article.insertAdjacentElement('afterend', talkContainer);
+        }
+      }
+      
+      if (talkContainer && typeof twikoo !== 'undefined') {
+        twikoo.init({
+          envId: 'https://hsqblog.netlify.app/.netlify/functions/twikoo',
+          el: '#tcomment',
+          path: window.location.pathname,
+          lang: 'zh-CN'
+        });
+      }
+    }
+  });
+
+  // --- 朋友卡片解锁逻辑 ---
+  async function unlock(id, correctHash) {
+    const input = document.getElementById('input-' + id).value;
+    const msgUint8 = new TextEncoder().encode(input);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+    if (hashHex === correctHash) {
+        document.getElementById('lock-' + id).style.display = 'none';
+        const imgDiv = document.getElementById('img-' + id);
+        imgDiv.style.display = 'block';
+        setTimeout(() => imgDiv.style.opacity = "1", 10);
+    } else {
+        const err = document.getElementById('err-' + id);
+        err.style.display = 'block';
+        setTimeout(() => err.style.display = 'none', 2000);
+    }
+  }
+</script>
+</div></body></html>

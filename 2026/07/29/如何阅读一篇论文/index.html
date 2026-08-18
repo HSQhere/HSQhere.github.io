@@ -1,0 +1,681 @@
+<!doctype html>
+<html lang="zh"><head>
+<title>如何阅读一篇论文 - HSQ 的个人博客</title>
+<meta charset="UTF-8">
+<meta name="keywords" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+
+<link rel="shortcut icon" href="/hexo_init/images/avatar.jpg" type="image/jpg" />
+<meta name="description" content="一、如何高效阅读一篇论文（核心目标：复刻作者思考网络）核心原则：非逐字通读，由浅入深、按需阅读，拒绝无效精读，全程搭建作者研究逻辑网络，不合适可随时终止阅读。  初筛判断（快速定取舍）：通读题目、关键词、摘要、结论，快速判定论文研究方向与核心价值，筛选是否契合自身研究兴趣，决定是否继续研读。  视觉精读（抓核心框架）：优先浏览全文图表，图表直观体现研究核心方法与实验结果，决定是否进一步阅读引言部分">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何阅读一篇论文">
+<meta property="og:url" content="https://hsqhere.github.io/2026/07/29/%E5%A6%82%E4%BD%95%E9%98%85%E8%AF%BB%E4%B8%80%E7%AF%87%E8%AE%BA%E6%96%87/index.html">
+<meta property="og:site_name" content="HSQ 的个人博客">
+<meta property="og:description" content="一、如何高效阅读一篇论文（核心目标：复刻作者思考网络）核心原则：非逐字通读，由浅入深、按需阅读，拒绝无效精读，全程搭建作者研究逻辑网络，不合适可随时终止阅读。  初筛判断（快速定取舍）：通读题目、关键词、摘要、结论，快速判定论文研究方向与核心价值，筛选是否契合自身研究兴趣，决定是否继续研读。  视觉精读（抓核心框架）：优先浏览全文图表，图表直观体现研究核心方法与实验结果，决定是否进一步阅读引言部分">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-07-29T03:42:53.000Z">
+<meta property="article:modified_time" content="2026-08-18T09:29:11.402Z">
+<meta property="article:author" content="HSQ">
+<meta property="article:tag" content="日记">
+<meta property="article:tag" content="论文">
+<meta property="article:tag" content="阅读">
+<meta name="twitter:card" content="summary">
+
+<link rel="stylesheet" href="/lib/fancybox/fancybox.css">
+<link rel="stylesheet" href="/lib/mdui_043tiny/mdui.css">
+
+
+<link rel="stylesheet" href="/lib/iconfont/iconfont.css?v=1787046489672">
+
+<link rel="stylesheet" href="/css/style.css?v=1787046489672">
+
+
+
+
+    
+        <link rel="stylesheet" href="/custom.css?v=1787046489672">
+    
+
+
+
+<script src="/lib/mdui_043tiny/mdui.js" async></script>
+<script src="/lib/fancybox/fancybox.umd.js" async></script>
+<script src="/lib/lax.min.js" async></script>
+
+
+<script async src="/js/app.js?v=1787046489672"></script>
+
+ 
+
+<!-- highlight.js CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<!-- APlayer 音乐播放器 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+<!-- Twikoo 评论系统 -->
+<script src="https://cdn.jsdelivr.net/npm/twikoo@1.6.39/dist/twikoo.all.min.js"></script>
+<!-- MathJax 数学公式渲染 -->
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true,
+    processEnvironments: true
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<!-- APlayer 音乐播放器 JS -->
+<script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+
+
+<link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+<meta name="generator" content="Hexo 8.1.1"></head><body class="nexmoe mdui-drawer-body-left"><div id="nexmoe-background"><div class="nexmoe-bg" style="background-image: url(/hexo_init/images/background_mainpage.png)"></div><div class="mdui-appbar mdui-shadow-0"><div class="mdui-toolbar"><a class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: &#039;#drawer&#039;, swipe: true}" title="menu"><i class="mdui-icon nexmoefont icon-menu"></i></a><div class="mdui-toolbar-spacer"></div><a class="mdui-btn mdui-btn-icon" href="/" title="HSQ"><img src="/hexo_init/images/avatar.jpg" alt="HSQ"></a></div></div></div><div id="nexmoe-header"><div class="nexmoe-drawer mdui-drawer" id="drawer">
+    <div class="nexmoe-avatar mdui-ripple">
+        <a href="/" title="HSQ">
+            <img src="/hexo_init/images/avatar.jpg" alt="HSQ" alt="HSQ">
+        </a>
+    </div>
+    <div class="nexmoe-count">
+        <div><span>文章</span>37</div>
+        <div><span>标签</span>82</div>
+        <div><span>分类</span>20</div>
+    </div>
+    <div class="nexmoe-list mdui-list" mdui-collapse="{accordion: true}">
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/" title="首页">
+            <i class="mdui-list-item-icon nexmoefont icon-home"></i>
+            <div class="mdui-list-item-content">
+                首页
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/archive.html" title="文章归档">
+            <i class="mdui-list-item-icon nexmoefont icon-container"></i>
+            <div class="mdui-list-item-content">
+                文章归档
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/gallery/" title="图库">
+            <i class="mdui-list-item-icon nexmoefont icon-gallery"></i>
+            <div class="mdui-list-item-content">
+                图库
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/plan/" title="规划">
+            <i class="mdui-list-item-icon nexmoefont icon-chart"></i>
+            <div class="mdui-list-item-content">
+                规划
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/friends/" title="朋友们">
+            <i class="mdui-list-item-icon nexmoefont icon-friends"></i>
+            <div class="mdui-list-item-content">
+                朋友们
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/about/" title="关于">
+            <i class="mdui-list-item-icon nexmoefont icon-info-circle"></i>
+            <div class="mdui-list-item-content">
+                关于
+            </div>
+        </a>
+        
+    </div>
+    
+    
+        
+        <div class="nexmoe-widget-wrap">
+    <div class="nexmoe-widget nexmoe-search">
+        
+            <form id="search_form">
+                <label><input class="st-default-search-input" id="search_value" name="q" type="search" placeholder="搜索" style="
+                    font-size: 15px !important;
+                    height: 56px !important;
+                    background-image: none;
+                "></label>
+            </form>
+         
+    </div>
+</div>
+
+
+	<script async src="/js/search.js?v=1787046489672"></script>
+
+
+
+    
+        
+        <div class="nexmoe-widget-wrap">
+	<div class="nexmoe-widget nexmoe-social">
+		<a
+			class="mdui-ripple"
+			href="https://space.bilibili.com/1382035035?spm_id_from=333.1007.0.0"
+			target="_blank"
+			mdui-tooltip="{content: '哔哩哔哩'}"
+			style="
+				color: rgb(231, 106, 141);
+				background-color: rgba(231, 106, 141, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-bilibili"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://github.com/HSQhere"
+			target="_blank"
+			mdui-tooltip="{content: 'GitHub'}"
+			style="
+				color: rgb(25, 23, 23);
+				background-color: rgba(25, 23, 23, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-github"
+			></i> </a
+		>
+	</div>
+</div>
+
+    
+        
+        <!-- 一言 -->
+<div class="nexmoe-widget-wrap">
+  <h3 class="nexmoe-widget-title">
+    一言
+  </h3>
+  <div class="nexmoe-widget">
+    <ul class="hitokoto-box">
+      <li id="hitokoto_text_parent" class="hitokoto-text" hitokotoCategory="">
+        <a href="#" id="hitokoto_text">
+          
+        </a>
+        <a href="#" id="hitokoto_error_text" style="display: none;">
+          
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  let hitokotoText = document.getElementById('hitokoto_text')
+  let hitokotoErroText = document.getElementById('hitokoto_error_text')
+  let hitokotoCategory = document.getElementById('hitokoto_text_parent').getAttribute('hitokotoCategory')
+  window.addEventListener('load', function () {
+    let url = 'https://v1.hitokoto.cn'
+    if (hitokotoCategory) {
+      url += '?c=' + hitokotoCategory
+    }
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        hitokotoText.innerText = "「 " + data.hitokoto + " 」 from " + data.from
+        hitokotoText.href = 'https://hitokoto.cn/?uuid=' + data.uuid
+      })
+      .catch((reason) => {
+        console.error(11, reason)
+        hitokotoText.style.display = 'none'
+        hitokotoErroText.style.display = 'block'
+      })
+  })
+</script>
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章分类</h3>
+    <div class="nexmoe-widget">
+
+      <ul class="category-list">
+
+        
+
+
+        
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/CLIP/">CLIP</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/LQR/">LQR</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/ROS2/">ROS2</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/Transformer/">Transformer</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/ViT/">ViT</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/人脸算法/">人脸算法</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/仿真/">仿真</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/大模型/">大模型</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/嵌入式/">嵌入式</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/日记/">日记</a>
+          <span class="category-list-count">3</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/机器人/">机器人</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/机器学习/">机器学习</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/机械/">机械</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/树洞/">树洞</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/深度学习/">深度学习</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/电控/">电控</a>
+          <span class="category-list-count">6</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/目标/">目标</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/编程语言/">编程语言</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/计算机/">计算机</a>
+          <span class="category-list-count">8</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/车辆/">车辆</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+      </ul>
+
+    </div>
+  </div>
+
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <div id="randomtagcloud" class="nexmoe-widget tagcloud nexmoe-rainbow">
+      <a href="/tags/ANSYS/" style="font-size: 10px;">ANSYS</a> <a href="/tags/CAD/" style="font-size: 10px;">CAD</a> <a href="/tags/CLIP/" style="font-size: 11.43px;">CLIP</a> <a href="/tags/CNN/" style="font-size: 10px;">CNN</a> <a href="/tags/GPU/" style="font-size: 10px;">GPU</a> <a href="/tags/Hough%E5%9C%86/" style="font-size: 10px;">Hough圆</a> <a href="/tags/LLM/" style="font-size: 10px;">LLM</a> <a href="/tags/LQR/" style="font-size: 10px;">LQR</a> <a href="/tags/Linux/" style="font-size: 11.43px;">Linux</a> <a href="/tags/PID/" style="font-size: 10px;">PID</a> <a href="/tags/ROS2/" style="font-size: 10px;">ROS2</a> <a href="/tags/STAR-CCM/" style="font-size: 10px;">STAR-CCM</a> <a href="/tags/Transformer/" style="font-size: 10px;">Transformer</a> <a href="/tags/ViT/" style="font-size: 10px;">ViT</a> <a href="/tags/cv/" style="font-size: 11.43px;">cv</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/foc/" style="font-size: 11.43px;">foc</a> <a href="/tags/humble/" style="font-size: 10px;">humble</a> <a href="/tags/jetson/" style="font-size: 11.43px;">jetson</a> <a href="/tags/keysking/" style="font-size: 10px;">keysking</a> <a href="/tags/pbc/" style="font-size: 10px;">pbc</a> <a href="/tags/pid/" style="font-size: 10px;">pid</a> <a href="/tags/pnp/" style="font-size: 10px;">pnp</a> <a href="/tags/ros2/" style="font-size: 10px;">ros2</a> <a href="/tags/simulink/" style="font-size: 10px;">simulink</a> <a href="/tags/stm32/" style="font-size: 11.43px;">stm32</a> <a href="/tags/%E4%B8%96%E7%95%8C%E6%A8%A1%E5%9E%8B/" style="font-size: 10px;">世界模型</a> <a href="/tags/%E4%BA%92%E5%8A%A8/" style="font-size: 10px;">互动</a> <a href="/tags/%E4%BA%BA%E8%84%B8%E6%A3%80%E6%B5%8B/" style="font-size: 10px;">人脸检测</a> <a href="/tags/%E4%BA%BA%E8%84%B8%E8%AF%86%E5%88%AB/" style="font-size: 10px;">人脸识别</a> <a href="/tags/%E4%BB%BF%E7%9C%9F/" style="font-size: 14.29px;">仿真</a> <a href="/tags/%E5%85%B7%E8%BA%AB%E6%99%BA%E8%83%BD/" style="font-size: 10px;">具身智能</a> <a href="/tags/%E5%88%B6%E5%9B%BE/" style="font-size: 11.43px;">制图</a> <a href="/tags/%E5%88%B7%E6%9C%BA/" style="font-size: 10px;">刷机</a> <a href="/tags/%E5%8A%A0%E9%80%9F%E5%BA%A6%E8%AE%A1/" style="font-size: 10px;">加速度计</a> <a href="/tags/%E5%8F%8D%E6%80%9D/" style="font-size: 10px;">反思</a> <a href="/tags/%E5%98%89%E7%AB%8B%E5%88%9B/" style="font-size: 10px;">嘉立创</a> <a href="/tags/%E5%A4%9A%E6%A8%A1%E6%80%81/" style="font-size: 14.29px;">多模态</a> <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/" style="font-size: 14.29px;">大模型</a> <a href="/tags/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B/" style="font-size: 10px;">大语言模型</a> <a href="/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/" style="font-size: 11.43px;">嵌入式</a> <a href="/tags/%E5%B9%B3%E8%A1%A1%E5%B0%8F%E8%BD%A6/" style="font-size: 11.43px;">平衡小车</a> <a href="/tags/%E5%BB%BA%E6%A8%A1/" style="font-size: 11.43px;">建模</a> <a href="/tags/%E6%84%9F%E6%83%85/" style="font-size: 11.43px;">感情</a> <a href="/tags/%E6%8A%A5%E9%94%99/" style="font-size: 12.86px;">报错</a> <a href="/tags/%E6%8E%A7%E5%88%B6%E7%AE%97%E6%B3%95/" style="font-size: 14.29px;">控制算法</a> <a href="/tags/%E6%8E%A9%E8%86%9C/" style="font-size: 10px;">掩膜</a> <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" style="font-size: 14.29px;">操作系统</a> <a href="/tags/%E6%95%99%E7%A8%8B/" style="font-size: 10px;">教程</a> <a href="/tags/%E6%97%A0%E5%88%B7%E7%94%B5%E6%9C%BA/" style="font-size: 11.43px;">无刷电机</a> <a href="/tags/%E6%97%A5%E8%AE%B0/" style="font-size: 20px;">日记</a> <a href="/tags/%E6%99%BA%E8%83%BD%E4%BD%93/" style="font-size: 10px;">智能体</a> <a href="/tags/%E6%9B%B4%E6%96%B0/" style="font-size: 10px;">更新</a> <a href="/tags/%E6%9C%BA%E5%99%A8%E4%BA%BA/" style="font-size: 12.86px;">机器人</a> <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" style="font-size: 10px;">机器学习</a> <a href="/tags/%E6%9C%BA%E6%A2%B0/" style="font-size: 12.86px;">机械</a> <a href="/tags/%E6%A0%91%E6%B4%9E/" style="font-size: 10px;">树洞</a> <a href="/tags/%E6%A0%91%E8%8E%93%E6%B4%BE/" style="font-size: 10px;">树莓派</a> <a href="/tags/%E6%B0%B4%E5%86%B7/" style="font-size: 10px;">水冷</a> <a href="/tags/%E6%B5%81%E5%9C%BA/" style="font-size: 10px;">流场</a> <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" style="font-size: 10px;">深度学习</a> <a href="/tags/%E7%94%9F%E6%B4%BB/" style="font-size: 10px;">生活</a> <a href="/tags/%E7%94%B5%E6%8E%A7/" style="font-size: 17.14px;">电控</a> <a href="/tags/%E7%9B%AE%E6%A0%87/" style="font-size: 11.43px;">目标</a> <a href="/tags/%E7%A9%BA%E6%B0%94%E5%8A%A8%E5%8A%9B%E5%AD%A6/" style="font-size: 10px;">空气动力学</a> <a href="/tags/%E7%AE%80%E5%8F%B2/" style="font-size: 10px;">简史</a> <a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 18.57px;">算法</a> <a href="/tags/%E7%BC%96%E7%A8%8B/" style="font-size: 10px;">编程</a> <a href="/tags/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/" style="font-size: 10px;">编程语言</a> <a href="/tags/%E8%A7%84%E5%88%92/" style="font-size: 10px;">规划</a> <a href="/tags/%E8%A7%86%E8%A7%89/" style="font-size: 15.71px;">视觉</a> <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/" style="font-size: 11.43px;">计算机</a> <a href="/tags/%E8%AE%BA%E6%96%87/" style="font-size: 10px;">论文</a> <a href="/tags/%E8%AF%84%E8%AE%BA%E5%8C%BA/" style="font-size: 10px;">评论区</a> <a href="/tags/%E8%AF%BB%E4%B9%A6/" style="font-size: 10px;">读书</a> <a href="/tags/%E8%BD%A6%E8%BE%86/" style="font-size: 11.43px;">车辆</a> <a href="/tags/%E9%97%AE%E9%A2%98/" style="font-size: 10px;">问题</a> <a href="/tags/%E9%98%85%E8%AF%BB/" style="font-size: 11.43px;">阅读</a> <a href="/tags/%E9%99%80%E8%9E%BA%E4%BB%AA/" style="font-size: 10px;">陀螺仪</a> <a href="/tags/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1/" style="font-size: 10px;">面向对象</a> <a href="/tags/%E9%9D%A2%E5%90%91%E8%BF%87%E7%A8%8B/" style="font-size: 10px;">面向过程</a> <a href="/tags/%E9%A6%99%E6%A9%99%E6%B4%BE/" style="font-size: 10px;">香橙派</a>
+    </div>
+    
+      <script>
+        var maxTagcloud = parseInt(17);
+        var tags_length = parseInt(82);
+        var tags_arr = [];
+        for(var i = 0; i < tags_length; i++){
+          tags_arr.push(i);
+        }
+        tags_arr.sort(function (l, r) {
+          return Math.random() > 0.5 ? -1 : 1;
+        });
+        tags_arr = tags_arr.slice(0, maxTagcloud < tags_length ? tags_length - maxTagcloud : 0);
+        for(var tag_i = 0; tag_i < tags_arr.length; tag_i++){
+          document.getElementById("randomtagcloud").children[tags_arr[tag_i]].style.display = 'none';
+        }
+      </script>
+    
+  </div>
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章归档</h3>
+    <div class="nexmoe-widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/">2026</a><span class="archive-list-count">37</span></li></ul>
+    </div>
+  </div>
+
+
+
+    
+        
+   
+    <div class="nexmoe-copyright">
+        &copy; 2026 HSQ
+        Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+        & <a href="https://github.com/theme-nexmoe/hexo-theme-nexmoe" target="_blank">Nexmoe</a>
+        
+    </div>
+</div><!-- .nexmoe-drawer --></div><div id="nexmoe-content"><div class="nexmoe-primary"><div class="nexmoe-post">
+  <article>
+    
+        <div class="nexmoe-post-cover absolute" style="padding-top: NaN%;"> 
+            <img src="/images/tech/robot/zotero读论文.png" alt="如何阅读一篇论文" loading="lazy">
+            <h1>如何阅读一篇论文</h1>
+        </div>
+    
+    
+    <div class="nexmoe-post-meta">
+    <div class="nexmoe-rainbow">
+        <a class="nexmoefont icon-calendar-fill">2026年07月29日</a>
+        
+            <a class="nexmoefont icon-appstore-fill -link" href="/categories/%E6%97%A5%E8%AE%B0/">日记</a>
+        
+        
+    <a><i class="nexmoefont icon-areachart"></i>约1.6k字</a>
+    <a><i class="nexmoefont icon-time-circle-fill"></i>预计需要5分钟</a>
+
+    </div>
+    
+    
+    
+    
+    
+</div>
+
+    <h1 id="一、如何高效阅读一篇论文（核心目标：复刻作者思考网络）"><a href="#一、如何高效阅读一篇论文（核心目标：复刻作者思考网络）" class="headerlink" title="一、如何高效阅读一篇论文（核心目标：复刻作者思考网络）"></a>一、如何高效阅读一篇论文（核心目标：复刻作者思考网络）</h1><p>核心原则：非逐字通读，<strong>由浅入深、按需阅读</strong>，拒绝无效精读，全程搭建作者研究逻辑网络，不合适可随时终止阅读。</p>
+<ol>
+<li><p><strong>初筛判断（快速定取舍）</strong>：通读题目、关键词、摘要、结论，快速判定论文研究方向与核心价值，筛选是否契合自身研究兴趣，决定是否继续研读。</p>
+</li>
+<li><p><strong>视觉精读（抓核心框架）</strong>：优先浏览全文图表，图表直观体现研究核心方法与实验结果，决定是否进一步阅读引言部分。</p>
+</li>
+<li><p><strong>核心研读（抓研究本质）</strong>：重点阅读<strong>研究结果、讨论分析</strong>，这是整篇论文的核心价值所在，吃透作者的研究逻辑、创新点与结论支撑。</p>
+</li>
+<li><p><strong>深度攻坚（按需精读）</strong>：仅当讨论部分具备参考价值、存在可借鉴&#x2F;可突破空间时，再精读最难的实验细节、参数设置、落地流程。</p>
+</li>
+<li><p><strong>同步输出（固化思考）</strong>：阅读全程及时记录笔记，梳理核心逻辑、创新点、缺陷与可优化方向，避免读完即忘。</p>
+</li>
+</ol>
+<h1 id="二、如何筛选适配的优质论文"><a href="#二、如何筛选适配的优质论文" class="headerlink" title="二、如何筛选适配的优质论文"></a>二、如何筛选适配的优质论文</h1><p>结合下文课题寻找路径，遵循<strong>先全貌、再细分、后落地</strong>的筛选逻辑：优先领域最新综述定方向，再筛选近1-2年顶会顶刊论文，最终聚焦可复现、可优化的高质量文献。</p>
+<h1 id="三、如何产出科研-Idea、构建课题方向"><a href="#三、如何产出科研-Idea、构建课题方向" class="headerlink" title="三、如何产出科研 Idea、构建课题方向"></a>三、如何产出科研 Idea、构建课题方向</h1><h2 id="1-读论文两大核心目的"><a href="#1-读论文两大核心目的" class="headerlink" title="1. 读论文两大核心目的"></a>1. 读论文两大核心目的</h2><ul>
+<li><p>宏观层面：掌握本专业领域研究现状、发展趋势、现存痛点与空白</p>
+</li>
+<li><p>微观层面：在领域认知积累中，挖掘创新点，形成专属课题 Idea，切入细分研究领域</p>
+</li>
+</ul>
+<h2 id="2-三种极简-Idea-生成方法"><a href="#2-三种极简-Idea-生成方法" class="headerlink" title="2. 三种极简 Idea 生成方法"></a>2. 三种极简 Idea 生成方法</h2><h3 id="（1）弥补缺陷法（最通用）"><a href="#（1）弥补缺陷法（最通用）" class="headerlink" title="（1）弥补缺陷法（最通用）"></a>（1）弥补缺陷法（最通用）</h3><p>所有论文均存在局限性，仅能解决特定场景、特定维度的问题，无完美研究。大量研读文献后，可精准捕捉单篇&#x2F;多篇论文的 <strong>weakness（缺陷、不足）</strong>，针对现有研究的短板、漏洞、未解决问题，提出对应的优化、补充解决方案，形成全新课题。</p>
+<h3 id="（2）新型方案法（创新优化）"><a href="#（2）新型方案法（创新优化）" class="headerlink" title="（2）新型方案法（创新优化）"></a>（2）新型方案法（创新优化）</h3><p>不局限于现有论文的研究框架，针对同一研究问题，跳出原有思路，在算法性能、实现方法、落地效益、轻量化程度等维度，设计全新解决方案，反复打磨、修正、完善，最终形成完整创新课题。</p>
+<h3 id="（3）减少约束法（进阶创新）"><a href="#（3）减少约束法（进阶创新）" class="headerlink" title="（3）减少约束法（进阶创新）"></a>（3）减少约束法（进阶创新）</h3><p>所有研究都存在前置 <strong>assumption（假设、约束条件）</strong>，约束越多、算法适用性越窄。通过去除、放宽原有论文的限定约束、前置假设，扩大算法适用场景、提升模型泛化能力，以此衍生全新研究方法与课题方向。</p>
+<h2 id="3-寻找课题的高效核心路径"><a href="#3-寻找课题的高效核心路径" class="headerlink" title="3. 寻找课题的高效核心路径"></a>3. 寻找课题的高效核心路径</h2><p>核心逻辑：<strong>最新综述把握领域全貌 → 顶会论文挖掘研究漏洞 → 实验复现提炼专属创新点</strong></p>
+<p>完整流程：</p>
+<p>第一步：精读2-3篇最新领域综述 → 搭建领域全局认知，锁定行业核心痛点与研究空白</p>
+<p>第二步：筛选近1-2年顶会论文 → 匹配自身设备、算法、研究方向，聚焦细分赛道</p>
+<p>第三步：Github 复现开源代码 → 落地实验，真实发现算法 Bug、性能瓶颈、落地短板</p>
+<p>第四步：提炼专属创新 Idea → 通过改结构、增模态、换损失函数、优化虚实迁移（Sim2Real）等方式完成创新</p>
+<h2 id="4-具体实操步骤-工具指南"><a href="#4-具体实操步骤-工具指南" class="headerlink" title="4. 具体实操步骤 + 工具指南"></a>4. 具体实操步骤 + 工具指南</h2><h3 id="第一步：研读最新综述（Survey），搭建领域框架"><a href="#第一步：研读最新综述（Survey），搭建领域框架" class="headerlink" title="第一步：研读最新综述（Survey），搭建领域框架"></a>第一步：研读最新综述（Survey），搭建领域框架</h3><p>拒绝盲目碎片化读论文，优先通过<strong>近一年内高认可度综述</strong>建立完整知识体系。</p>
+<p><strong>推荐检索关键词（arXiv &#x2F; Google Scholar）</strong>：</p>
+<ul>
+<li><p>Embodied AI World Models Survey 2025&#x2F;2026</p>
+</li>
+<li><p>Vision Language Action Models Manipulation Survey</p>
+</li>
+<li><p>Sim-to-Real Robot Learning Survey</p>
+</li>
+</ul>
+<p><strong>核心研读重点</strong>：聚焦综述中 <strong>Challenges and Future Directions（挑战与未来方向）</strong> 章节，该板块集中罗列领域公认未解决难题、未来研究热点，是天然的课题创新来源。</p>
+<h3 id="第二步：三层顶会论文阅读法（高效精读、挖掘创新）"><a href="#第二步：三层顶会论文阅读法（高效精读、挖掘创新）" class="headerlink" title="第二步：三层顶会论文阅读法（高效精读、挖掘创新）"></a>第二步：三层顶会论文阅读法（高效精读、挖掘创新）</h3><p>杜绝逐字通读，分层阅读、精准发力，大幅提升读文效率。</p>
+<h4 id="（1）泛读（5分钟-篇）——-筛选过滤"><a href="#（1）泛读（5分钟-篇）——-筛选过滤" class="headerlink" title="（1）泛读（5分钟&#x2F;篇）—— 筛选过滤"></a>（1）泛读（5分钟&#x2F;篇）—— 筛选过滤</h4><p>阅读内容：标题 + 摘要 + 首页框架图（Fig1）+ 结论</p>
+<p>核心目的：快速判定论文技术路线、研究方向，匹配自身机械臂、仿真器、研究场景，不相关直接舍弃。</p>
+<h4 id="（2）精读（30分钟-篇）——-吃透逻辑"><a href="#（2）精读（30分钟-篇）——-吃透逻辑" class="headerlink" title="（2）精读（30分钟&#x2F;篇）—— 吃透逻辑"></a>（2）精读（30分钟&#x2F;篇）—— 吃透逻辑</h4><p>阅读内容：核心方法论（Method）、实验对比（Experiments）</p>
+<p>核心目的：拆解作者创新思路，弄懂理论设计、数学逻辑、代码落地的完整流程。</p>
+<h4 id="（3）批判性阅读-——-寻找创新突破口"><a href="#（3）批判性阅读-——-寻找创新突破口" class="headerlink" title="（3）批判性阅读 —— 寻找创新突破口"></a>（3）批判性阅读 —— 寻找创新突破口</h4><p>主动提问、反向思考，挖掘论文短板：</p>
+<ul>
+<li><p>该算法在哪些场景会失效？（弱光环境、受力突变、未知物体、低算力场景等）</p>
+</li>
+<li><p>论文基线模型（Baseline）效果是否存在短板？能否用更简单、轻量化、高效的方案替代？</p>
+</li>
+</ul>
+<h3 id="第三步：现代化学术工具链（替代传统-CiteSpace）"><a href="#第三步：现代化学术工具链（替代传统-CiteSpace）" class="headerlink" title="第三步：现代化学术工具链（替代传统 CiteSpace）"></a>第三步：现代化学术工具链（替代传统 CiteSpace）</h3><p>适配前沿科研节奏，高效找文献、跑数据、读论文、追热点</p>
+<table>
+<thead>
+<tr>
+<th>工具名称</th>
+<th>核心用途</th>
+<th>适配优势</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Connected Papers &#x2F; Litmaps</td>
+<td>梳理论文关联关系、构建研究脉络树</td>
+<td>输入顶会核心论文（OpenVLA、π₀等），自动生成文献关联网络，快速集齐领域衍生研究、前后续工作</td>
+</tr>
+<tr>
+<td>Papers with Code</td>
+<td>检索开源代码、权威 Benchmark 榜单</td>
+<td>一键获取领域 SOTA 最优算法，附带 Github 开源仓库、实验指标对比，便于复现与对标优化</td>
+</tr>
+<tr>
+<td>ArXiv Xplore &#x2F; Hugging Face Daily Papers</td>
+<td>追踪每日前沿最新成果</td>
+<td>具身智能、大模型等前沿领域最新成果优先首发于此，每日快速浏览即可掌握行业新动态</td>
+</tr>
+<tr>
+<td>ChatPDF &#x2F; NotebookLM</td>
+<td>AI 辅助批量精读、对比论文</td>
+<td>批量导入多篇文献，可精准提问对比算法差异、优缺点、解决方案，大幅降低精读成本</td>
+</tr>
+</tbody></table>
+
+    
+  </article>
+
+  
+      
+    <div class="nexmoe-post-copyright">
+        <strong>本文作者：</strong>HSQ<br>
+        <strong>本文链接：</strong><a href="https://hsqhere.github.io/2026/07/29/%E5%A6%82%E4%BD%95%E9%98%85%E8%AF%BB%E4%B8%80%E7%AF%87%E8%AE%BA%E6%96%87/" title="https:&#x2F;&#x2F;hsqhere.github.io&#x2F;2026&#x2F;07&#x2F;29&#x2F;%E5%A6%82%E4%BD%95%E9%98%85%E8%AF%BB%E4%B8%80%E7%AF%87%E8%AE%BA%E6%96%87&#x2F;" target="_blank" rel="noopener">https:&#x2F;&#x2F;hsqhere.github.io&#x2F;2026&#x2F;07&#x2F;29&#x2F;%E5%A6%82%E4%BD%95%E9%98%85%E8%AF%BB%E4%B8%80%E7%AF%87%E8%AE%BA%E6%96%87&#x2F;</a><br>
+        
+            # <strong>版权声明：</strong>本文采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/cn/deed.zh" target="_blank">CC BY-NC-SA 3.0 CN</a> 协议进行许可
+
+        
+    </div>
+
+
+  
+  
+  <div class="nexmoe-post-meta nexmoe-rainbow">
+   
+    
+        <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E6%97%A5%E8%AE%B0/" rel="tag">日记</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E8%AE%BA%E6%96%87/" rel="tag">论文</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E9%98%85%E8%AF%BB/" rel="tag">阅读</a>
+    
+</div>
+  
+  
+    <script async src="/js/copy-codeblock.js?v=1787046489541"></script>
+  
+
+  
+      <div class="nexmoe-post-footer">
+          
+      </div>
+  
+</div></div><div class="nexmoe-post-right">    <div class="nexmoe-fixed">
+        <div class="nexmoe-tool">
+
+            
+
+            
+            
+            <button class="mdui-fab catalog" style="overflow:unset;">
+                <i class="nexmoefont icon-i-catalog"></i>
+                <div class="nexmoe-toc">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%A6%82%E4%BD%95%E9%AB%98%E6%95%88%E9%98%85%E8%AF%BB%E4%B8%80%E7%AF%87%E8%AE%BA%E6%96%87%EF%BC%88%E6%A0%B8%E5%BF%83%E7%9B%AE%E6%A0%87%EF%BC%9A%E5%A4%8D%E5%88%BB%E4%BD%9C%E8%80%85%E6%80%9D%E8%80%83%E7%BD%91%E7%BB%9C%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">一、如何高效阅读一篇论文（核心目标：复刻作者思考网络）</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%A6%82%E4%BD%95%E7%AD%9B%E9%80%89%E9%80%82%E9%85%8D%E7%9A%84%E4%BC%98%E8%B4%A8%E8%AE%BA%E6%96%87"><span class="toc-number">2.</span> <span class="toc-text">二、如何筛选适配的优质论文</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%A6%82%E4%BD%95%E4%BA%A7%E5%87%BA%E7%A7%91%E7%A0%94-Idea%E3%80%81%E6%9E%84%E5%BB%BA%E8%AF%BE%E9%A2%98%E6%96%B9%E5%90%91"><span class="toc-number">3.</span> <span class="toc-text">三、如何产出科研 Idea、构建课题方向</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E8%AF%BB%E8%AE%BA%E6%96%87%E4%B8%A4%E5%A4%A7%E6%A0%B8%E5%BF%83%E7%9B%AE%E7%9A%84"><span class="toc-number">3.1.</span> <span class="toc-text">1. 读论文两大核心目的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E4%B8%89%E7%A7%8D%E6%9E%81%E7%AE%80-Idea-%E7%94%9F%E6%88%90%E6%96%B9%E6%B3%95"><span class="toc-number">3.2.</span> <span class="toc-text">2. 三种极简 Idea 生成方法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%EF%BC%881%EF%BC%89%E5%BC%A5%E8%A1%A5%E7%BC%BA%E9%99%B7%E6%B3%95%EF%BC%88%E6%9C%80%E9%80%9A%E7%94%A8%EF%BC%89"><span class="toc-number">3.2.1.</span> <span class="toc-text">（1）弥补缺陷法（最通用）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%EF%BC%882%EF%BC%89%E6%96%B0%E5%9E%8B%E6%96%B9%E6%A1%88%E6%B3%95%EF%BC%88%E5%88%9B%E6%96%B0%E4%BC%98%E5%8C%96%EF%BC%89"><span class="toc-number">3.2.2.</span> <span class="toc-text">（2）新型方案法（创新优化）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%EF%BC%883%EF%BC%89%E5%87%8F%E5%B0%91%E7%BA%A6%E6%9D%9F%E6%B3%95%EF%BC%88%E8%BF%9B%E9%98%B6%E5%88%9B%E6%96%B0%EF%BC%89"><span class="toc-number">3.2.3.</span> <span class="toc-text">（3）减少约束法（进阶创新）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E5%AF%BB%E6%89%BE%E8%AF%BE%E9%A2%98%E7%9A%84%E9%AB%98%E6%95%88%E6%A0%B8%E5%BF%83%E8%B7%AF%E5%BE%84"><span class="toc-number">3.3.</span> <span class="toc-text">3. 寻找课题的高效核心路径</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E5%85%B7%E4%BD%93%E5%AE%9E%E6%93%8D%E6%AD%A5%E9%AA%A4-%E5%B7%A5%E5%85%B7%E6%8C%87%E5%8D%97"><span class="toc-number">3.4.</span> <span class="toc-text">4. 具体实操步骤 + 工具指南</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E7%A0%94%E8%AF%BB%E6%9C%80%E6%96%B0%E7%BB%BC%E8%BF%B0%EF%BC%88Survey%EF%BC%89%EF%BC%8C%E6%90%AD%E5%BB%BA%E9%A2%86%E5%9F%9F%E6%A1%86%E6%9E%B6"><span class="toc-number">3.4.1.</span> <span class="toc-text">第一步：研读最新综述（Survey），搭建领域框架</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E4%B8%89%E5%B1%82%E9%A1%B6%E4%BC%9A%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E6%B3%95%EF%BC%88%E9%AB%98%E6%95%88%E7%B2%BE%E8%AF%BB%E3%80%81%E6%8C%96%E6%8E%98%E5%88%9B%E6%96%B0%EF%BC%89"><span class="toc-number">3.4.2.</span> <span class="toc-text">第二步：三层顶会论文阅读法（高效精读、挖掘创新）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%881%EF%BC%89%E6%B3%9B%E8%AF%BB%EF%BC%885%E5%88%86%E9%92%9F-%E7%AF%87%EF%BC%89%E2%80%94%E2%80%94-%E7%AD%9B%E9%80%89%E8%BF%87%E6%BB%A4"><span class="toc-number">3.4.2.1.</span> <span class="toc-text">（1）泛读（5分钟&#x2F;篇）—— 筛选过滤</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%882%EF%BC%89%E7%B2%BE%E8%AF%BB%EF%BC%8830%E5%88%86%E9%92%9F-%E7%AF%87%EF%BC%89%E2%80%94%E2%80%94-%E5%90%83%E9%80%8F%E9%80%BB%E8%BE%91"><span class="toc-number">3.4.2.2.</span> <span class="toc-text">（2）精读（30分钟&#x2F;篇）—— 吃透逻辑</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%883%EF%BC%89%E6%89%B9%E5%88%A4%E6%80%A7%E9%98%85%E8%AF%BB-%E2%80%94%E2%80%94-%E5%AF%BB%E6%89%BE%E5%88%9B%E6%96%B0%E7%AA%81%E7%A0%B4%E5%8F%A3"><span class="toc-number">3.4.2.3.</span> <span class="toc-text">（3）批判性阅读 —— 寻找创新突破口</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E7%8E%B0%E4%BB%A3%E5%8C%96%E5%AD%A6%E6%9C%AF%E5%B7%A5%E5%85%B7%E9%93%BE%EF%BC%88%E6%9B%BF%E4%BB%A3%E4%BC%A0%E7%BB%9F-CiteSpace%EF%BC%89"><span class="toc-number">3.4.3.</span> <span class="toc-text">第三步：现代化学术工具链（替代传统 CiteSpace）</span></a></li></ol></li></ol></li></ol>
+                </div>
+            </button>
+            
+
+            
+
+            <a href="#nexmoe-content" class="backtop toc-link" aria-label="Back To Top" title="top"><button class="mdui-fab mdui-ripple"><i class="nexmoefont icon-caret-top"></i></button></a>
+        </div>
+    </div>
+</div></div><div id="nexmoe-footer"><!--!--></div><div id="nexmoe-search-space"><div class="search-container"><div class="search-header"><div class="search-input-container"><input class="search-input" type="text" placeholder="搜索" onInput="sinput();"></div><a class="search-close" onclick="sclose();">×</a></div><div class="search-body"></div></div></div><div><div id="aplayer" style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;"></div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // --- APlayer 音乐播放器部分 ---
+    const ap = new APlayer({
+      container: document.getElementById('aplayer'),
+      fixed: true,
+      autoplay: false,
+      theme: '#22d9df',
+      loop: 'all',
+      order: 'random',
+      preload: 'auto',
+      volume: 0.2,
+      mutex: true,
+      lrcType: 0,
+      audio: [
+        {
+          name: '那么骄傲',
+          artist: '茜茜',
+          url: '/music/那么骄傲 - 茜茜.mp3', 
+          cover: '/music/cover茜茜.jpg',
+          lrc: '[00:00.00]暂无歌词'
+        }
+      ]
+    });
+
+    // --- Twikoo 评论系统部分 ---
+    if (window.location.pathname.match(/\/\d{4}\/\d{2}\/\d{2}\//) || 
+        document.querySelector('article.post') || 
+        document.body.classList.contains('post-template')) {
+      
+      let talkContainer = document.getElementById('tcomment');
+      if (!talkContainer) {
+        const article = document.querySelector('article') || 
+                        document.querySelector('.nexmoe-post') || 
+                        document.querySelector('.post-content') ||
+                        document.querySelector('main');
+        if (article) {
+          talkContainer = document.createElement('div');
+          talkContainer.id = 'tcomment';
+          article.insertAdjacentElement('afterend', talkContainer);
+        }
+      }
+      
+      if (talkContainer && typeof twikoo !== 'undefined') {
+        twikoo.init({
+          envId: 'https://hsqblog.netlify.app/.netlify/functions/twikoo',
+          el: '#tcomment',
+          path: window.location.pathname,
+          lang: 'zh-CN'
+        });
+      }
+    }
+  });
+
+  // --- 朋友卡片解锁逻辑 ---
+  async function unlock(id, correctHash) {
+    const input = document.getElementById('input-' + id).value;
+    const msgUint8 = new TextEncoder().encode(input);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+    if (hashHex === correctHash) {
+        document.getElementById('lock-' + id).style.display = 'none';
+        const imgDiv = document.getElementById('img-' + id);
+        imgDiv.style.display = 'block';
+        setTimeout(() => imgDiv.style.opacity = "1", 10);
+    } else {
+        const err = document.getElementById('err-' + id);
+        err.style.display = 'block';
+        setTimeout(() => err.style.display = 'none', 2000);
+    }
+  }
+</script>
+</div></body></html>

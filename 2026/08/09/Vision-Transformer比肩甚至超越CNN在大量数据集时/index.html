@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="zh"><head>
+<title>Vision Transformer比肩甚至超越CNN在大量数据集时 - HSQ 的个人博客</title>
+<meta charset="UTF-8">
+<meta name="keywords" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+
+<link rel="shortcut icon" href="/hexo_init/images/avatar.jpg" type="image/jpg" />
+<meta name="description" content="📝 Vision Transformer (ViT) 学习笔记0. 前言在计算机视觉领域，卷积神经网络 (Convolutional Neural Network, CNN) 长期以来一直是处理图像任务的主流架构。然而，随着 Transformer 在自然语言处理领域的巨大成功，研究人员开始探索将这种基于自注意力机制的架构应用于视觉任务。Vision Transformer (ViT) 是这一探">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Vision Transformer比肩甚至超越CNN在大量数据集时">
+<meta property="og:url" content="https://hsqhere.github.io/2026/08/09/Vision-Transformer%E6%AF%94%E8%82%A9%E7%94%9A%E8%87%B3%E8%B6%85%E8%B6%8ACNN%E5%9C%A8%E5%A4%A7%E9%87%8F%E6%95%B0%E6%8D%AE%E9%9B%86%E6%97%B6/index.html">
+<meta property="og:site_name" content="HSQ 的个人博客">
+<meta property="og:description" content="📝 Vision Transformer (ViT) 学习笔记0. 前言在计算机视觉领域，卷积神经网络 (Convolutional Neural Network, CNN) 长期以来一直是处理图像任务的主流架构。然而，随着 Transformer 在自然语言处理领域的巨大成功，研究人员开始探索将这种基于自注意力机制的架构应用于视觉任务。Vision Transformer (ViT) 是这一探">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hsqhere.github.io/images/tech/program/Vision-Transformer%E7%A4%BA%E6%84%8F%E5%9B%BE.png">
+<meta property="article:published_time" content="2026-08-09T02:28:59.000Z">
+<meta property="article:modified_time" content="2026-08-18T09:47:43.842Z">
+<meta property="article:author" content="HSQ">
+<meta property="article:tag" content="ViT">
+<meta property="article:tag" content="多模态">
+<meta property="article:tag" content="大模型">
+<meta property="article:tag" content="算法">
+<meta property="article:tag" content="视觉">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hsqhere.github.io/images/tech/program/Vision-Transformer%E7%A4%BA%E6%84%8F%E5%9B%BE.png">
+
+<link rel="stylesheet" href="/lib/fancybox/fancybox.css">
+<link rel="stylesheet" href="/lib/mdui_043tiny/mdui.css">
+
+
+<link rel="stylesheet" href="/lib/iconfont/iconfont.css?v=1787046489658">
+
+<link rel="stylesheet" href="/css/style.css?v=1787046489658">
+
+
+
+
+    
+        <link rel="stylesheet" href="/custom.css?v=1787046489658">
+    
+
+
+
+<script src="/lib/mdui_043tiny/mdui.js" async></script>
+<script src="/lib/fancybox/fancybox.umd.js" async></script>
+<script src="/lib/lax.min.js" async></script>
+
+
+<script async src="/js/app.js?v=1787046489658"></script>
+
+ 
+
+<!-- highlight.js CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<!-- APlayer 音乐播放器 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+<!-- Twikoo 评论系统 -->
+<script src="https://cdn.jsdelivr.net/npm/twikoo@1.6.39/dist/twikoo.all.min.js"></script>
+<!-- MathJax 数学公式渲染 -->
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true,
+    processEnvironments: true
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<!-- APlayer 音乐播放器 JS -->
+<script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+
+
+<link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+<meta name="generator" content="Hexo 8.1.1"></head><body class="nexmoe mdui-drawer-body-left"><div id="nexmoe-background"><div class="nexmoe-bg" style="background-image: url(/hexo_init/images/background_mainpage.png)"></div><div class="mdui-appbar mdui-shadow-0"><div class="mdui-toolbar"><a class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: &#039;#drawer&#039;, swipe: true}" title="menu"><i class="mdui-icon nexmoefont icon-menu"></i></a><div class="mdui-toolbar-spacer"></div><a class="mdui-btn mdui-btn-icon" href="/" title="HSQ"><img src="/hexo_init/images/avatar.jpg" alt="HSQ"></a></div></div></div><div id="nexmoe-header"><div class="nexmoe-drawer mdui-drawer" id="drawer">
+    <div class="nexmoe-avatar mdui-ripple">
+        <a href="/" title="HSQ">
+            <img src="/hexo_init/images/avatar.jpg" alt="HSQ" alt="HSQ">
+        </a>
+    </div>
+    <div class="nexmoe-count">
+        <div><span>文章</span>37</div>
+        <div><span>标签</span>82</div>
+        <div><span>分类</span>20</div>
+    </div>
+    <div class="nexmoe-list mdui-list" mdui-collapse="{accordion: true}">
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/" title="首页">
+            <i class="mdui-list-item-icon nexmoefont icon-home"></i>
+            <div class="mdui-list-item-content">
+                首页
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/archive.html" title="文章归档">
+            <i class="mdui-list-item-icon nexmoefont icon-container"></i>
+            <div class="mdui-list-item-content">
+                文章归档
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/gallery/" title="图库">
+            <i class="mdui-list-item-icon nexmoefont icon-gallery"></i>
+            <div class="mdui-list-item-content">
+                图库
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/plan/" title="规划">
+            <i class="mdui-list-item-icon nexmoefont icon-chart"></i>
+            <div class="mdui-list-item-content">
+                规划
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/friends/" title="朋友们">
+            <i class="mdui-list-item-icon nexmoefont icon-friends"></i>
+            <div class="mdui-list-item-content">
+                朋友们
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/about/" title="关于">
+            <i class="mdui-list-item-icon nexmoefont icon-info-circle"></i>
+            <div class="mdui-list-item-content">
+                关于
+            </div>
+        </a>
+        
+    </div>
+    
+    
+        
+        <div class="nexmoe-widget-wrap">
+    <div class="nexmoe-widget nexmoe-search">
+        
+            <form id="search_form">
+                <label><input class="st-default-search-input" id="search_value" name="q" type="search" placeholder="搜索" style="
+                    font-size: 15px !important;
+                    height: 56px !important;
+                    background-image: none;
+                "></label>
+            </form>
+         
+    </div>
+</div>
+
+
+	<script async src="/js/search.js?v=1787046489659"></script>
+
+
+
+    
+        
+        <div class="nexmoe-widget-wrap">
+	<div class="nexmoe-widget nexmoe-social">
+		<a
+			class="mdui-ripple"
+			href="https://space.bilibili.com/1382035035?spm_id_from=333.1007.0.0"
+			target="_blank"
+			mdui-tooltip="{content: '哔哩哔哩'}"
+			style="
+				color: rgb(231, 106, 141);
+				background-color: rgba(231, 106, 141, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-bilibili"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://github.com/HSQhere"
+			target="_blank"
+			mdui-tooltip="{content: 'GitHub'}"
+			style="
+				color: rgb(25, 23, 23);
+				background-color: rgba(25, 23, 23, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-github"
+			></i> </a
+		>
+	</div>
+</div>
+
+    
+        
+        <!-- 一言 -->
+<div class="nexmoe-widget-wrap">
+  <h3 class="nexmoe-widget-title">
+    一言
+  </h3>
+  <div class="nexmoe-widget">
+    <ul class="hitokoto-box">
+      <li id="hitokoto_text_parent" class="hitokoto-text" hitokotoCategory="">
+        <a href="#" id="hitokoto_text">
+          
+        </a>
+        <a href="#" id="hitokoto_error_text" style="display: none;">
+          
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  let hitokotoText = document.getElementById('hitokoto_text')
+  let hitokotoErroText = document.getElementById('hitokoto_error_text')
+  let hitokotoCategory = document.getElementById('hitokoto_text_parent').getAttribute('hitokotoCategory')
+  window.addEventListener('load', function () {
+    let url = 'https://v1.hitokoto.cn'
+    if (hitokotoCategory) {
+      url += '?c=' + hitokotoCategory
+    }
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        hitokotoText.innerText = "「 " + data.hitokoto + " 」 from " + data.from
+        hitokotoText.href = 'https://hitokoto.cn/?uuid=' + data.uuid
+      })
+      .catch((reason) => {
+        console.error(11, reason)
+        hitokotoText.style.display = 'none'
+        hitokotoErroText.style.display = 'block'
+      })
+  })
+</script>
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章分类</h3>
+    <div class="nexmoe-widget">
+
+      <ul class="category-list">
+
+        
+
+
+        
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/CLIP/">CLIP</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/LQR/">LQR</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/ROS2/">ROS2</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/Transformer/">Transformer</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/ViT/">ViT</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/人脸算法/">人脸算法</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/仿真/">仿真</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/大模型/">大模型</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/嵌入式/">嵌入式</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/日记/">日记</a>
+          <span class="category-list-count">3</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/机器人/">机器人</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/机器学习/">机器学习</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/机械/">机械</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/树洞/">树洞</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/深度学习/">深度学习</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/电控/">电控</a>
+          <span class="category-list-count">6</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/目标/">目标</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/编程语言/">编程语言</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/计算机/">计算机</a>
+          <span class="category-list-count">8</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/车辆/">车辆</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+      </ul>
+
+    </div>
+  </div>
+
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <div id="randomtagcloud" class="nexmoe-widget tagcloud nexmoe-rainbow">
+      <a href="/tags/ANSYS/" style="font-size: 10px;">ANSYS</a> <a href="/tags/CAD/" style="font-size: 10px;">CAD</a> <a href="/tags/CLIP/" style="font-size: 11.43px;">CLIP</a> <a href="/tags/CNN/" style="font-size: 10px;">CNN</a> <a href="/tags/GPU/" style="font-size: 10px;">GPU</a> <a href="/tags/Hough%E5%9C%86/" style="font-size: 10px;">Hough圆</a> <a href="/tags/LLM/" style="font-size: 10px;">LLM</a> <a href="/tags/LQR/" style="font-size: 10px;">LQR</a> <a href="/tags/Linux/" style="font-size: 11.43px;">Linux</a> <a href="/tags/PID/" style="font-size: 10px;">PID</a> <a href="/tags/ROS2/" style="font-size: 10px;">ROS2</a> <a href="/tags/STAR-CCM/" style="font-size: 10px;">STAR-CCM</a> <a href="/tags/Transformer/" style="font-size: 10px;">Transformer</a> <a href="/tags/ViT/" style="font-size: 10px;">ViT</a> <a href="/tags/cv/" style="font-size: 11.43px;">cv</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/foc/" style="font-size: 11.43px;">foc</a> <a href="/tags/humble/" style="font-size: 10px;">humble</a> <a href="/tags/jetson/" style="font-size: 11.43px;">jetson</a> <a href="/tags/keysking/" style="font-size: 10px;">keysking</a> <a href="/tags/pbc/" style="font-size: 10px;">pbc</a> <a href="/tags/pid/" style="font-size: 10px;">pid</a> <a href="/tags/pnp/" style="font-size: 10px;">pnp</a> <a href="/tags/ros2/" style="font-size: 10px;">ros2</a> <a href="/tags/simulink/" style="font-size: 10px;">simulink</a> <a href="/tags/stm32/" style="font-size: 11.43px;">stm32</a> <a href="/tags/%E4%B8%96%E7%95%8C%E6%A8%A1%E5%9E%8B/" style="font-size: 10px;">世界模型</a> <a href="/tags/%E4%BA%92%E5%8A%A8/" style="font-size: 10px;">互动</a> <a href="/tags/%E4%BA%BA%E8%84%B8%E6%A3%80%E6%B5%8B/" style="font-size: 10px;">人脸检测</a> <a href="/tags/%E4%BA%BA%E8%84%B8%E8%AF%86%E5%88%AB/" style="font-size: 10px;">人脸识别</a> <a href="/tags/%E4%BB%BF%E7%9C%9F/" style="font-size: 14.29px;">仿真</a> <a href="/tags/%E5%85%B7%E8%BA%AB%E6%99%BA%E8%83%BD/" style="font-size: 10px;">具身智能</a> <a href="/tags/%E5%88%B6%E5%9B%BE/" style="font-size: 11.43px;">制图</a> <a href="/tags/%E5%88%B7%E6%9C%BA/" style="font-size: 10px;">刷机</a> <a href="/tags/%E5%8A%A0%E9%80%9F%E5%BA%A6%E8%AE%A1/" style="font-size: 10px;">加速度计</a> <a href="/tags/%E5%8F%8D%E6%80%9D/" style="font-size: 10px;">反思</a> <a href="/tags/%E5%98%89%E7%AB%8B%E5%88%9B/" style="font-size: 10px;">嘉立创</a> <a href="/tags/%E5%A4%9A%E6%A8%A1%E6%80%81/" style="font-size: 14.29px;">多模态</a> <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/" style="font-size: 14.29px;">大模型</a> <a href="/tags/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B/" style="font-size: 10px;">大语言模型</a> <a href="/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/" style="font-size: 11.43px;">嵌入式</a> <a href="/tags/%E5%B9%B3%E8%A1%A1%E5%B0%8F%E8%BD%A6/" style="font-size: 11.43px;">平衡小车</a> <a href="/tags/%E5%BB%BA%E6%A8%A1/" style="font-size: 11.43px;">建模</a> <a href="/tags/%E6%84%9F%E6%83%85/" style="font-size: 11.43px;">感情</a> <a href="/tags/%E6%8A%A5%E9%94%99/" style="font-size: 12.86px;">报错</a> <a href="/tags/%E6%8E%A7%E5%88%B6%E7%AE%97%E6%B3%95/" style="font-size: 14.29px;">控制算法</a> <a href="/tags/%E6%8E%A9%E8%86%9C/" style="font-size: 10px;">掩膜</a> <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" style="font-size: 14.29px;">操作系统</a> <a href="/tags/%E6%95%99%E7%A8%8B/" style="font-size: 10px;">教程</a> <a href="/tags/%E6%97%A0%E5%88%B7%E7%94%B5%E6%9C%BA/" style="font-size: 11.43px;">无刷电机</a> <a href="/tags/%E6%97%A5%E8%AE%B0/" style="font-size: 20px;">日记</a> <a href="/tags/%E6%99%BA%E8%83%BD%E4%BD%93/" style="font-size: 10px;">智能体</a> <a href="/tags/%E6%9B%B4%E6%96%B0/" style="font-size: 10px;">更新</a> <a href="/tags/%E6%9C%BA%E5%99%A8%E4%BA%BA/" style="font-size: 12.86px;">机器人</a> <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" style="font-size: 10px;">机器学习</a> <a href="/tags/%E6%9C%BA%E6%A2%B0/" style="font-size: 12.86px;">机械</a> <a href="/tags/%E6%A0%91%E6%B4%9E/" style="font-size: 10px;">树洞</a> <a href="/tags/%E6%A0%91%E8%8E%93%E6%B4%BE/" style="font-size: 10px;">树莓派</a> <a href="/tags/%E6%B0%B4%E5%86%B7/" style="font-size: 10px;">水冷</a> <a href="/tags/%E6%B5%81%E5%9C%BA/" style="font-size: 10px;">流场</a> <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" style="font-size: 10px;">深度学习</a> <a href="/tags/%E7%94%9F%E6%B4%BB/" style="font-size: 10px;">生活</a> <a href="/tags/%E7%94%B5%E6%8E%A7/" style="font-size: 17.14px;">电控</a> <a href="/tags/%E7%9B%AE%E6%A0%87/" style="font-size: 11.43px;">目标</a> <a href="/tags/%E7%A9%BA%E6%B0%94%E5%8A%A8%E5%8A%9B%E5%AD%A6/" style="font-size: 10px;">空气动力学</a> <a href="/tags/%E7%AE%80%E5%8F%B2/" style="font-size: 10px;">简史</a> <a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 18.57px;">算法</a> <a href="/tags/%E7%BC%96%E7%A8%8B/" style="font-size: 10px;">编程</a> <a href="/tags/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/" style="font-size: 10px;">编程语言</a> <a href="/tags/%E8%A7%84%E5%88%92/" style="font-size: 10px;">规划</a> <a href="/tags/%E8%A7%86%E8%A7%89/" style="font-size: 15.71px;">视觉</a> <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/" style="font-size: 11.43px;">计算机</a> <a href="/tags/%E8%AE%BA%E6%96%87/" style="font-size: 10px;">论文</a> <a href="/tags/%E8%AF%84%E8%AE%BA%E5%8C%BA/" style="font-size: 10px;">评论区</a> <a href="/tags/%E8%AF%BB%E4%B9%A6/" style="font-size: 10px;">读书</a> <a href="/tags/%E8%BD%A6%E8%BE%86/" style="font-size: 11.43px;">车辆</a> <a href="/tags/%E9%97%AE%E9%A2%98/" style="font-size: 10px;">问题</a> <a href="/tags/%E9%98%85%E8%AF%BB/" style="font-size: 11.43px;">阅读</a> <a href="/tags/%E9%99%80%E8%9E%BA%E4%BB%AA/" style="font-size: 10px;">陀螺仪</a> <a href="/tags/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1/" style="font-size: 10px;">面向对象</a> <a href="/tags/%E9%9D%A2%E5%90%91%E8%BF%87%E7%A8%8B/" style="font-size: 10px;">面向过程</a> <a href="/tags/%E9%A6%99%E6%A9%99%E6%B4%BE/" style="font-size: 10px;">香橙派</a>
+    </div>
+    
+      <script>
+        var maxTagcloud = parseInt(17);
+        var tags_length = parseInt(82);
+        var tags_arr = [];
+        for(var i = 0; i < tags_length; i++){
+          tags_arr.push(i);
+        }
+        tags_arr.sort(function (l, r) {
+          return Math.random() > 0.5 ? -1 : 1;
+        });
+        tags_arr = tags_arr.slice(0, maxTagcloud < tags_length ? tags_length - maxTagcloud : 0);
+        for(var tag_i = 0; tag_i < tags_arr.length; tag_i++){
+          document.getElementById("randomtagcloud").children[tags_arr[tag_i]].style.display = 'none';
+        }
+      </script>
+    
+  </div>
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章归档</h3>
+    <div class="nexmoe-widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/">2026</a><span class="archive-list-count">37</span></li></ul>
+    </div>
+  </div>
+
+
+
+    
+        
+   
+    <div class="nexmoe-copyright">
+        &copy; 2026 HSQ
+        Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+        & <a href="https://github.com/theme-nexmoe/hexo-theme-nexmoe" target="_blank">Nexmoe</a>
+        
+    </div>
+</div><!-- .nexmoe-drawer --></div><div id="nexmoe-content"><div class="nexmoe-primary"><div class="nexmoe-post">
+  <article>
+    
+        <div class="nexmoe-post-cover absolute" style="padding-top: NaN%;"> 
+            <img src="/images/tech/program/Vision-Transformer示意图.png" alt="Vision Transformer比肩甚至超越CNN在大量数据集时" loading="lazy">
+            <h1>Vision Transformer比肩甚至超越CNN在大量数据集时</h1>
+        </div>
+    
+    
+    <div class="nexmoe-post-meta">
+    <div class="nexmoe-rainbow">
+        <a class="nexmoefont icon-calendar-fill">2026年08月09日</a>
+        
+            <a class="nexmoefont icon-appstore-fill -link" href="/categories/ViT/">ViT</a>
+        
+        
+    <a><i class="nexmoefont icon-areachart"></i>约1.8k字</a>
+    <a><i class="nexmoefont icon-time-circle-fill"></i>预计需要7分钟</a>
+
+    </div>
+    
+    
+    
+    
+    
+</div>
+
+    <h1 id="📝-Vision-Transformer-ViT-学习笔记"><a href="#📝-Vision-Transformer-ViT-学习笔记" class="headerlink" title="📝 Vision Transformer (ViT) 学习笔记"></a>📝 Vision Transformer (ViT) 学习笔记</h1><h2 id="0-前言"><a href="#0-前言" class="headerlink" title="0. 前言"></a>0. 前言</h2><p>在计算机视觉领域，卷积神经网络 (Convolutional Neural Network, CNN) 长期以来一直是处理图像任务的主流架构。然而，随着 Transformer 在自然语言处理领域的巨大成功，研究人员开始探索将这种基于自注意力机制的架构应用于视觉任务。Vision Transformer (ViT) 是这一探索的重要里程碑，它首次证明了纯 Transformer 架构在图像分类任务上可以超越最先进的 CNN 模型。本文将详细介绍 ViT 的技术原理，并使用 PyTorch 从零开始构建 ViT 模型用于图像分类任务。</p>
+<h2 id="1-ViT-技术原理"><a href="#1-ViT-技术原理" class="headerlink" title="1. ViT 技术原理"></a>1. ViT 技术原理</h2><h3 id="1-1-核心思想"><a href="#1-1-核心思想" class="headerlink" title="1.1 核心思想"></a>1.1 核心思想</h3><p>Vision Transformer (ViT) 的核心思想是将图像分割成固定大小的小块 (patch)，将这些 patch 线性嵌入后加上位置编码，然后像自然语言处理 (Natural Language Processing, NLP) 中的词元 (token) 一样 将这些 patch 序列输入标准的 Transformer 编码器中进行处理。</p>
+<h3 id="1-2-使用-Transformer-处理图像数据"><a href="#1-2-使用-Transformer-处理图像数据" class="headerlink" title="1.2 使用 Transformer 处理图像数据"></a>1.2 使用 Transformer 处理图像数据</h3><p>Transformer 非常擅长处理时间序列数据，图像在某种程度上也可以视为时间序列。例如，将图像分解成大小为 16×16 的小块，如果我们按顺序将这些图像块依次输入模型，那么这些块也具有序列格式。这与卷积神经网络非常相似，在卷积神经网络 (CNN) 中，我们也将图像视为多个小块，并在块上应用卷积核（即创建一个卷积核并在图像上移动）。Transformer 会在此基础上，增加一个基于全连接层的嵌入 (embedding) 层，这使得每个块的大小不再是 16×16，而是该图像部分的密集表示，此外，还需要添加位置嵌入 (positional embedding)。</p>
+<p>这些模型也可以仅包含编码器。例如，可以在每个操作的开头添加一个额外的词元，以创建整个图像的表示。在分类过程中，我们可以使用该词元将整个图像分类为给定的类别。架构的其余部分与 Transformer 编码器块相同。ViT 架构的主要思想是分块并在图像块上应用位置嵌入。</p>
+<h2 id="2-ViT-关键组件"><a href="#2-ViT-关键组件" class="headerlink" title="2. ViT 关键组件"></a>2. ViT 关键组件</h2><p><img onerror="imgOnError(this);" data-fancybox="gallery" src="/../images/tech/program/Vision-Transformer%E7%A4%BA%E6%84%8F%E5%9B%BE.png" alt="Vision-Transformer示意图" data-caption="Vision-Transformer示意图" loading="lazy"><br>ViT 的成功依赖于几个精心设计的核心组件，这些组件共同实现了将 Transformer 架构有效应用于图像数据的创新方法。接下来，我们将深入剖析每个关键组件的设计原理和实现细节。</p>
+<h3 id="2-1-图像分块-Image-Patching"><a href="#2-1-图像分块-Image-Patching" class="headerlink" title="2.1 图像分块 (Image Patching)"></a>2.1 图像分块 (Image Patching)</h3><h4 id="【原理】"><a href="#【原理】" class="headerlink" title="【原理】"></a>【原理】</h4><p>Transformer 原本是为序列数据设计的，而图像是 2D 结构，图像分块 (Image Patching) 是将 2D 图像转换为 1D 序列的最直接方法，每个块 (patch) 相当于 NLP 中的一个 token。假设输入图像尺寸为 $H \times W \times C$ (高度 × 宽度 × 通道)，patch 大小为 $P \times P$ (通常 $16 \times 16$)，那么分块数量为：</p>
+<p>$$N &#x3D; \frac{H \times W}{P^2}$$​</p>
+<p>较大的 patch 会丢失局部细节但计算效率高，较小的 patch 保留更多细节但增加序列长度。</p>
+<h4 id="【补全与强化】"><a href="#【补全与强化】" class="headerlink" title="【补全与强化】"></a>【补全与强化】</h4><p><strong>实现方式对比：</strong></p>
+<ol>
+<li><p><strong>展平 + 线性投影</strong>：先把 2D 的 Patch 拉直成 1D，再用 <code>nn.Linear</code> 变换。</p>
+</li>
+<li><p><strong>卷积层高效分块</strong>：直接使用 2D 卷积一步到位。 可以通过使用卷积实现高效分块：</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs Python"><span class="hljs-variable language_">self</span>.proj = nn.Conv2d(<br>    in_channels=in_channels, <br>    out_channels=embed_dim, <br>    kernel_size=patch_size, <br>    stride=patch_size<br>)<br></code></pre></td></tr></table></figure>
+<ul>
+<li><strong>为什么卷积能做到？</strong> 当卷积核大小 K&#x3D;P 且步长 S&#x3D;P 时，卷积核刚好无重叠地滑过图像，数学点积运算与线性投影<strong>完全等价</strong>，但 GPU 计算并行度更高。</li>
+</ul>
+</li>
+</ol>
+<h3 id="2-2-Patch-嵌入-Patch-Embedding"><a href="#2-2-Patch-嵌入-Patch-Embedding" class="headerlink" title="2.2 Patch 嵌入 (Patch Embedding)"></a>2.2 Patch 嵌入 (Patch Embedding)</h3><h4 id="【原理】-1"><a href="#【原理】-1" class="headerlink" title="【原理】"></a>【原理】</h4><p>Patch 嵌入 (Patch Embedding) 将每个 patch 展平并通过线性投影映射到 D 维空间，类似于 NLP 中的词嵌入，包括展平 patch（P×P×C→P2C 维向量）和线性投影（P2C→D，通常 D&#x3D;768）。<br>在 PyTorch 中可以使用以下代码实现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs Python"><span class="hljs-comment"># 方式 A：手动展平 + Linear</span><br>x = x.flatten(<span class="hljs-number">2</span>).transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)  <span class="hljs-comment"># [B, N, P²C]</span><br><span class="hljs-variable language_">self</span>.proj = nn.Linear(P^<span class="hljs-number">2</span> * C, D)<br><br><span class="hljs-comment"># 方式 B：直接使用卷积层实现</span><br>x = <span class="hljs-variable language_">self</span>.proj(x)  <span class="hljs-comment"># 输入 [B, C, H, W] -&gt; 输出 [B, D, H/P, W/P]</span><br>x = x.flatten(<span class="hljs-number">2</span>).transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)  <span class="hljs-comment"># 转换为 Transformer 标准格式 [B, N, D]</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="【补全与强化：数据形状演算-以-ViT-Base-为例-】"><a href="#【补全与强化：数据形状演算-以-ViT-Base-为例-】" class="headerlink" title="【补全与强化：数据形状演算 (以 ViT-Base 为例)】"></a>【补全与强化：数据形状演算 (以 ViT-Base 为例)】</h4><ul>
+<li><p>输入图像：$x \in [B, 3, 224, 224]$</p>
+</li>
+<li><p>经过卷积：$\text{Conv2d}(3, 768, K&#x3D;16, S&#x3D;16) \rightarrow [B, 768, 14, 14]$</p>
+</li>
+<li><p>空间展平：<code>flatten(2)</code> $\rightarrow [B, 768, 196]$ （其中 $N &#x3D; 14 \times 14 &#x3D; 196$）</p>
+</li>
+<li><p>维度转置：<code>transpose(1, 2)</code> $\rightarrow [B, 196, 768]$ （得到了 196 个 $768$ 维的 Token）</p>
+</li>
+</ul>
+<h3 id="2-3-位置编码-Position-Embedding"><a href="#2-3-位置编码-Position-Embedding" class="headerlink" title="2.3 位置编码 (Position Embedding)"></a>2.3 位置编码 (Position Embedding)</h3><h4 id="【原理】-2"><a href="#【原理】-2" class="headerlink" title="【原理】"></a>【原理】</h4><p>Transformer 本身是排列不变的，因此必须注入空间位置信息，不同于 Transformer 的固定编码，ViT 使用可学习的位置编码 (Position Embedding)，形状为 (N+1)×D (N 个 patch + 1 个分类 token)。<br>在 PyTorch 中可以使用以下代码实现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs Python"><span class="hljs-variable language_">self</span>.pos_embed = nn.Parameter(torch.zeros(<span class="hljs-number">1</span>, N + <span class="hljs-number">1</span>, D))<br>nn.init.trunc_normal_(<span class="hljs-variable language_">self</span>.pos_embed, std=<span class="hljs-number">0.02</span>)<br></code></pre></td></tr></table></figure>
+<h4 id="【补全与强化】-1"><a href="#【补全与强化】-1" class="headerlink" title="【补全与强化】"></a>【补全与强化】</h4><ul>
+<li><p><strong>作用机制</strong>：直接与 Patch 序列进行<strong>逐元素相加（Element-wise Addition）</strong>，即：</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Python">x = x + <span class="hljs-variable language_">self</span>.pos_embed  <span class="hljs-comment"># [B, N+1, D] + [1, N+1, D] -&gt; [B, N+1, D]</span><br></code></pre></td></tr></table></figure>
+</li>
+<li><p><strong>特点</strong>：不需要人工设计正弦余弦公式，模型在训练过程中通过反向传播自动学习出最佳的位置几何关系。</p>
+</li>
+</ul>
+<h3 id="2-4-分类-token-Class-Token"><a href="#2-4-分类-token-Class-Token" class="headerlink" title="2.4 分类 token (Class Token)"></a>2.4 分类 token (Class Token)</h3><h4 id="【原理】-3"><a href="#【原理】-3" class="headerlink" title="【原理】"></a>【原理】</h4><p>分类 token (Class Token) 类似 BERT 的 <code>[CLS]</code> token，用于分类任务，作为整个图像的表征，通过自注意力聚合全局信息。</p>
+<p>在 PyTorch 中可以使用以下代码添加分类 token：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs Python"><span class="hljs-variable language_">self</span>.cls_token = nn.Parameter(torch.zeros(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, D))<br>nn.init.trunc_normal_(<span class="hljs-variable language_">self</span>.cls_token, std=<span class="hljs-number">0.02</span>)<br><br><span class="hljs-comment"># 前向传播时的拼接操作：</span><br>cls_tokens = <span class="hljs-variable language_">self</span>.cls_token.expand(B, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>)  <span class="hljs-comment"># 扩展为与 Batch 同等大小: [B, 1, D]</span><br>x = torch.cat((cls_tokens, x), dim=<span class="hljs-number">1</span>)           <span class="hljs-comment"># 拼接在序列最前面: [B, 1 + N, D]</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="【补全与强化】-2"><a href="#【补全与强化】-2" class="headerlink" title="【补全与强化】"></a>【补全与强化】</h4><ul>
+<li><p><strong>执行顺序（关键）</strong>：<code>[CLS]</code> Token 是在<strong>进入 Transformer 编码器之前</strong>拼接上去的，拼接后序列长度从 N 变成 N+1，随后再与 <code>pos_embed</code> 相加。</p>
+</li>
+<li><p><strong>信息抽取</strong>：数据经过 Transformer 编码器多层自注意力机制的交互后，直接提取第 <code>0</code> 号位置的向量 <code>x[:, 0]</code> 输入最后的 MLP &#x2F; 线性分类头，完成图像分类。</p>
+</li>
+</ul>
+<h2 id="3-完整-Patch-Embedding-模块整合代码"><a href="#3-完整-Patch-Embedding-模块整合代码" class="headerlink" title="3. 完整 Patch Embedding 模块整合代码"></a>3. 完整 Patch Embedding 模块整合代码</h2><p>结合上述 2.1 - 2.4 节的所有步骤，一个完整的 ViT 输入处理模块代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs Python"><span class="hljs-keyword">import</span> torch<br><span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn<br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">ViTPatchEmbedding</span>(nn.Module):<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, img_size=<span class="hljs-number">224</span>, patch_size=<span class="hljs-number">16</span>, in_chans=<span class="hljs-number">3</span>, embed_dim=<span class="hljs-number">768</span></span>):<br>        <span class="hljs-built_in">super</span>().__init__()<br>        <span class="hljs-variable language_">self</span>.img_size = img_size<br>        <span class="hljs-variable language_">self</span>.patch_size = patch_size<br>        <span class="hljs-variable language_">self</span>.n_patches = (img_size // patch_size) * (img_size // patch_size)<br>        <br>        <span class="hljs-comment"># 2.1 &amp; 2.2 卷积高效分块与嵌入映射</span><br>        <span class="hljs-variable language_">self</span>.proj = nn.Conv2d(in_chans, embed_dim, kernel_size=patch_size, stride=patch_size)<br>        <br>        <span class="hljs-comment"># 2.4 可学习的分类 Token</span><br>        <span class="hljs-variable language_">self</span>.cls_token = nn.Parameter(torch.zeros(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, embed_dim))<br>        <br>        <span class="hljs-comment"># 2.3 可学习的位置编码 (1个 CLS + N个 Patch)</span><br>        <span class="hljs-variable language_">self</span>.pos_embed = nn.Parameter(torch.zeros(<span class="hljs-number">1</span>, <span class="hljs-number">1</span> + <span class="hljs-variable language_">self</span>.n_patches, embed_dim))<br>        <br>        <span class="hljs-comment"># 参数截断正态分布初始化</span><br>        nn.init.trunc_normal_(<span class="hljs-variable language_">self</span>.pos_embed, std=<span class="hljs-number">0.02</span>)<br>        nn.init.trunc_normal_(<span class="hljs-variable language_">self</span>.cls_token, std=<span class="hljs-number">0.02</span>)<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x</span>):<br>        B = x.shape[<span class="hljs-number">0</span>]<br>        <br>        <span class="hljs-comment"># 1. 卷积投影 + 格式转换 [B, C, H, W] -&gt; [B, N, D]</span><br>        x = <span class="hljs-variable language_">self</span>.proj(x).flatten(<span class="hljs-number">2</span>).transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)<br>        <br>        <span class="hljs-comment"># 2. 拼接分类 Token -&gt; [B, N+1, D]</span><br>        cls_tokens = <span class="hljs-variable language_">self</span>.cls_token.expand(B, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>)<br>        x = torch.cat((cls_tokens, x), dim=<span class="hljs-number">1</span>)<br>        <br>        <span class="hljs-comment"># 3. 叠加位置编码 -&gt; [B, N+1, D]</span><br>        x = x + <span class="hljs-variable language_">self</span>.pos_embed<br>        <span class="hljs-keyword">return</span> x<br></code></pre></td></tr></table></figure>
+    
+  </article>
+
+  
+      
+    <div class="nexmoe-post-copyright">
+        <strong>本文作者：</strong>HSQ<br>
+        <strong>本文链接：</strong><a href="https://hsqhere.github.io/2026/08/09/Vision-Transformer%E6%AF%94%E8%82%A9%E7%94%9A%E8%87%B3%E8%B6%85%E8%B6%8ACNN%E5%9C%A8%E5%A4%A7%E9%87%8F%E6%95%B0%E6%8D%AE%E9%9B%86%E6%97%B6/" title="https:&#x2F;&#x2F;hsqhere.github.io&#x2F;2026&#x2F;08&#x2F;09&#x2F;Vision-Transformer%E6%AF%94%E8%82%A9%E7%94%9A%E8%87%B3%E8%B6%85%E8%B6%8ACNN%E5%9C%A8%E5%A4%A7%E9%87%8F%E6%95%B0%E6%8D%AE%E9%9B%86%E6%97%B6&#x2F;" target="_blank" rel="noopener">https:&#x2F;&#x2F;hsqhere.github.io&#x2F;2026&#x2F;08&#x2F;09&#x2F;Vision-Transformer%E6%AF%94%E8%82%A9%E7%94%9A%E8%87%B3%E8%B6%85%E8%B6%8ACNN%E5%9C%A8%E5%A4%A7%E9%87%8F%E6%95%B0%E6%8D%AE%E9%9B%86%E6%97%B6&#x2F;</a><br>
+        
+            # <strong>版权声明：</strong>本文采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/cn/deed.zh" target="_blank">CC BY-NC-SA 3.0 CN</a> 协议进行许可
+
+        
+    </div>
+
+
+  
+  
+  <div class="nexmoe-post-meta nexmoe-rainbow">
+   
+    
+        <a class="nexmoefont icon-tag-fill -none-link" href="/tags/ViT/" rel="tag">ViT</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E5%A4%9A%E6%A8%A1%E6%80%81/" rel="tag">多模态</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/" rel="tag">大模型</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E8%A7%86%E8%A7%89/" rel="tag">视觉</a>
+    
+</div>
+  
+  
+    <script async src="/js/copy-codeblock.js?v=1787046489536"></script>
+  
+
+  
+      <div class="nexmoe-post-footer">
+          
+      </div>
+  
+</div></div><div class="nexmoe-post-right">    <div class="nexmoe-fixed">
+        <div class="nexmoe-tool">
+
+            
+
+            
+            
+            <button class="mdui-fab catalog" style="overflow:unset;">
+                <i class="nexmoefont icon-i-catalog"></i>
+                <div class="nexmoe-toc">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%F0%9F%93%9D-Vision-Transformer-ViT-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0"><span class="toc-number">1.</span> <span class="toc-text">📝 Vision Transformer (ViT) 学习笔记</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#0-%E5%89%8D%E8%A8%80"><span class="toc-number">1.1.</span> <span class="toc-text">0. 前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-ViT-%E6%8A%80%E6%9C%AF%E5%8E%9F%E7%90%86"><span class="toc-number">1.2.</span> <span class="toc-text">1. ViT 技术原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3"><span class="toc-number">1.2.1.</span> <span class="toc-text">1.1 核心思想</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E4%BD%BF%E7%94%A8-Transformer-%E5%A4%84%E7%90%86%E5%9B%BE%E5%83%8F%E6%95%B0%E6%8D%AE"><span class="toc-number">1.2.2.</span> <span class="toc-text">1.2 使用 Transformer 处理图像数据</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-ViT-%E5%85%B3%E9%94%AE%E7%BB%84%E4%BB%B6"><span class="toc-number">1.3.</span> <span class="toc-text">2. ViT 关键组件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E5%9B%BE%E5%83%8F%E5%88%86%E5%9D%97-Image-Patching"><span class="toc-number">1.3.1.</span> <span class="toc-text">2.1 图像分块 (Image Patching)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E3%80%90%E5%8E%9F%E7%90%86%E3%80%91"><span class="toc-number">1.3.1.1.</span> <span class="toc-text">【原理】</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E3%80%90%E8%A1%A5%E5%85%A8%E4%B8%8E%E5%BC%BA%E5%8C%96%E3%80%91"><span class="toc-number">1.3.1.2.</span> <span class="toc-text">【补全与强化】</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-Patch-%E5%B5%8C%E5%85%A5-Patch-Embedding"><span class="toc-number">1.3.2.</span> <span class="toc-text">2.2 Patch 嵌入 (Patch Embedding)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E3%80%90%E5%8E%9F%E7%90%86%E3%80%91-1"><span class="toc-number">1.3.2.1.</span> <span class="toc-text">【原理】</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E3%80%90%E8%A1%A5%E5%85%A8%E4%B8%8E%E5%BC%BA%E5%8C%96%EF%BC%9A%E6%95%B0%E6%8D%AE%E5%BD%A2%E7%8A%B6%E6%BC%94%E7%AE%97-%E4%BB%A5-ViT-Base-%E4%B8%BA%E4%BE%8B-%E3%80%91"><span class="toc-number">1.3.2.2.</span> <span class="toc-text">【补全与强化：数据形状演算 (以 ViT-Base 为例)】</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E4%BD%8D%E7%BD%AE%E7%BC%96%E7%A0%81-Position-Embedding"><span class="toc-number">1.3.3.</span> <span class="toc-text">2.3 位置编码 (Position Embedding)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E3%80%90%E5%8E%9F%E7%90%86%E3%80%91-2"><span class="toc-number">1.3.3.1.</span> <span class="toc-text">【原理】</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E3%80%90%E8%A1%A5%E5%85%A8%E4%B8%8E%E5%BC%BA%E5%8C%96%E3%80%91-1"><span class="toc-number">1.3.3.2.</span> <span class="toc-text">【补全与强化】</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E5%88%86%E7%B1%BB-token-Class-Token"><span class="toc-number">1.3.4.</span> <span class="toc-text">2.4 分类 token (Class Token)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E3%80%90%E5%8E%9F%E7%90%86%E3%80%91-3"><span class="toc-number">1.3.4.1.</span> <span class="toc-text">【原理】</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E3%80%90%E8%A1%A5%E5%85%A8%E4%B8%8E%E5%BC%BA%E5%8C%96%E3%80%91-2"><span class="toc-number">1.3.4.2.</span> <span class="toc-text">【补全与强化】</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E5%AE%8C%E6%95%B4-Patch-Embedding-%E6%A8%A1%E5%9D%97%E6%95%B4%E5%90%88%E4%BB%A3%E7%A0%81"><span class="toc-number">1.4.</span> <span class="toc-text">3. 完整 Patch Embedding 模块整合代码</span></a></li></ol></li></ol>
+                </div>
+            </button>
+            
+
+            
+
+            <a href="#nexmoe-content" class="backtop toc-link" aria-label="Back To Top" title="top"><button class="mdui-fab mdui-ripple"><i class="nexmoefont icon-caret-top"></i></button></a>
+        </div>
+    </div>
+</div></div><div id="nexmoe-footer"><!--!--></div><div id="nexmoe-search-space"><div class="search-container"><div class="search-header"><div class="search-input-container"><input class="search-input" type="text" placeholder="搜索" onInput="sinput();"></div><a class="search-close" onclick="sclose();">×</a></div><div class="search-body"></div></div></div><div><div id="aplayer" style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;"></div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // --- APlayer 音乐播放器部分 ---
+    const ap = new APlayer({
+      container: document.getElementById('aplayer'),
+      fixed: true,
+      autoplay: false,
+      theme: '#22d9df',
+      loop: 'all',
+      order: 'random',
+      preload: 'auto',
+      volume: 0.2,
+      mutex: true,
+      lrcType: 0,
+      audio: [
+        {
+          name: '那么骄傲',
+          artist: '茜茜',
+          url: '/music/那么骄傲 - 茜茜.mp3', 
+          cover: '/music/cover茜茜.jpg',
+          lrc: '[00:00.00]暂无歌词'
+        }
+      ]
+    });
+
+    // --- Twikoo 评论系统部分 ---
+    if (window.location.pathname.match(/\/\d{4}\/\d{2}\/\d{2}\//) || 
+        document.querySelector('article.post') || 
+        document.body.classList.contains('post-template')) {
+      
+      let talkContainer = document.getElementById('tcomment');
+      if (!talkContainer) {
+        const article = document.querySelector('article') || 
+                        document.querySelector('.nexmoe-post') || 
+                        document.querySelector('.post-content') ||
+                        document.querySelector('main');
+        if (article) {
+          talkContainer = document.createElement('div');
+          talkContainer.id = 'tcomment';
+          article.insertAdjacentElement('afterend', talkContainer);
+        }
+      }
+      
+      if (talkContainer && typeof twikoo !== 'undefined') {
+        twikoo.init({
+          envId: 'https://hsqblog.netlify.app/.netlify/functions/twikoo',
+          el: '#tcomment',
+          path: window.location.pathname,
+          lang: 'zh-CN'
+        });
+      }
+    }
+  });
+
+  // --- 朋友卡片解锁逻辑 ---
+  async function unlock(id, correctHash) {
+    const input = document.getElementById('input-' + id).value;
+    const msgUint8 = new TextEncoder().encode(input);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+    if (hashHex === correctHash) {
+        document.getElementById('lock-' + id).style.display = 'none';
+        const imgDiv = document.getElementById('img-' + id);
+        imgDiv.style.display = 'block';
+        setTimeout(() => imgDiv.style.opacity = "1", 10);
+    } else {
+        const err = document.getElementById('err-' + id);
+        err.style.display = 'block';
+        setTimeout(() => err.style.display = 'none', 2000);
+    }
+  }
+</script>
+</div></body></html>

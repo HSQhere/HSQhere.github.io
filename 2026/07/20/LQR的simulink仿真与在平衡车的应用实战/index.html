@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="zh"><head>
+<title>LQR的simulink仿真与在平衡车的应用实战 - HSQ 的个人博客</title>
+<meta charset="UTF-8">
+<meta name="keywords" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+
+<link rel="shortcut icon" href="/hexo_init/images/avatar.jpg" type="image/jpg" />
+<meta name="description" content="一：LQR 理论求解的具体步骤LQR（线性二次型调节器）的核心目标是：在保证系统稳定的前提下，用最小的控制能量（省电、省电机性能）最快地把系统状态调回 0。对于一个线性时不变系统：$$\dot{x} &#x3D; Ax + Bu$$ 求解 ： 设定目标函数（Cost Function $J$） 设计一个评价指标 $J$，表示系统的“总代价”： $$J &#x3D; \int_{0}^{\infty">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LQR的simulink仿真与在平衡车的应用实战">
+<meta property="og:url" content="https://hsqhere.github.io/2026/07/20/LQR%E7%9A%84simulink%E4%BB%BF%E7%9C%9F%E4%B8%8E%E5%9C%A8%E5%B9%B3%E8%A1%A1%E8%BD%A6%E7%9A%84%E5%BA%94%E7%94%A8%E5%AE%9E%E6%88%98/index.html">
+<meta property="og:site_name" content="HSQ 的个人博客">
+<meta property="og:description" content="一：LQR 理论求解的具体步骤LQR（线性二次型调节器）的核心目标是：在保证系统稳定的前提下，用最小的控制能量（省电、省电机性能）最快地把系统状态调回 0。对于一个线性时不变系统：$$\dot{x} &#x3D; Ax + Bu$$ 求解 ： 设定目标函数（Cost Function $J$） 设计一个评价指标 $J$，表示系统的“总代价”： $$J &#x3D; \int_{0}^{\infty">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hsqhere.github.io/images/tech/electrical/%E5%85%A8%E7%8A%B6%E6%80%81%E5%8F%8D%E9%A6%88%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F%E5%9B%BE%E5%BD%A2.png">
+<meta property="og:image" content="https://hsqhere.github.io/images/tech/electrical/%E5%85%A8%E7%8A%B6%E6%80%81%E5%8F%8D%E9%A6%88%E6%8E%A7%E5%88%B6%E4%B8%8E%E7%A7%AF%E5%88%86%E7%B3%BB%E7%BB%9F.png">
+<meta property="og:image" content="https://hsqhere.github.io/images/tech/electrical/%E5%9F%BA%E4%BA%8E%E5%85%A8%E7%8A%B6%E6%80%81%E8%A7%82%E6%B5%8B%E5%99%A8%E7%9A%84%E5%8F%8D%E9%A6%88%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F.png">
+<meta property="og:image" content="https://hsqhere.github.io/images/tech/electrical/%E5%85%A8%E7%8A%B6%E6%80%81%E5%8F%8D%E9%A6%88%E6%8E%A7%E5%88%B6%E4%B8%8E%E7%A7%AF%E5%88%86%E7%B3%BB%E7%BB%9F.png">
+<meta property="og:image" content="https://hsqhere.github.io/images/tech/electrical/%E5%85%A8%E7%8A%B6%E6%80%81%E5%8F%8D%E9%A6%88%E6%8E%A7%E5%88%B6%E4%B8%8E%E7%A7%AF%E5%88%86%E7%B3%BB%E7%BB%9F-%E6%94%B6%E6%95%9B%E7%BB%93%E6%9E%9C.png">
+<meta property="og:image" content="https://hsqhere.github.io/images/tech/electrical/%E5%85%A8%E5%B1%95%E5%BC%80%E7%9A%84%E5%85%A8%E7%8A%B6%E6%80%81%E5%8F%8D%E9%A6%88%E6%8E%A7%E5%88%B6%E4%B8%8E%E7%A7%AF%E5%88%86%E7%B3%BB%E7%BB%9F.png">
+<meta property="article:published_time" content="2026-07-20T12:24:29.000Z">
+<meta property="article:modified_time" content="2026-08-18T09:42:59.882Z">
+<meta property="article:author" content="HSQ">
+<meta property="article:tag" content="LQR">
+<meta property="article:tag" content="simulink">
+<meta property="article:tag" content="仿真">
+<meta property="article:tag" content="平衡小车">
+<meta property="article:tag" content="算法">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hsqhere.github.io/images/tech/electrical/%E5%85%A8%E7%8A%B6%E6%80%81%E5%8F%8D%E9%A6%88%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F%E5%9B%BE%E5%BD%A2.png">
+
+<link rel="stylesheet" href="/lib/fancybox/fancybox.css">
+<link rel="stylesheet" href="/lib/mdui_043tiny/mdui.css">
+
+
+<link rel="stylesheet" href="/lib/iconfont/iconfont.css?v=1787046489673">
+
+<link rel="stylesheet" href="/css/style.css?v=1787046489673">
+
+
+
+
+    
+        <link rel="stylesheet" href="/custom.css?v=1787046489673">
+    
+
+
+
+<script src="/lib/mdui_043tiny/mdui.js" async></script>
+<script src="/lib/fancybox/fancybox.umd.js" async></script>
+<script src="/lib/lax.min.js" async></script>
+
+
+<script async src="/js/app.js?v=1787046489673"></script>
+
+ 
+
+<!-- highlight.js CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<!-- APlayer 音乐播放器 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+<!-- Twikoo 评论系统 -->
+<script src="https://cdn.jsdelivr.net/npm/twikoo@1.6.39/dist/twikoo.all.min.js"></script>
+<!-- MathJax 数学公式渲染 -->
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true,
+    processEnvironments: true
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<!-- APlayer 音乐播放器 JS -->
+<script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+
+
+<link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+<meta name="generator" content="Hexo 8.1.1"></head><body class="nexmoe mdui-drawer-body-left"><div id="nexmoe-background"><div class="nexmoe-bg" style="background-image: url(/hexo_init/images/background_mainpage.png)"></div><div class="mdui-appbar mdui-shadow-0"><div class="mdui-toolbar"><a class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: &#039;#drawer&#039;, swipe: true}" title="menu"><i class="mdui-icon nexmoefont icon-menu"></i></a><div class="mdui-toolbar-spacer"></div><a class="mdui-btn mdui-btn-icon" href="/" title="HSQ"><img src="/hexo_init/images/avatar.jpg" alt="HSQ"></a></div></div></div><div id="nexmoe-header"><div class="nexmoe-drawer mdui-drawer" id="drawer">
+    <div class="nexmoe-avatar mdui-ripple">
+        <a href="/" title="HSQ">
+            <img src="/hexo_init/images/avatar.jpg" alt="HSQ" alt="HSQ">
+        </a>
+    </div>
+    <div class="nexmoe-count">
+        <div><span>文章</span>37</div>
+        <div><span>标签</span>82</div>
+        <div><span>分类</span>20</div>
+    </div>
+    <div class="nexmoe-list mdui-list" mdui-collapse="{accordion: true}">
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/" title="首页">
+            <i class="mdui-list-item-icon nexmoefont icon-home"></i>
+            <div class="mdui-list-item-content">
+                首页
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/archive.html" title="文章归档">
+            <i class="mdui-list-item-icon nexmoefont icon-container"></i>
+            <div class="mdui-list-item-content">
+                文章归档
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/gallery/" title="图库">
+            <i class="mdui-list-item-icon nexmoefont icon-gallery"></i>
+            <div class="mdui-list-item-content">
+                图库
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/plan/" title="规划">
+            <i class="mdui-list-item-icon nexmoefont icon-chart"></i>
+            <div class="mdui-list-item-content">
+                规划
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/friends/" title="朋友们">
+            <i class="mdui-list-item-icon nexmoefont icon-friends"></i>
+            <div class="mdui-list-item-content">
+                朋友们
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/about/" title="关于">
+            <i class="mdui-list-item-icon nexmoefont icon-info-circle"></i>
+            <div class="mdui-list-item-content">
+                关于
+            </div>
+        </a>
+        
+    </div>
+    
+    
+        
+        <div class="nexmoe-widget-wrap">
+    <div class="nexmoe-widget nexmoe-search">
+        
+            <form id="search_form">
+                <label><input class="st-default-search-input" id="search_value" name="q" type="search" placeholder="搜索" style="
+                    font-size: 15px !important;
+                    height: 56px !important;
+                    background-image: none;
+                "></label>
+            </form>
+         
+    </div>
+</div>
+
+
+	<script async src="/js/search.js?v=1787046489674"></script>
+
+
+
+    
+        
+        <div class="nexmoe-widget-wrap">
+	<div class="nexmoe-widget nexmoe-social">
+		<a
+			class="mdui-ripple"
+			href="https://space.bilibili.com/1382035035?spm_id_from=333.1007.0.0"
+			target="_blank"
+			mdui-tooltip="{content: '哔哩哔哩'}"
+			style="
+				color: rgb(231, 106, 141);
+				background-color: rgba(231, 106, 141, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-bilibili"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://github.com/HSQhere"
+			target="_blank"
+			mdui-tooltip="{content: 'GitHub'}"
+			style="
+				color: rgb(25, 23, 23);
+				background-color: rgba(25, 23, 23, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-github"
+			></i> </a
+		>
+	</div>
+</div>
+
+    
+        
+        <!-- 一言 -->
+<div class="nexmoe-widget-wrap">
+  <h3 class="nexmoe-widget-title">
+    一言
+  </h3>
+  <div class="nexmoe-widget">
+    <ul class="hitokoto-box">
+      <li id="hitokoto_text_parent" class="hitokoto-text" hitokotoCategory="">
+        <a href="#" id="hitokoto_text">
+          
+        </a>
+        <a href="#" id="hitokoto_error_text" style="display: none;">
+          
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  let hitokotoText = document.getElementById('hitokoto_text')
+  let hitokotoErroText = document.getElementById('hitokoto_error_text')
+  let hitokotoCategory = document.getElementById('hitokoto_text_parent').getAttribute('hitokotoCategory')
+  window.addEventListener('load', function () {
+    let url = 'https://v1.hitokoto.cn'
+    if (hitokotoCategory) {
+      url += '?c=' + hitokotoCategory
+    }
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        hitokotoText.innerText = "「 " + data.hitokoto + " 」 from " + data.from
+        hitokotoText.href = 'https://hitokoto.cn/?uuid=' + data.uuid
+      })
+      .catch((reason) => {
+        console.error(11, reason)
+        hitokotoText.style.display = 'none'
+        hitokotoErroText.style.display = 'block'
+      })
+  })
+</script>
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章分类</h3>
+    <div class="nexmoe-widget">
+
+      <ul class="category-list">
+
+        
+
+
+        
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/CLIP/">CLIP</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/LQR/">LQR</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/ROS2/">ROS2</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/Transformer/">Transformer</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/ViT/">ViT</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/人脸算法/">人脸算法</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/仿真/">仿真</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/大模型/">大模型</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/嵌入式/">嵌入式</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/日记/">日记</a>
+          <span class="category-list-count">3</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/机器人/">机器人</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/机器学习/">机器学习</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/机械/">机械</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/树洞/">树洞</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/深度学习/">深度学习</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/电控/">电控</a>
+          <span class="category-list-count">6</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/目标/">目标</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/编程语言/">编程语言</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/计算机/">计算机</a>
+          <span class="category-list-count">8</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/车辆/">车辆</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+      </ul>
+
+    </div>
+  </div>
+
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <div id="randomtagcloud" class="nexmoe-widget tagcloud nexmoe-rainbow">
+      <a href="/tags/ANSYS/" style="font-size: 10px;">ANSYS</a> <a href="/tags/CAD/" style="font-size: 10px;">CAD</a> <a href="/tags/CLIP/" style="font-size: 11.43px;">CLIP</a> <a href="/tags/CNN/" style="font-size: 10px;">CNN</a> <a href="/tags/GPU/" style="font-size: 10px;">GPU</a> <a href="/tags/Hough%E5%9C%86/" style="font-size: 10px;">Hough圆</a> <a href="/tags/LLM/" style="font-size: 10px;">LLM</a> <a href="/tags/LQR/" style="font-size: 10px;">LQR</a> <a href="/tags/Linux/" style="font-size: 11.43px;">Linux</a> <a href="/tags/PID/" style="font-size: 10px;">PID</a> <a href="/tags/ROS2/" style="font-size: 10px;">ROS2</a> <a href="/tags/STAR-CCM/" style="font-size: 10px;">STAR-CCM</a> <a href="/tags/Transformer/" style="font-size: 10px;">Transformer</a> <a href="/tags/ViT/" style="font-size: 10px;">ViT</a> <a href="/tags/cv/" style="font-size: 11.43px;">cv</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/foc/" style="font-size: 11.43px;">foc</a> <a href="/tags/humble/" style="font-size: 10px;">humble</a> <a href="/tags/jetson/" style="font-size: 11.43px;">jetson</a> <a href="/tags/keysking/" style="font-size: 10px;">keysking</a> <a href="/tags/pbc/" style="font-size: 10px;">pbc</a> <a href="/tags/pid/" style="font-size: 10px;">pid</a> <a href="/tags/pnp/" style="font-size: 10px;">pnp</a> <a href="/tags/ros2/" style="font-size: 10px;">ros2</a> <a href="/tags/simulink/" style="font-size: 10px;">simulink</a> <a href="/tags/stm32/" style="font-size: 11.43px;">stm32</a> <a href="/tags/%E4%B8%96%E7%95%8C%E6%A8%A1%E5%9E%8B/" style="font-size: 10px;">世界模型</a> <a href="/tags/%E4%BA%92%E5%8A%A8/" style="font-size: 10px;">互动</a> <a href="/tags/%E4%BA%BA%E8%84%B8%E6%A3%80%E6%B5%8B/" style="font-size: 10px;">人脸检测</a> <a href="/tags/%E4%BA%BA%E8%84%B8%E8%AF%86%E5%88%AB/" style="font-size: 10px;">人脸识别</a> <a href="/tags/%E4%BB%BF%E7%9C%9F/" style="font-size: 14.29px;">仿真</a> <a href="/tags/%E5%85%B7%E8%BA%AB%E6%99%BA%E8%83%BD/" style="font-size: 10px;">具身智能</a> <a href="/tags/%E5%88%B6%E5%9B%BE/" style="font-size: 11.43px;">制图</a> <a href="/tags/%E5%88%B7%E6%9C%BA/" style="font-size: 10px;">刷机</a> <a href="/tags/%E5%8A%A0%E9%80%9F%E5%BA%A6%E8%AE%A1/" style="font-size: 10px;">加速度计</a> <a href="/tags/%E5%8F%8D%E6%80%9D/" style="font-size: 10px;">反思</a> <a href="/tags/%E5%98%89%E7%AB%8B%E5%88%9B/" style="font-size: 10px;">嘉立创</a> <a href="/tags/%E5%A4%9A%E6%A8%A1%E6%80%81/" style="font-size: 14.29px;">多模态</a> <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/" style="font-size: 14.29px;">大模型</a> <a href="/tags/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B/" style="font-size: 10px;">大语言模型</a> <a href="/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/" style="font-size: 11.43px;">嵌入式</a> <a href="/tags/%E5%B9%B3%E8%A1%A1%E5%B0%8F%E8%BD%A6/" style="font-size: 11.43px;">平衡小车</a> <a href="/tags/%E5%BB%BA%E6%A8%A1/" style="font-size: 11.43px;">建模</a> <a href="/tags/%E6%84%9F%E6%83%85/" style="font-size: 11.43px;">感情</a> <a href="/tags/%E6%8A%A5%E9%94%99/" style="font-size: 12.86px;">报错</a> <a href="/tags/%E6%8E%A7%E5%88%B6%E7%AE%97%E6%B3%95/" style="font-size: 14.29px;">控制算法</a> <a href="/tags/%E6%8E%A9%E8%86%9C/" style="font-size: 10px;">掩膜</a> <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" style="font-size: 14.29px;">操作系统</a> <a href="/tags/%E6%95%99%E7%A8%8B/" style="font-size: 10px;">教程</a> <a href="/tags/%E6%97%A0%E5%88%B7%E7%94%B5%E6%9C%BA/" style="font-size: 11.43px;">无刷电机</a> <a href="/tags/%E6%97%A5%E8%AE%B0/" style="font-size: 20px;">日记</a> <a href="/tags/%E6%99%BA%E8%83%BD%E4%BD%93/" style="font-size: 10px;">智能体</a> <a href="/tags/%E6%9B%B4%E6%96%B0/" style="font-size: 10px;">更新</a> <a href="/tags/%E6%9C%BA%E5%99%A8%E4%BA%BA/" style="font-size: 12.86px;">机器人</a> <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" style="font-size: 10px;">机器学习</a> <a href="/tags/%E6%9C%BA%E6%A2%B0/" style="font-size: 12.86px;">机械</a> <a href="/tags/%E6%A0%91%E6%B4%9E/" style="font-size: 10px;">树洞</a> <a href="/tags/%E6%A0%91%E8%8E%93%E6%B4%BE/" style="font-size: 10px;">树莓派</a> <a href="/tags/%E6%B0%B4%E5%86%B7/" style="font-size: 10px;">水冷</a> <a href="/tags/%E6%B5%81%E5%9C%BA/" style="font-size: 10px;">流场</a> <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" style="font-size: 10px;">深度学习</a> <a href="/tags/%E7%94%9F%E6%B4%BB/" style="font-size: 10px;">生活</a> <a href="/tags/%E7%94%B5%E6%8E%A7/" style="font-size: 17.14px;">电控</a> <a href="/tags/%E7%9B%AE%E6%A0%87/" style="font-size: 11.43px;">目标</a> <a href="/tags/%E7%A9%BA%E6%B0%94%E5%8A%A8%E5%8A%9B%E5%AD%A6/" style="font-size: 10px;">空气动力学</a> <a href="/tags/%E7%AE%80%E5%8F%B2/" style="font-size: 10px;">简史</a> <a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 18.57px;">算法</a> <a href="/tags/%E7%BC%96%E7%A8%8B/" style="font-size: 10px;">编程</a> <a href="/tags/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/" style="font-size: 10px;">编程语言</a> <a href="/tags/%E8%A7%84%E5%88%92/" style="font-size: 10px;">规划</a> <a href="/tags/%E8%A7%86%E8%A7%89/" style="font-size: 15.71px;">视觉</a> <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/" style="font-size: 11.43px;">计算机</a> <a href="/tags/%E8%AE%BA%E6%96%87/" style="font-size: 10px;">论文</a> <a href="/tags/%E8%AF%84%E8%AE%BA%E5%8C%BA/" style="font-size: 10px;">评论区</a> <a href="/tags/%E8%AF%BB%E4%B9%A6/" style="font-size: 10px;">读书</a> <a href="/tags/%E8%BD%A6%E8%BE%86/" style="font-size: 11.43px;">车辆</a> <a href="/tags/%E9%97%AE%E9%A2%98/" style="font-size: 10px;">问题</a> <a href="/tags/%E9%98%85%E8%AF%BB/" style="font-size: 11.43px;">阅读</a> <a href="/tags/%E9%99%80%E8%9E%BA%E4%BB%AA/" style="font-size: 10px;">陀螺仪</a> <a href="/tags/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1/" style="font-size: 10px;">面向对象</a> <a href="/tags/%E9%9D%A2%E5%90%91%E8%BF%87%E7%A8%8B/" style="font-size: 10px;">面向过程</a> <a href="/tags/%E9%A6%99%E6%A9%99%E6%B4%BE/" style="font-size: 10px;">香橙派</a>
+    </div>
+    
+      <script>
+        var maxTagcloud = parseInt(17);
+        var tags_length = parseInt(82);
+        var tags_arr = [];
+        for(var i = 0; i < tags_length; i++){
+          tags_arr.push(i);
+        }
+        tags_arr.sort(function (l, r) {
+          return Math.random() > 0.5 ? -1 : 1;
+        });
+        tags_arr = tags_arr.slice(0, maxTagcloud < tags_length ? tags_length - maxTagcloud : 0);
+        for(var tag_i = 0; tag_i < tags_arr.length; tag_i++){
+          document.getElementById("randomtagcloud").children[tags_arr[tag_i]].style.display = 'none';
+        }
+      </script>
+    
+  </div>
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章归档</h3>
+    <div class="nexmoe-widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/">2026</a><span class="archive-list-count">37</span></li></ul>
+    </div>
+  </div>
+
+
+
+    
+        
+   
+    <div class="nexmoe-copyright">
+        &copy; 2026 HSQ
+        Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+        & <a href="https://github.com/theme-nexmoe/hexo-theme-nexmoe" target="_blank">Nexmoe</a>
+        
+    </div>
+</div><!-- .nexmoe-drawer --></div><div id="nexmoe-content"><div class="nexmoe-primary"><div class="nexmoe-post">
+  <article>
+    
+        <div class="nexmoe-post-cover absolute" style="padding-top: NaN%;"> 
+            <img src="/images/tech/electrical/全状态反馈控制系统图形.png" alt="LQR的simulink仿真与在平衡车的应用实战" loading="lazy">
+            <h1>LQR的simulink仿真与在平衡车的应用实战</h1>
+        </div>
+    
+    
+    <div class="nexmoe-post-meta">
+    <div class="nexmoe-rainbow">
+        <a class="nexmoefont icon-calendar-fill">2026年07月20日</a>
+        
+            <a class="nexmoefont icon-appstore-fill -link" href="/categories/LQR/">LQR</a>
+        
+        
+    <a><i class="nexmoefont icon-areachart"></i>约4.2k字</a>
+    <a><i class="nexmoefont icon-time-circle-fill"></i>预计需要19分钟</a>
+
+    </div>
+    
+    
+    
+    
+    
+</div>
+
+    <h2 id="一：LQR-理论求解的具体步骤"><a href="#一：LQR-理论求解的具体步骤" class="headerlink" title="一：LQR 理论求解的具体步骤"></a>一：LQR 理论求解的具体步骤</h2><p>LQR（线性二次型调节器）的核心目标是：<strong>在保证系统稳定的前提下，用最小的控制能量（省电、省电机性能）最快地把系统状态调回 0。</strong><br>对于一个线性时不变系统：<br>$$\dot{x} &#x3D; Ax + Bu$$</p>
+<h3 id="求解-："><a href="#求解-：" class="headerlink" title="求解 ："></a>求解 ：</h3><ol>
+<li><strong>设定目标函数（Cost Function $J$）</strong><br> 设计一个评价指标 $J$，表示系统的“总代价”：<br> $$J &#x3D; \int_{0}^{\infty} \left( x^T Q x + u^T R u \right) dt$$<ul>
+<li>$Q$：<strong>状态权重矩阵</strong>，惩罚状态偏差（$x$ 偏离 0 越大，$J$ 越大）。</li>
+<li>$R$：<strong>控制权重矩阵</strong>，惩罚控制能量（电机出力 $u$ 越大，$J$ 越大）。</li>
+<li><strong>$x^T Q x$</strong>：代表小车的<strong>状态误差成本</strong>。</li>
+<li><strong>$u^T R u$</strong>：代表小车的<strong>电机用力成本</strong>。</li>
+</ul>
+</li>
+<li><strong>选取权重矩阵 $Q$ 与 $R$</strong><br> 根据工程经验预设 $Q$（半正定矩阵，对角阵，维度与状态向量一致）和 $R$（正定矩阵，维度与输入向量一致）。</li>
+<li><strong>求解代数里Riccati 方程</strong><br> 算法会求解一个对称正定矩阵 $P$：<br> $$A^T P + P A - P B R^{-1} B^T P + Q &#x3D; 0$$</li>
+<li><strong>计算最优状态反馈增益矩阵 $K$</strong><br> 得到 $P$ 后，即可直接算出最优反馈系数 $K$：<br> $$K &#x3D; R^{-1} B^T P$$<br> 最终的控制律就是简短的全状态反馈：<br> $$u &#x3D; -Kx$$<br><strong>原理简要分析：</strong><br><img onerror="imgOnError(this);" data-fancybox="gallery" src="/../images/tech/electrical/%E5%85%A8%E7%8A%B6%E6%80%81%E5%8F%8D%E9%A6%88%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F%E5%9B%BE%E5%BD%A2.png" alt="全状态反馈控制系统图形" data-caption="全状态反馈控制系统图形" loading="lazy"><br>对于开环系统（即图中灰色区域）：<br>$$\begin{cases} \dot{x} &#x3D; Ax + Bu &amp; \text{—— 状态方程（State Equation）} \ y &#x3D; Cx + Du &amp; \text{—— 输出方程（Output Equation）} \end{cases}$$<br>由现代控制理论我们知道开环传递函数的极点就是系统矩阵A的特征值。先经过了第一个式子的x的微分方程，可以由u（控制函数）求解x，再经过第二个式子得到对应的y，这个中间控制量x与K的乘积可以反求u。得到状态反馈控制。如此形成闭环形式，状态变换矩阵A变成了(A-BK)。$$\dot{x} &#x3D; Ax + Bu &#x3D; (A - BK)x$$因此通过配置反馈矩阵K，可以使得闭环系统的极点达到我们期望的状态。注意，这种控制器的设计与输出矩阵C,D没有关系。但是一般来说由于x以及其对应的变量无法直接求出所以引入，通过求y和u的变换得到x此时在增益矩阵K前面加入观测器（一般Kerman），输入是y、u求得x再输入K。<em><strong>注意一般的物理系统没有前馈，即无法直接由u影响y，所以D&#x3D;0。</strong></em><br><img onerror="imgOnError(this);" data-fancybox="gallery" src="/../images/tech/electrical/%E5%85%A8%E7%8A%B6%E6%80%81%E5%8F%8D%E9%A6%88%E6%8E%A7%E5%88%B6%E4%B8%8E%E7%A7%AF%E5%88%86%E7%B3%BB%E7%BB%9F.png" alt="全状态反馈控制与积分系统" data-caption="全状态反馈控制与积分系统" loading="lazy"><br><em>全状态反馈控制与积分系统</em></li>
+</ol>
+<p>此时可以得到<strong>基于全状态观测器的反馈控制系统</strong>：<br><img onerror="imgOnError(this);" data-fancybox="gallery" src="/../images/tech/electrical/%E5%9F%BA%E4%BA%8E%E5%85%A8%E7%8A%B6%E6%80%81%E8%A7%82%E6%B5%8B%E5%99%A8%E7%9A%84%E5%8F%8D%E9%A6%88%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F.png" alt="基于全状态观测器的反馈控制系统" data-caption="基于全状态观测器的反馈控制系统" loading="lazy"></p>
+<p>接下来就是求解最小的代价函数就可以得到合适的K了。而我们的小车可以先从简单的来，不考虑观测器，直接差分法，即微分，来求。虽然有较多的噪音。</p>
+<blockquote>
+<p>当然求解$Q$ 和 $R$ 的对角线参数都是靠“试”出来的,核心原则：Bryson 规则法（初次量化）</p>
+</blockquote>
+<p><em>PS:</em> 在控制理论中，<strong>能控性</strong>的定义是：在有限的时间内，是否总能找到一个控制输入 $u$，把小车从<strong>任意</strong>初始状态拉回到<strong>任意</strong>目标状态。<br><strong>能控性矩阵</strong> $M_c$：</p>
+<p>$$M_c &#x3D; \begin{bmatrix} B &amp; AB &amp; A^2B &amp; \dots &amp; A^{n-1}B \end{bmatrix}$$</p>
+<p>其中 $n$ 是系统的阶数（状态变量的个数）。例如二阶小车，能控性矩阵就是 $M_c &#x3D; \begin{bmatrix} B &amp; AB \end{bmatrix}$。<br>当能控性矩阵满秩，小车能达到的状态，就是、向量的<strong>线性组合</strong>，意味着你的控制信号可以控制到小车的“每一个维度”。</p>
+<h2 id="二：物理状态方程的推导与-A-B-矩阵提取"><a href="#二：物理状态方程的推导与-A-B-矩阵提取" class="headerlink" title="二：物理状态方程的推导与 $A, B$ 矩阵提取"></a>二：物理状态方程的推导与 $A, B$ 矩阵提取</h2><p>以<strong>平衡小车</strong>最经典的一维简化模型为例。</p>
+<h3 id="一、-状态变量与控制输入的定义"><a href="#一、-状态变量与控制输入的定义" class="headerlink" title="一、 状态变量与控制输入的定义"></a>一、 状态变量与控制输入的定义</h3><p>首先，系统完整的 <strong>6个状态变量</strong> 构成的向量 x 定义如下（严格对应代码和仿真中的 6 个通道）：</p>
+<p>$$x &#x3D; \begin{bmatrix} x \ \dot{x} \ \theta_p \ \dot{\theta}_p \ \delta \ \dot{\delta} \end{bmatrix} \begin{aligned} &amp;\leftarrow \text{小车位移 (Displacement)} \ &amp;\leftarrow \text{前进速度 (Velocity)} \ &amp;\leftarrow \text{车体倾角 (Pitch Angle)} \ &amp;\leftarrow \text{车体角速度 (Pitch Rate)} \ &amp;\leftarrow \text{转向角&#x2F;偏航角 (Yaw Angle)} \ &amp;\leftarrow \text{转向角速度 (Yaw Rate)} \end{aligned}$$</p>
+<p>系统的 <strong>2个控制输入</strong> 构成的向量 u 定义如下：</p>
+<p>$$u &#x3D; \begin{bmatrix} \dot v_{L0} \ \dot v_{R0} \end{bmatrix} \begin{aligned} &amp;\leftarrow \text{左轮无摩擦时理想线加速度} \ &amp;\leftarrow \text{右轮无摩擦时理想线加速度} \end{aligned}$$</p>
+<p>(注：由于电机转矩不好直接控制，教程中已通过刚体定轴转动定律将其等效转化为了速度&#x2F;加速度控制量)。</p>
+<h2 id="二、车轮动力学分析（获得车轮方程）"><a href="#二、车轮动力学分析（获得车轮方程）" class="headerlink" title="二、车轮动力学分析（获得车轮方程）"></a>二、车轮动力学分析（获得车轮方程）</h2><p>首先对小车的<strong>右轮</strong>进行受力分析（左轮同理）：</p>
+<ol>
+<li><strong>水平平动（牛顿第二定律）</strong>：<br> $$m\ddot{x}<em>R &#x3D; H</em>{fR} - H_R \quad \text{— (1)}$$</li>
+<li><strong>绕轴转动（刚体定轴转动定律）</strong>：<br> $$I\dot{\omega}<em>R &#x3D; T_R - H</em>{fR}r \quad \text{— (2)}$$<br>在车轮<strong>纯滚动不打滑</strong>的假设下，车轮线速度与角速度满足 $\omega_R &#x3D; \frac{\dot{x}_R}{r}$，两边求导得 $\dot{\omega}_R &#x3D; \frac{\ddot{x}_R}{r}$。 将该关系代入公式 (2) 消除 $\dot{\omega}_R$，再与公式 (1) 联立<strong>消去地面摩擦力 $H_{fR}$</strong>，可以得到车轮轴心受到的水平力 $H_R$：<br>$$\left(m + \frac{I}{r^2}\right)\ddot{x}_R &#x3D; \frac{T_R}{r} - H_R \quad \text{— (3)}$$<br>同理，对<strong>左轮</strong>进行相同的分析：</li>
+</ol>
+<p>$$\left(m + \frac{I}{r^2}\right)\ddot{x}_L &#x3D; \frac{T_L}{r} - H_L \quad \text{— (4)}$$</p>
+<h2 id="三、车体正向运动分析（前进与直立）"><a href="#三、车体正向运动分析（前进与直立）" class="headerlink" title="三、车体正向运动分析（前进与直立）"></a>三、车体正向运动分析（前进与直立）</h2><p>小车底盘中心位置定义为左右轮的平均位移：$x &#x3D; \frac{x_L + x_R}{2}$。将公式 (3) 和 (4) 相加除以 2，得到整个底盘的平动方程：</p>
+<p>$$\left(m + \frac{I}{r^2}\right)\ddot{x} &#x3D; \frac{T_L + T_R}{2r} - \frac{H_L + H_R}{2} \quad \text{— (5)}$$<br>接下来分析<strong>整个车体（看作倒立摆）</strong>。车体质量为 $M$，质心到地面的距离为 $l$，倾角为 $\theta_p$。</p>
+<ol>
+<li><p><strong>车体水平方向运动（牛顿第二定律）</strong>： 根据运动合成，车体质心的水平位置为 $x_G &#x3D; x + l\sin\theta_p$。对其求二次导数：<br> $$M\ddot{x}_G &#x3D; M\frac{d^2}{dt^2}(x + l\sin\theta_p) &#x3D; H_L + H_R$$<br> 展开并进行<strong>小角度线性化</strong>（因为LQR是处理线性系统的）（当 $\theta_p \to 0$ 时，$\sin\theta_p \approx \theta_p$，$\cos\theta_p \approx 1$，$\dot{\theta}_p^2 \approx 0$）：<br> $$M\ddot{x} + Ml\ddot{\theta}_p &#x3D; H_L + H_R \quad \text{— (6)}$$</p>
+</li>
+<li><p><strong>将车体方程 (6) 代入底盘方程 (5)，消去未知的内部作用力 $(H_L + H_R)$</strong>：<br> $$\left(M + 2m + \frac{2I}{r^2}\right)\ddot{x} + Ml\ddot{\theta}_p &#x3D; \frac{T_L + T_R}{r} \quad \text{— (7)}$$</p>
+</li>
+<li><p><strong>车体绕质心的转动方程（刚体转动定律）</strong>： 考虑重力矩、摆动惯性力矩以及电机的反作用力矩，线性化后的转动方程为：<br> $$Ml\ddot{x} + (J_p + Ml^2)\ddot{\theta}_p &#x3D; Mlg\theta_p - (T_L + T_R) \quad \text{— (8)}$$</p>
+</li>
+</ol>
+<h3 id="核心解耦：求出-ddot-x-和-ddot-theta-p"><a href="#核心解耦：求出-ddot-x-和-ddot-theta-p" class="headerlink" title="核心解耦：求出 $\ddot{x}$ 和 $\ddot{\theta}_p$"></a>核心解耦：求出 $\ddot{x}$ 和 $\ddot{\theta}_p$</h3><p>方程 (7) 和 (8) 是关于 $\ddot{x}$ 和 $\ddot{\theta}<em>p$ 的二元一次方程组组。 定义总惯性分母：$Q</em>{eq} &#x3D; J_pM + (J_p + Ml^2)(2m + \frac{2I}{r^2})$。 通过克拉默法则或代入消元法，解出这两个最高阶导数：<br>$$\ddot{x} &#x3D; \underbrace{-\frac{M^2l^2g}{Q_{eq}}}<em>{A</em>{23}}\theta_p + \underbrace{\frac{J_p + Ml^2 + Mlr}{Q_{eq}r}}<em>{B</em>{21}}(T_L + T_R) \quad \text{— (9)}$$</p>
+<p>$$\ddot{\theta}<em>p &#x3D; \underbrace{\frac{Mlg(M+2m+\frac{2I}{r^2})}{Q</em>{eq}}}<em>{A</em>{43}}\theta_p \underbrace{-\frac{\frac{Ml}{r} + M + 2m + \frac{2I}{r^2}}{Q_{eq}}}<em>{B</em>{41}}(T_L + T_R) \quad \text{— (10)}$$</p>
+<h2 id="四、车体转向运动分析（偏航-Yaw）"><a href="#四、车体转向运动分析（偏航-Yaw）" class="headerlink" title="四、车体转向运动分析（偏航 Yaw）"></a>四、车体转向运动分析（偏航 Yaw）</h2><p>转向是由左右轮摩擦力不等引起的。令轮距为 $d$，绕竖直 $Y$ 轴的转动惯量为 $J_\delta$，偏航角为 $\delta$。</p>
+<ol>
+<li><strong>车体绕 $Y$ 轴转动方程</strong>：<br> $$J_\delta\ddot{\delta} &#x3D; \frac{d}{2}(H_L - H_R) \quad \text{— (11)}$$</li>
+<li>将左轮方程 (4) 减去右轮方程 (3)，并利用几何关系 $\dot{x}<em>L - \dot{x}<em>R &#x3D; d\dot{\delta}$ 代入消元，可以解出转向角速度的导数 $\ddot{\delta}$：<br> $$\ddot{\delta} &#x3D; \underbrace{\frac{1}{r(md + \frac{Id}{r^2} + \frac{2J</em>\delta}{d})}}</em>{B’_{61}}(T_L - T_R) \quad \text{— (12)}$$</li>
+</ol>
+<h2 id="五、输入量转换与构建完整的-A、B-矩阵"><a href="#五、输入量转换与构建完整的-A、B-矩阵" class="headerlink" title="五、输入量转换与构建完整的 A、B 矩阵"></a>五、输入量转换与构建完整的 A、B 矩阵</h2><p>由于<strong>电机的输出转矩 $T$ 无法在单片机里直接极其精准地控制，需要转换为理想控制速度 $u &#x3D; [\dot v_{L0}, \dot v_{R0}]^T$</strong>。 根据转动定律，转矩与无摩擦理想加速度速度的关系：$T &#x3D; \frac{I}{r}u$。</p>
+<p>这意味着，我们在步骤二和步骤三中得到的关于 $T$ 的系数（$B’$），在写进标准状态空间时，全部需要<strong>乘以 $\frac{I}{r}$ 的系数修正</strong>。</p>
+<p>现在，我们令状态向量 $x &#x3D; [x, \dot{x}, \theta_p, \dot{\theta}<em>p, \delta, \dot{\delta}]^T$，控制输入$u &#x3D; [\dot v</em>{L0}, \dot v_{R0}]^T$，严格根据一阶微分关系排列矩阵：</p>
+<h3 id="空间状态方程"><a href="#空间状态方程" class="headerlink" title="空间状态方程"></a>空间状态方程</h3><p>$$\begin{bmatrix} \dot{x} \ \ddot{x} \ \dot{\theta}<em>p \ \ddot{\theta}<em>p \ \dot{\delta} \ \ddot{\delta} \end{bmatrix} &#x3D; \begin{bmatrix} 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \ 0 &amp; 0 &amp; A</em>{23} &amp; 0 &amp; 0 &amp; 0 \ 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 \ 0 &amp; 0 &amp; A</em>{43} &amp; 0 &amp; 0 &amp; 0 \ 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 \ 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \end{bmatrix} \begin{bmatrix} x \ \dot{x} \ \theta_p \ \dot{\theta}<em>p \ \delta \ \dot{\delta} \end{bmatrix} + B \begin{bmatrix} \dot v</em>{L0} \ \dot v_{R0} \end{bmatrix}$$</p>
+<h3 id="A-矩阵"><a href="#A-矩阵" class="headerlink" title="$A$ 矩阵"></a>$A$ 矩阵</h3><p>$$A &#x3D; \begin{bmatrix} 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \ 0 &amp; 0 &amp; A_{23} &amp; 0 &amp; 0 &amp; 0 \ 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 \ 0 &amp; 0 &amp; A_{43} &amp; 0 &amp; 0 &amp; 0 \ 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 \ 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \end{bmatrix} $$</p>
+<p>其中：</p>
+<ul>
+<li><p>$A_{23} &#x3D; -\frac{M^2l^2g}{Q_{eq}}$</p>
+</li>
+<li><p>$A_{43} &#x3D; \frac{Mlg(M+2m+\frac{2I}{r^2})}{Q_{eq}}$</p>
+</li>
+</ul>
+<h3 id="B-矩阵"><a href="#B-矩阵" class="headerlink" title="$B$ 矩阵"></a>$B$ 矩阵</h3><p>$$B &#x3D; \frac{I}{r} \begin{bmatrix} 0 &amp; 0 \ B_{21} &amp; B_{22} \ 0 &amp; 0 \ B_{41} &amp; B_{42} \ 0 &amp; 0 \ B_{61} &amp; B_{62} \end{bmatrix}$$</p>
+<p>其中：</p>
+<ul>
+<li><p>$B_{21} &#x3D; B_{22} &#x3D; \frac{J_p + Ml^2 + Mlr}{Q_{eq}r}$</p>
+</li>
+<li><p>$B_{41} &#x3D; B_{42} &#x3D; -\frac{\frac{Ml}{r} + M + 2m + \frac{2I}{r^2}}{Q_{eq}}$</p>
+</li>
+<li><p>$B_{61} &#x3D; -B_{62} &#x3D; \frac{1}{r(md + \frac{Id}{r^2} + \frac{2J_\delta}{d})}$</p>
+</li>
+</ul>
+<h3 id="共同的分母常数-Q-eq"><a href="#共同的分母常数-Q-eq" class="headerlink" title="共同的分母常数 $Q_{eq}$"></a>共同的分母常数 $Q_{eq}$</h3><p>$$Q_{eq} &#x3D; J_pM + (J_p + Ml^2)\left(2m + \frac{2I}{r^2}\right)$$</p>
+<h2 id="三：MATLAB-代码实现"><a href="#三：MATLAB-代码实现" class="headerlink" title="三：MATLAB 代码实现"></a>三：MATLAB 代码实现</h2><p>在 MATLAB 中，只需要直接定义物理参数、构建矩阵并调用 <code>lqr()</code> 函数即可：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><code class="hljs matlab">clc<br>m = <span class="hljs-number">0.035</span>;<span class="hljs-comment">%车轮的质量</span><br>r = <span class="hljs-number">0.0672</span>/<span class="hljs-number">2</span>;<span class="hljs-comment">%车轮的半径</span><br><span class="hljs-built_in">i</span> = <span class="hljs-number">0.5</span>*m*r^<span class="hljs-number">2</span>;<span class="hljs-comment">%车轮的转动惯量</span><br>m2 = <span class="hljs-number">0.757</span>;<span class="hljs-comment">%整车的质量</span><br>M = m2<span class="hljs-number">-2</span>*m;<span class="hljs-comment">%车体的质量</span><br>H = <span class="hljs-number">0.0903</span>;<span class="hljs-comment">%车体高度</span><br>L = <span class="hljs-number">0.0530</span>;<span class="hljs-comment">%车体长度 平行轮子</span><br>W = <span class="hljs-number">0.0930</span>;<span class="hljs-comment">%车体宽度 垂直轮子</span><br>d = <span class="hljs-number">0.1612</span>;<span class="hljs-comment">%轮距</span><br>l = <span class="hljs-number">0.5</span>*H;<span class="hljs-comment">%质心距底盘中心的距离</span><br>J_p = (<span class="hljs-number">1</span>/<span class="hljs-number">12</span>)*M*(H^<span class="hljs-number">2</span>+L^<span class="hljs-number">2</span>);<span class="hljs-comment">%车体绕质心转动时的转动惯量</span><br>J_delta = (<span class="hljs-number">1</span>/<span class="hljs-number">12</span>)*M*(W^<span class="hljs-number">2</span>+L^<span class="hljs-number">2</span>);<span class="hljs-comment">%车体绕 y 轴转动时的转动惯量</span><br>g = <span class="hljs-number">9.8</span>;<span class="hljs-comment">%重力加速度</span><br>Q_eq = J_p*M+(J_p+M*L^<span class="hljs-number">2</span>)*(<span class="hljs-number">2</span>*m+<span class="hljs-number">2</span>*<span class="hljs-built_in">i</span>/r^<span class="hljs-number">2</span>);<br>A_23 = -(M^<span class="hljs-number">2</span>*L^<span class="hljs-number">2</span>*g)/Q_eq;<br>A_43 = M*L*g*(M+<span class="hljs-number">2</span>*m+<span class="hljs-number">2</span>*<span class="hljs-built_in">i</span>/r^<span class="hljs-number">2</span>)/Q_eq;<br>B_21 = (J_p+M*L^<span class="hljs-number">2</span>+M*L*r)/(Q_eq*r);<br>B_22 = B_21;<br>B_41 = -(M*L/r+M+<span class="hljs-number">2</span>*m+<span class="hljs-number">2</span>*<span class="hljs-built_in">i</span>/r^<span class="hljs-number">2</span>)/Q_eq;<br>B_42 = B_41;<br>B_61 = <span class="hljs-number">1</span>/(r*(m*d+<span class="hljs-built_in">i</span>*d/r^<span class="hljs-number">2</span>+<span class="hljs-number">2</span>*J_delta/d));<br>B_62 = -B_61;<br>A = [<span class="hljs-number">0</span> <span class="hljs-number">1</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span>; <span class="hljs-number">0</span> <span class="hljs-number">0</span> A_23 <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span>; <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">1</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span>; <span class="hljs-number">0</span> <span class="hljs-number">0</span> A_43 <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span>; <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">1</span>; <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span>];<br>B = (<span class="hljs-built_in">i</span>/r)*[<span class="hljs-number">0</span> <span class="hljs-number">0</span>; B_21 B_22; <span class="hljs-number">0</span> <span class="hljs-number">0</span>; B_41 B_42; <span class="hljs-number">0</span> <span class="hljs-number">0</span>; B_61 B_62];<br>C = <span class="hljs-built_in">eye</span>(<span class="hljs-number">6</span>);<br>D = <span class="hljs-built_in">zeros</span>(<span class="hljs-number">6</span>,<span class="hljs-number">2</span>);<br>Tc = ctrb(A,B);<br><span class="hljs-keyword">if</span> (rank(Tc)==<span class="hljs-number">6</span>)<br>	fprintf(<span class="hljs-string">&#x27;此系统是可控的！\n&#x27;</span>);<br>	Q = <span class="hljs-built_in">diag</span>([ ...<br>		<span class="hljs-number">12000</span>, ... <span class="hljs-comment">% Q(1,1)</span><br>		<span class="hljs-number">15000</span>, ... <span class="hljs-comment">% Q(2,2)</span><br>		<span class="hljs-number">900</span>, ... <span class="hljs-comment">% Q(3,3)</span><br>		<span class="hljs-number">850</span>, ... <span class="hljs-comment">% Q(4,4)</span><br>		<span class="hljs-number">1000</span>, ... <span class="hljs-comment">% Q(5,5)</span><br>		<span class="hljs-number">1000</span> ... <span class="hljs-comment">% Q(6,6)</span><br>	]);<br>	R = [<span class="hljs-number">1</span> <span class="hljs-number">0</span>;<br>		<span class="hljs-number">0</span> <span class="hljs-number">1</span>]; <span class="hljs-comment">% 控制量 (左右电机 PWM/加速度) 的权重</span><br>	K = lqr(A,B,Q,R);<br>	<span class="hljs-built_in">disp</span>(<span class="hljs-string">&#x27;计算出的 LQR 反馈矩阵 K 为：&#x27;</span>);<br>	<span class="hljs-built_in">disp</span>(K);<br><span class="hljs-keyword">end</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="四：Simulink-的连接与配置"><a href="#四：Simulink-的连接与配置" class="headerlink" title="四：Simulink 的连接与配置"></a>四：Simulink 的连接与配置</h2><p>在 Simulink 中搭建全状态反馈闭环系统的步骤如下：</p>
+<h3 id="1-模块准备与拉取"><a href="#1-模块准备与拉取" class="headerlink" title="1. 模块准备与拉取"></a>1. 模块准备与拉取</h3><p>在 Simulink Library 中依次找到并拖入以下模块：</p>
+<ul>
+<li><strong><code>State-Space</code>（状态空间模块）</strong>：用来代表你的物理对象（Plant）。</li>
+<li><strong><code>Gain</code>（增益模块）</strong>：用来作为增益矩阵 $K$。</li>
+<li><strong><code>Sum</code>（加减法&#x2F;求和模块）</strong>：用于计算 $u &#x3D; u_{\text{target}} - Kx$。</li>
+<li><strong><code>Constant</code>（常数模块）</strong>：设置期望的目标状态（通常全为 0）。</li>
+<li><strong><code>Scope</code>（示波器模块）</strong>：观察 $x, \theta$ 等状态随时间的变化曲线。</li>
+<li><strong><code>Mux</code> &#x2F; <code>Demux</code>（信号总线模块）</strong>：用于打包或拆分 4 维状态信号。</li>
+<li><strong><code>Selector</code>（选择器）</strong>：根据索引选择输出通道。</li>
+</ul>
+<h3 id="2-模块参数配置"><a href="#2-模块参数配置" class="headerlink" title="2. 模块参数配置"></a>2. 模块参数配置</h3><ul>
+<li><strong>双击 <code>State-Space</code> 模块</strong>：<ul>
+<li>$A$ 填入 <code>A</code></li>
+<li>$B$ 填入 <code>B</code></li>
+<li>$C$ 填入 <code>eye(4)</code></li>
+<li>$D$ 填入 <code>zeros(4,1)</code></li>
+<li>Initial conditions（初始状态）设置一个倾斜初始角：<code>[0; 0; 0.1; 0]</code>（代表车身初始倾斜了约 5.7 度）。也可以填0。</li>
+</ul>
+</li>
+<li><strong>双击 <code>Gain</code> 模块</strong>：<ul>
+<li>Gain（增益值）填入 <code>-K</code></li>
+<li><strong>重点</strong>：将 Multiplication 选项由 <code>Element-wise(K.*u)</code> 改为 <strong><code>Matrix(K*u)</code></strong>！</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-信号连线逻辑"><a href="#3-信号连线逻辑" class="headerlink" title="3. 信号连线逻辑"></a>3. 信号连线逻辑</h3><p><em><strong>为了整体掌握反馈与外界交互模型，我们先把空间状态方程整体打包。</strong></em><br>因为传感器都可以测得六个需要的变量所以不需要输出方程，即<code>y == x</code><br>现实世界是有摩擦力和阻力的，为了消除稳态误差，我们引入积分项，组成：<br>$$u &#x3D; \underbrace{- \Big( K_1 x + K_2 \dot{x} + K_3 \theta_p + K_4 \dot{\theta}<em>p + K_5 \delta + K_6 \dot{\delta} \Big)}</em>{\text{LQR 主反馈 } u_{\text{LQR}}} + \underbrace{K_i \int_{0}^{t} \big( x_{\text{target}} - x(\tau) \big) , d\tau}<em>{\text{位置积分支路 } u</em>{\text{Integral}}}$$<br><em>积分一般消除位移的所以直接表示为x的误差</em>。<br>更一般的我们假设需要的是$x_{\text{target}}$<br>得到$u &#x3D;K(x_{\text{target}} - x) - K_i \int_{0}^{t} \big( x_{\text{target}} - x(\tau) \big) , d\tau$</p>
+<blockquote>
+<p>需要注意的是：因为K一般是看成正的，所以需要考虑实际的u和x变化量的方向关系，正负表示正负反馈，可以通过观测角度${\theta}$和位移x来确定符号。当向前进时，对于两个独立的反馈都是，通过重力牵引，小车先向前倾，再回正。</p>
+</blockquote>
+<p>左边的首项x，引入step步进，表示目标x位置指令。<br><img onerror="imgOnError(this);" data-fancybox="gallery" src="/../images/tech/electrical/%E5%85%A8%E7%8A%B6%E6%80%81%E5%8F%8D%E9%A6%88%E6%8E%A7%E5%88%B6%E4%B8%8E%E7%A7%AF%E5%88%86%E7%B3%BB%E7%BB%9F.png" alt="全状态反馈控制与积分系统" data-caption="全状态反馈控制与积分系统" loading="lazy"></p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="/../images/tech/electrical/%E5%85%A8%E7%8A%B6%E6%80%81%E5%8F%8D%E9%A6%88%E6%8E%A7%E5%88%B6%E4%B8%8E%E7%A7%AF%E5%88%86%E7%B3%BB%E7%BB%9F-%E6%94%B6%E6%95%9B%E7%BB%93%E6%9E%9C.png" alt="全状态反馈控制与积分系统-收敛结果" data-caption="全状态反馈控制与积分系统-收敛结果" loading="lazy"><br><em>收敛结果</em></p>
+<p><em><strong>接下来我们展开空间状态方程。</strong></em></p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="/../images/tech/electrical/%E5%85%A8%E5%B1%95%E5%BC%80%E7%9A%84%E5%85%A8%E7%8A%B6%E6%80%81%E5%8F%8D%E9%A6%88%E6%8E%A7%E5%88%B6%E4%B8%8E%E7%A7%AF%E5%88%86%E7%B3%BB%E7%BB%9F.png" alt="全展开的全状态反馈控制与积分系统" data-caption="全展开的全状态反馈控制与积分系统" loading="lazy"></p>
+<h3 id="一、-控制律关系式（LQR-反馈控制量-u-）"><a href="#一、-控制律关系式（LQR-反馈控制量-u-）" class="headerlink" title="一、 控制律关系式（LQR 反馈控制量 $u$）"></a>一、 控制律关系式（LQR 反馈控制量 $u$）</h3><p>6 个状态量汇合后，分别经过增益矩阵 <code>K1</code> 和 <code>K2</code>，得到左右轮（或两个控制通道）的控制量 $u_1, u_2$：</p>
+<p>$$K &#x3D; \begin{bmatrix} K_{1,1} &amp; K_{1,2} &amp; K_{1,3} &amp; K_{1,4} &amp; K_{1,5} &amp; K_{1,6} \ K_{2,1} &amp; K_{2,2} &amp; K_{2,3} &amp; K_{2,4} &amp; K_{2,5} &amp; K_{2,6} \end{bmatrix}$$</p>
+<p>$$\begin{cases} u_1 &#x3D; - K_1 \cdot X &#x3D; - \big( K_{11} x + K_{12} x’ + K_{13} \theta + K_{14} \theta’ + K_{15} \delta + K_{16} \delta’ \big) \ u_2 &#x3D; - K_2 \cdot X &#x3D; - \big( K_{21} x + K_{22} x’ + K_{23} \theta + K_{24} \theta’ + K_{25} \delta + K_{26} \delta’ \big) \end{cases}$$</p>
+<h3 id="二、-状态微分关系式（系统的物理状态方程-dot-X-AX-BU-）"><a href="#二、-状态微分关系式（系统的物理状态方程-dot-X-AX-BU-）" class="headerlink" title="二、 状态微分关系式（系统的物理状态方程 $\dot{X} &#x3D; AX + BU$）"></a>二、 状态微分关系式（系统的物理状态方程 $\dot{X} &#x3D; AX + BU$）</h3><p>根据框图左侧三个求和节点（Sum Block）以及积分器输入的信号汇总，可以直接写出三个二阶加速度（微分）方程：</p>
+<h4 id="1-线加速度方程-ddot-x-（即-x’’-）"><a href="#1-线加速度方程-ddot-x-（即-x’’-）" class="headerlink" title="1. 线加速度方程 $\ddot{x}$（即 $x’’$）"></a>1. 线加速度方程 $\ddot{x}$（即 $x’’$）</h4><p>进入 $x’$ 前方求和点的信号有：由 $\theta$ 经过增益 $A_{23}$，以及 $u_1, u_2$ 分别经过 $B_{21}, B_{22}$：</p>
+<p>$$\ddot{x} &#x3D; A_{23} , \theta + B_{21} , u_1 + B_{22} , u_2$$</p>
+<h4 id="2-角加速度方程-ddot-theta-（即-theta’’-）"><a href="#2-角加速度方程-ddot-theta-（即-theta’’-）" class="headerlink" title="2. 角加速度方程 $\ddot{\theta}$（即 $\theta’’$）"></a>2. 角加速度方程 $\ddot{\theta}$（即 $\theta’’$）</h4><p>进入 $\theta’$ 前方求和点的信号有：由 $\theta$ 经过增益 $A_{43}$，以及 $u_1, u_2$ 分别经过 $B_{41}, B_{42}$：<br>$$\ddot{\theta} &#x3D; A_{43} , \theta + B_{41} , u_1 + B_{42} , u_2$$</p>
+<h4 id="3-偏航角加速度方程-ddot-delta-（即-delta’’-）"><a href="#3-偏航角加速度方程-ddot-delta-（即-delta’’-）" class="headerlink" title="3. 偏航角加速度方程 $\ddot{\delta}$（即 $\delta’’$）"></a>3. 偏航角加速度方程 $\ddot{\delta}$（即 $\delta’’$）</h4><p>进入 $\delta’$ 前方求和点的信号有：由 $u_1, u_2$ 分别经过 $B_{61}, B_{62}$：<br>$$\ddot{\delta} &#x3D; B_{61} , u_1 + B_{62} , u_2$$</p>
+<table>
+<thead>
+<tr>
+<th><strong>状态变量 xi​</strong></th>
+<th><strong>物理意义</strong></th>
+<th><strong>建议的最大允许偏差 xi,max​</strong></th>
+<th><strong>计算得到的初始 Qii​</strong></th>
+<th><strong>说明与调校建议</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>$x_1 &#x3D; x$</strong></td>
+<td>位移 $(m)$</td>
+<td>$0.2 \text{ m}$ ($20\text{ cm}$)</td>
+<td>$Q_{11} &#x3D; \frac{1}{0.2^2} &#x3D; \mathbf{25}$</td>
+<td>允许小车前后晃动的物理范围</td>
+</tr>
+<tr>
+<td><strong>$x_2 &#x3D; \dot{x}$</strong></td>
+<td>速度 $(m&#x2F;s)$</td>
+<td>$0.5 \text{ m&#x2F;s}$</td>
+<td>$Q_{22} &#x3D; \frac{1}{0.5^2} &#x3D; \mathbf{4}$</td>
+<td>轮子和电机最大期望运行速度</td>
+</tr>
+<tr>
+<td><strong>$x_3 &#x3D; \theta$</strong></td>
+<td>倾角 $(\text{rad})$</td>
+<td>$5^\circ \approx 0.087 \text{ rad}$</td>
+<td>$Q_{33} &#x3D; \frac{1}{0.087^2} \approx \mathbf{130}$</td>
+<td><strong>最重要的项</strong>！小车倾角越小越稳</td>
+</tr>
+<tr>
+<td><strong>$x_4 &#x3D; \dot{\theta}$</strong></td>
+<td>角速度 $(\text{rad&#x2F;s})$</td>
+<td>$2.0 \text{ rad&#x2F;s} \approx 115^\circ&#x2F;\text{s}$</td>
+<td>$Q_{44} &#x3D; \frac{1}{2.0^2} &#x3D; \mathbf{0.25}$</td>
+<td>抑制倾角快变，防止高频震荡</td>
+</tr>
+<tr>
+<td><strong>$x_5 &#x3D; \psi$</strong></td>
+<td>偏航角 $(\text{rad})$</td>
+<td>$10^\circ \approx 0.174 \text{ rad}$</td>
+<td>$Q_{55} &#x3D; \frac{1}{0.174^2} \approx \mathbf{33}$</td>
+<td>转向控制的基准角度</td>
+</tr>
+<tr>
+<td><strong>$x_6 &#x3D; \dot{\psi}$</strong></td>
+<td>偏航角速度 $(\text{rad&#x2F;s})$</td>
+<td>$3.0 \text{ rad&#x2F;s}$</td>
+<td>$Q_{66} &#x3D; \frac{1}{3.0^2} \approx \mathbf{0.11}$</td>
+<td>抑制转向时的抖动</td>
+</tr>
+</tbody></table>
+
+    
+  </article>
+
+  
+      
+    <div class="nexmoe-post-copyright">
+        <strong>本文作者：</strong>HSQ<br>
+        <strong>本文链接：</strong><a href="https://hsqhere.github.io/2026/07/20/LQR%E7%9A%84simulink%E4%BB%BF%E7%9C%9F%E4%B8%8E%E5%9C%A8%E5%B9%B3%E8%A1%A1%E8%BD%A6%E7%9A%84%E5%BA%94%E7%94%A8%E5%AE%9E%E6%88%98/" title="https:&#x2F;&#x2F;hsqhere.github.io&#x2F;2026&#x2F;07&#x2F;20&#x2F;LQR%E7%9A%84simulink%E4%BB%BF%E7%9C%9F%E4%B8%8E%E5%9C%A8%E5%B9%B3%E8%A1%A1%E8%BD%A6%E7%9A%84%E5%BA%94%E7%94%A8%E5%AE%9E%E6%88%98&#x2F;" target="_blank" rel="noopener">https:&#x2F;&#x2F;hsqhere.github.io&#x2F;2026&#x2F;07&#x2F;20&#x2F;LQR%E7%9A%84simulink%E4%BB%BF%E7%9C%9F%E4%B8%8E%E5%9C%A8%E5%B9%B3%E8%A1%A1%E8%BD%A6%E7%9A%84%E5%BA%94%E7%94%A8%E5%AE%9E%E6%88%98&#x2F;</a><br>
+        
+            # <strong>版权声明：</strong>本文采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/cn/deed.zh" target="_blank">CC BY-NC-SA 3.0 CN</a> 协议进行许可
+
+        
+    </div>
+
+
+  
+  
+  <div class="nexmoe-post-meta nexmoe-rainbow">
+   
+    
+        <a class="nexmoefont icon-tag-fill -none-link" href="/tags/LQR/" rel="tag">LQR</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/simulink/" rel="tag">simulink</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E4%BB%BF%E7%9C%9F/" rel="tag">仿真</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E5%B9%B3%E8%A1%A1%E5%B0%8F%E8%BD%A6/" rel="tag">平衡小车</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a>
+    
+</div>
+  
+  
+    <script async src="/js/copy-codeblock.js?v=1787046489543"></script>
+  
+
+  
+      <div class="nexmoe-post-footer">
+          
+      </div>
+  
+</div></div><div class="nexmoe-post-right">    <div class="nexmoe-fixed">
+        <div class="nexmoe-tool">
+
+            
+
+            
+            
+            <button class="mdui-fab catalog" style="overflow:unset;">
+                <i class="nexmoefont icon-i-catalog"></i>
+                <div class="nexmoe-toc">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%EF%BC%9ALQR-%E7%90%86%E8%AE%BA%E6%B1%82%E8%A7%A3%E7%9A%84%E5%85%B7%E4%BD%93%E6%AD%A5%E9%AA%A4"><span class="toc-number">1.</span> <span class="toc-text">一：LQR 理论求解的具体步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B1%82%E8%A7%A3-%EF%BC%9A"><span class="toc-number">1.1.</span> <span class="toc-text">求解 ：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%EF%BC%9A%E7%89%A9%E7%90%86%E7%8A%B6%E6%80%81%E6%96%B9%E7%A8%8B%E7%9A%84%E6%8E%A8%E5%AF%BC%E4%B8%8E-A-B-%E7%9F%A9%E9%98%B5%E6%8F%90%E5%8F%96"><span class="toc-number">2.</span> <span class="toc-text">二：物理状态方程的推导与 $A, B$ 矩阵提取</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E3%80%81-%E7%8A%B6%E6%80%81%E5%8F%98%E9%87%8F%E4%B8%8E%E6%8E%A7%E5%88%B6%E8%BE%93%E5%85%A5%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="toc-number">2.1.</span> <span class="toc-text">一、 状态变量与控制输入的定义</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E8%BD%A6%E8%BD%AE%E5%8A%A8%E5%8A%9B%E5%AD%A6%E5%88%86%E6%9E%90%EF%BC%88%E8%8E%B7%E5%BE%97%E8%BD%A6%E8%BD%AE%E6%96%B9%E7%A8%8B%EF%BC%89"><span class="toc-number">3.</span> <span class="toc-text">二、车轮动力学分析（获得车轮方程）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E8%BD%A6%E4%BD%93%E6%AD%A3%E5%90%91%E8%BF%90%E5%8A%A8%E5%88%86%E6%9E%90%EF%BC%88%E5%89%8D%E8%BF%9B%E4%B8%8E%E7%9B%B4%E7%AB%8B%EF%BC%89"><span class="toc-number">4.</span> <span class="toc-text">三、车体正向运动分析（前进与直立）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E8%A7%A3%E8%80%A6%EF%BC%9A%E6%B1%82%E5%87%BA-ddot-x-%E5%92%8C-ddot-theta-p"><span class="toc-number">4.1.</span> <span class="toc-text">核心解耦：求出 $\ddot{x}$ 和 $\ddot{\theta}_p$</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E8%BD%A6%E4%BD%93%E8%BD%AC%E5%90%91%E8%BF%90%E5%8A%A8%E5%88%86%E6%9E%90%EF%BC%88%E5%81%8F%E8%88%AA-Yaw%EF%BC%89"><span class="toc-number">5.</span> <span class="toc-text">四、车体转向运动分析（偏航 Yaw）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E8%BE%93%E5%85%A5%E9%87%8F%E8%BD%AC%E6%8D%A2%E4%B8%8E%E6%9E%84%E5%BB%BA%E5%AE%8C%E6%95%B4%E7%9A%84-A%E3%80%81B-%E7%9F%A9%E9%98%B5"><span class="toc-number">6.</span> <span class="toc-text">五、输入量转换与构建完整的 A、B 矩阵</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A9%BA%E9%97%B4%E7%8A%B6%E6%80%81%E6%96%B9%E7%A8%8B"><span class="toc-number">6.1.</span> <span class="toc-text">空间状态方程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#A-%E7%9F%A9%E9%98%B5"><span class="toc-number">6.2.</span> <span class="toc-text">$A$ 矩阵</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#B-%E7%9F%A9%E9%98%B5"><span class="toc-number">6.3.</span> <span class="toc-text">$B$ 矩阵</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B1%E5%90%8C%E7%9A%84%E5%88%86%E6%AF%8D%E5%B8%B8%E6%95%B0-Q-eq"><span class="toc-number">6.4.</span> <span class="toc-text">共同的分母常数 $Q_{eq}$</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%EF%BC%9AMATLAB-%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="toc-number">7.</span> <span class="toc-text">三：MATLAB 代码实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%EF%BC%9ASimulink-%E7%9A%84%E8%BF%9E%E6%8E%A5%E4%B8%8E%E9%85%8D%E7%BD%AE"><span class="toc-number">8.</span> <span class="toc-text">四：Simulink 的连接与配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A8%A1%E5%9D%97%E5%87%86%E5%A4%87%E4%B8%8E%E6%8B%89%E5%8F%96"><span class="toc-number">8.1.</span> <span class="toc-text">1. 模块准备与拉取</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%A8%A1%E5%9D%97%E5%8F%82%E6%95%B0%E9%85%8D%E7%BD%AE"><span class="toc-number">8.2.</span> <span class="toc-text">2. 模块参数配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E4%BF%A1%E5%8F%B7%E8%BF%9E%E7%BA%BF%E9%80%BB%E8%BE%91"><span class="toc-number">8.3.</span> <span class="toc-text">3. 信号连线逻辑</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E3%80%81-%E6%8E%A7%E5%88%B6%E5%BE%8B%E5%85%B3%E7%B3%BB%E5%BC%8F%EF%BC%88LQR-%E5%8F%8D%E9%A6%88%E6%8E%A7%E5%88%B6%E9%87%8F-u-%EF%BC%89"><span class="toc-number">8.4.</span> <span class="toc-text">一、 控制律关系式（LQR 反馈控制量 $u$）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8C%E3%80%81-%E7%8A%B6%E6%80%81%E5%BE%AE%E5%88%86%E5%85%B3%E7%B3%BB%E5%BC%8F%EF%BC%88%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%89%A9%E7%90%86%E7%8A%B6%E6%80%81%E6%96%B9%E7%A8%8B-dot-X-AX-BU-%EF%BC%89"><span class="toc-number">8.5.</span> <span class="toc-text">二、 状态微分关系式（系统的物理状态方程 $\dot{X} &#x3D; AX + BU$）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E7%BA%BF%E5%8A%A0%E9%80%9F%E5%BA%A6%E6%96%B9%E7%A8%8B-ddot-x-%EF%BC%88%E5%8D%B3-x%E2%80%99%E2%80%99-%EF%BC%89"><span class="toc-number">8.5.1.</span> <span class="toc-text">1. 线加速度方程 $\ddot{x}$（即 $x’’$）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E8%A7%92%E5%8A%A0%E9%80%9F%E5%BA%A6%E6%96%B9%E7%A8%8B-ddot-theta-%EF%BC%88%E5%8D%B3-theta%E2%80%99%E2%80%99-%EF%BC%89"><span class="toc-number">8.5.2.</span> <span class="toc-text">2. 角加速度方程 $\ddot{\theta}$（即 $\theta’’$）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E5%81%8F%E8%88%AA%E8%A7%92%E5%8A%A0%E9%80%9F%E5%BA%A6%E6%96%B9%E7%A8%8B-ddot-delta-%EF%BC%88%E5%8D%B3-delta%E2%80%99%E2%80%99-%EF%BC%89"><span class="toc-number">8.5.3.</span> <span class="toc-text">3. 偏航角加速度方程 $\ddot{\delta}$（即 $\delta’’$）</span></a></li></ol></li></ol></li></ol>
+                </div>
+            </button>
+            
+
+            
+
+            <a href="#nexmoe-content" class="backtop toc-link" aria-label="Back To Top" title="top"><button class="mdui-fab mdui-ripple"><i class="nexmoefont icon-caret-top"></i></button></a>
+        </div>
+    </div>
+</div></div><div id="nexmoe-footer"><!--!--></div><div id="nexmoe-search-space"><div class="search-container"><div class="search-header"><div class="search-input-container"><input class="search-input" type="text" placeholder="搜索" onInput="sinput();"></div><a class="search-close" onclick="sclose();">×</a></div><div class="search-body"></div></div></div><div><div id="aplayer" style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;"></div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // --- APlayer 音乐播放器部分 ---
+    const ap = new APlayer({
+      container: document.getElementById('aplayer'),
+      fixed: true,
+      autoplay: false,
+      theme: '#22d9df',
+      loop: 'all',
+      order: 'random',
+      preload: 'auto',
+      volume: 0.2,
+      mutex: true,
+      lrcType: 0,
+      audio: [
+        {
+          name: '那么骄傲',
+          artist: '茜茜',
+          url: '/music/那么骄傲 - 茜茜.mp3', 
+          cover: '/music/cover茜茜.jpg',
+          lrc: '[00:00.00]暂无歌词'
+        }
+      ]
+    });
+
+    // --- Twikoo 评论系统部分 ---
+    if (window.location.pathname.match(/\/\d{4}\/\d{2}\/\d{2}\//) || 
+        document.querySelector('article.post') || 
+        document.body.classList.contains('post-template')) {
+      
+      let talkContainer = document.getElementById('tcomment');
+      if (!talkContainer) {
+        const article = document.querySelector('article') || 
+                        document.querySelector('.nexmoe-post') || 
+                        document.querySelector('.post-content') ||
+                        document.querySelector('main');
+        if (article) {
+          talkContainer = document.createElement('div');
+          talkContainer.id = 'tcomment';
+          article.insertAdjacentElement('afterend', talkContainer);
+        }
+      }
+      
+      if (talkContainer && typeof twikoo !== 'undefined') {
+        twikoo.init({
+          envId: 'https://hsqblog.netlify.app/.netlify/functions/twikoo',
+          el: '#tcomment',
+          path: window.location.pathname,
+          lang: 'zh-CN'
+        });
+      }
+    }
+  });
+
+  // --- 朋友卡片解锁逻辑 ---
+  async function unlock(id, correctHash) {
+    const input = document.getElementById('input-' + id).value;
+    const msgUint8 = new TextEncoder().encode(input);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+    if (hashHex === correctHash) {
+        document.getElementById('lock-' + id).style.display = 'none';
+        const imgDiv = document.getElementById('img-' + id);
+        imgDiv.style.display = 'block';
+        setTimeout(() => imgDiv.style.opacity = "1", 10);
+    } else {
+        const err = document.getElementById('err-' + id);
+        err.style.display = 'block';
+        setTimeout(() => err.style.display = 'none', 2000);
+    }
+  }
+</script>
+</div></body></html>

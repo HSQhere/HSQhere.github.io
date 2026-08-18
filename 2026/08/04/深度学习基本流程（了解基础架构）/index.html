@@ -1,0 +1,923 @@
+<!doctype html>
+<html lang="zh"><head>
+<title>深度学习基本流程（了解基础架构） - HSQ 的个人博客</title>
+<meta charset="UTF-8">
+<meta name="keywords" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+
+<link rel="shortcut icon" href="/hexo_init/images/avatar.jpg" type="image/jpg" />
+<meta name="description" content="参考学习《深度学习入门：基于Python的理论与实现》（鱼书）总结 一、 机器学习全局地图：范式、工具与目标你的笔记第一页用一个极其优雅的矩阵表，把“怎么学（范式）”、“用什么算（算法）”和“做啥任务（目标）”给完全串联了起来： 1. 三大核心学习范式（How to learn） 监督学习（Supervised Learning）：训练数据包含输入 $X$ 和真实标签 $Y$，目标是学习 $X \">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深度学习基本流程（了解基础架构）">
+<meta property="og:url" content="https://hsqhere.github.io/2026/08/04/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%9F%BA%E6%9C%AC%E6%B5%81%E7%A8%8B%EF%BC%88%E4%BA%86%E8%A7%A3%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84%EF%BC%89/index.html">
+<meta property="og:site_name" content="HSQ 的个人博客">
+<meta property="og:description" content="参考学习《深度学习入门：基于Python的理论与实现》（鱼书）总结 一、 机器学习全局地图：范式、工具与目标你的笔记第一页用一个极其优雅的矩阵表，把“怎么学（范式）”、“用什么算（算法）”和“做啥任务（目标）”给完全串联了起来： 1. 三大核心学习范式（How to learn） 监督学习（Supervised Learning）：训练数据包含输入 $X$ 和真实标签 $Y$，目标是学习 $X \">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-08-04T06:56:15.000Z">
+<meta property="article:modified_time" content="2026-08-18T09:35:18.157Z">
+<meta property="article:author" content="HSQ">
+<meta property="article:tag" content="CNN">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="算法">
+<meta property="article:tag" content="阅读">
+<meta name="twitter:card" content="summary">
+
+<link rel="stylesheet" href="/lib/fancybox/fancybox.css">
+<link rel="stylesheet" href="/lib/mdui_043tiny/mdui.css">
+
+
+<link rel="stylesheet" href="/lib/iconfont/iconfont.css?v=1787046489666">
+
+<link rel="stylesheet" href="/css/style.css?v=1787046489666">
+
+
+
+
+    
+        <link rel="stylesheet" href="/custom.css?v=1787046489666">
+    
+
+
+
+<script src="/lib/mdui_043tiny/mdui.js" async></script>
+<script src="/lib/fancybox/fancybox.umd.js" async></script>
+<script src="/lib/lax.min.js" async></script>
+
+
+<script async src="/js/app.js?v=1787046489666"></script>
+
+ 
+
+<!-- highlight.js CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<!-- APlayer 音乐播放器 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+<!-- Twikoo 评论系统 -->
+<script src="https://cdn.jsdelivr.net/npm/twikoo@1.6.39/dist/twikoo.all.min.js"></script>
+<!-- MathJax 数学公式渲染 -->
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true,
+    processEnvironments: true
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<!-- APlayer 音乐播放器 JS -->
+<script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+
+
+<link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+<meta name="generator" content="Hexo 8.1.1"></head><body class="nexmoe mdui-drawer-body-left"><div id="nexmoe-background"><div class="nexmoe-bg" style="background-image: url(/hexo_init/images/background_mainpage.png)"></div><div class="mdui-appbar mdui-shadow-0"><div class="mdui-toolbar"><a class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: &#039;#drawer&#039;, swipe: true}" title="menu"><i class="mdui-icon nexmoefont icon-menu"></i></a><div class="mdui-toolbar-spacer"></div><a class="mdui-btn mdui-btn-icon" href="/" title="HSQ"><img src="/hexo_init/images/avatar.jpg" alt="HSQ"></a></div></div></div><div id="nexmoe-header"><div class="nexmoe-drawer mdui-drawer" id="drawer">
+    <div class="nexmoe-avatar mdui-ripple">
+        <a href="/" title="HSQ">
+            <img src="/hexo_init/images/avatar.jpg" alt="HSQ" alt="HSQ">
+        </a>
+    </div>
+    <div class="nexmoe-count">
+        <div><span>文章</span>37</div>
+        <div><span>标签</span>82</div>
+        <div><span>分类</span>20</div>
+    </div>
+    <div class="nexmoe-list mdui-list" mdui-collapse="{accordion: true}">
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/" title="首页">
+            <i class="mdui-list-item-icon nexmoefont icon-home"></i>
+            <div class="mdui-list-item-content">
+                首页
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/archive.html" title="文章归档">
+            <i class="mdui-list-item-icon nexmoefont icon-container"></i>
+            <div class="mdui-list-item-content">
+                文章归档
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/gallery/" title="图库">
+            <i class="mdui-list-item-icon nexmoefont icon-gallery"></i>
+            <div class="mdui-list-item-content">
+                图库
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/plan/" title="规划">
+            <i class="mdui-list-item-icon nexmoefont icon-chart"></i>
+            <div class="mdui-list-item-content">
+                规划
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/friends/" title="朋友们">
+            <i class="mdui-list-item-icon nexmoefont icon-friends"></i>
+            <div class="mdui-list-item-content">
+                朋友们
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/about/" title="关于">
+            <i class="mdui-list-item-icon nexmoefont icon-info-circle"></i>
+            <div class="mdui-list-item-content">
+                关于
+            </div>
+        </a>
+        
+    </div>
+    
+    
+        
+        <div class="nexmoe-widget-wrap">
+    <div class="nexmoe-widget nexmoe-search">
+        
+            <form id="search_form">
+                <label><input class="st-default-search-input" id="search_value" name="q" type="search" placeholder="搜索" style="
+                    font-size: 15px !important;
+                    height: 56px !important;
+                    background-image: none;
+                "></label>
+            </form>
+         
+    </div>
+</div>
+
+
+	<script async src="/js/search.js?v=1787046489666"></script>
+
+
+
+    
+        
+        <div class="nexmoe-widget-wrap">
+	<div class="nexmoe-widget nexmoe-social">
+		<a
+			class="mdui-ripple"
+			href="https://space.bilibili.com/1382035035?spm_id_from=333.1007.0.0"
+			target="_blank"
+			mdui-tooltip="{content: '哔哩哔哩'}"
+			style="
+				color: rgb(231, 106, 141);
+				background-color: rgba(231, 106, 141, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-bilibili"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://github.com/HSQhere"
+			target="_blank"
+			mdui-tooltip="{content: 'GitHub'}"
+			style="
+				color: rgb(25, 23, 23);
+				background-color: rgba(25, 23, 23, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-github"
+			></i> </a
+		>
+	</div>
+</div>
+
+    
+        
+        <!-- 一言 -->
+<div class="nexmoe-widget-wrap">
+  <h3 class="nexmoe-widget-title">
+    一言
+  </h3>
+  <div class="nexmoe-widget">
+    <ul class="hitokoto-box">
+      <li id="hitokoto_text_parent" class="hitokoto-text" hitokotoCategory="">
+        <a href="#" id="hitokoto_text">
+          
+        </a>
+        <a href="#" id="hitokoto_error_text" style="display: none;">
+          
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  let hitokotoText = document.getElementById('hitokoto_text')
+  let hitokotoErroText = document.getElementById('hitokoto_error_text')
+  let hitokotoCategory = document.getElementById('hitokoto_text_parent').getAttribute('hitokotoCategory')
+  window.addEventListener('load', function () {
+    let url = 'https://v1.hitokoto.cn'
+    if (hitokotoCategory) {
+      url += '?c=' + hitokotoCategory
+    }
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        hitokotoText.innerText = "「 " + data.hitokoto + " 」 from " + data.from
+        hitokotoText.href = 'https://hitokoto.cn/?uuid=' + data.uuid
+      })
+      .catch((reason) => {
+        console.error(11, reason)
+        hitokotoText.style.display = 'none'
+        hitokotoErroText.style.display = 'block'
+      })
+  })
+</script>
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章分类</h3>
+    <div class="nexmoe-widget">
+
+      <ul class="category-list">
+
+        
+
+
+        
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/CLIP/">CLIP</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/LQR/">LQR</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/ROS2/">ROS2</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/Transformer/">Transformer</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/ViT/">ViT</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/人脸算法/">人脸算法</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/仿真/">仿真</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/大模型/">大模型</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/嵌入式/">嵌入式</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/日记/">日记</a>
+          <span class="category-list-count">3</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/机器人/">机器人</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/机器学习/">机器学习</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/机械/">机械</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/树洞/">树洞</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/深度学习/">深度学习</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/电控/">电控</a>
+          <span class="category-list-count">6</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/目标/">目标</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/编程语言/">编程语言</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/计算机/">计算机</a>
+          <span class="category-list-count">8</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/车辆/">车辆</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+      </ul>
+
+    </div>
+  </div>
+
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <div id="randomtagcloud" class="nexmoe-widget tagcloud nexmoe-rainbow">
+      <a href="/tags/ANSYS/" style="font-size: 10px;">ANSYS</a> <a href="/tags/CAD/" style="font-size: 10px;">CAD</a> <a href="/tags/CLIP/" style="font-size: 11.43px;">CLIP</a> <a href="/tags/CNN/" style="font-size: 10px;">CNN</a> <a href="/tags/GPU/" style="font-size: 10px;">GPU</a> <a href="/tags/Hough%E5%9C%86/" style="font-size: 10px;">Hough圆</a> <a href="/tags/LLM/" style="font-size: 10px;">LLM</a> <a href="/tags/LQR/" style="font-size: 10px;">LQR</a> <a href="/tags/Linux/" style="font-size: 11.43px;">Linux</a> <a href="/tags/PID/" style="font-size: 10px;">PID</a> <a href="/tags/ROS2/" style="font-size: 10px;">ROS2</a> <a href="/tags/STAR-CCM/" style="font-size: 10px;">STAR-CCM</a> <a href="/tags/Transformer/" style="font-size: 10px;">Transformer</a> <a href="/tags/ViT/" style="font-size: 10px;">ViT</a> <a href="/tags/cv/" style="font-size: 11.43px;">cv</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/foc/" style="font-size: 11.43px;">foc</a> <a href="/tags/humble/" style="font-size: 10px;">humble</a> <a href="/tags/jetson/" style="font-size: 11.43px;">jetson</a> <a href="/tags/keysking/" style="font-size: 10px;">keysking</a> <a href="/tags/pbc/" style="font-size: 10px;">pbc</a> <a href="/tags/pid/" style="font-size: 10px;">pid</a> <a href="/tags/pnp/" style="font-size: 10px;">pnp</a> <a href="/tags/ros2/" style="font-size: 10px;">ros2</a> <a href="/tags/simulink/" style="font-size: 10px;">simulink</a> <a href="/tags/stm32/" style="font-size: 11.43px;">stm32</a> <a href="/tags/%E4%B8%96%E7%95%8C%E6%A8%A1%E5%9E%8B/" style="font-size: 10px;">世界模型</a> <a href="/tags/%E4%BA%92%E5%8A%A8/" style="font-size: 10px;">互动</a> <a href="/tags/%E4%BA%BA%E8%84%B8%E6%A3%80%E6%B5%8B/" style="font-size: 10px;">人脸检测</a> <a href="/tags/%E4%BA%BA%E8%84%B8%E8%AF%86%E5%88%AB/" style="font-size: 10px;">人脸识别</a> <a href="/tags/%E4%BB%BF%E7%9C%9F/" style="font-size: 14.29px;">仿真</a> <a href="/tags/%E5%85%B7%E8%BA%AB%E6%99%BA%E8%83%BD/" style="font-size: 10px;">具身智能</a> <a href="/tags/%E5%88%B6%E5%9B%BE/" style="font-size: 11.43px;">制图</a> <a href="/tags/%E5%88%B7%E6%9C%BA/" style="font-size: 10px;">刷机</a> <a href="/tags/%E5%8A%A0%E9%80%9F%E5%BA%A6%E8%AE%A1/" style="font-size: 10px;">加速度计</a> <a href="/tags/%E5%8F%8D%E6%80%9D/" style="font-size: 10px;">反思</a> <a href="/tags/%E5%98%89%E7%AB%8B%E5%88%9B/" style="font-size: 10px;">嘉立创</a> <a href="/tags/%E5%A4%9A%E6%A8%A1%E6%80%81/" style="font-size: 14.29px;">多模态</a> <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/" style="font-size: 14.29px;">大模型</a> <a href="/tags/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B/" style="font-size: 10px;">大语言模型</a> <a href="/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/" style="font-size: 11.43px;">嵌入式</a> <a href="/tags/%E5%B9%B3%E8%A1%A1%E5%B0%8F%E8%BD%A6/" style="font-size: 11.43px;">平衡小车</a> <a href="/tags/%E5%BB%BA%E6%A8%A1/" style="font-size: 11.43px;">建模</a> <a href="/tags/%E6%84%9F%E6%83%85/" style="font-size: 11.43px;">感情</a> <a href="/tags/%E6%8A%A5%E9%94%99/" style="font-size: 12.86px;">报错</a> <a href="/tags/%E6%8E%A7%E5%88%B6%E7%AE%97%E6%B3%95/" style="font-size: 14.29px;">控制算法</a> <a href="/tags/%E6%8E%A9%E8%86%9C/" style="font-size: 10px;">掩膜</a> <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" style="font-size: 14.29px;">操作系统</a> <a href="/tags/%E6%95%99%E7%A8%8B/" style="font-size: 10px;">教程</a> <a href="/tags/%E6%97%A0%E5%88%B7%E7%94%B5%E6%9C%BA/" style="font-size: 11.43px;">无刷电机</a> <a href="/tags/%E6%97%A5%E8%AE%B0/" style="font-size: 20px;">日记</a> <a href="/tags/%E6%99%BA%E8%83%BD%E4%BD%93/" style="font-size: 10px;">智能体</a> <a href="/tags/%E6%9B%B4%E6%96%B0/" style="font-size: 10px;">更新</a> <a href="/tags/%E6%9C%BA%E5%99%A8%E4%BA%BA/" style="font-size: 12.86px;">机器人</a> <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" style="font-size: 10px;">机器学习</a> <a href="/tags/%E6%9C%BA%E6%A2%B0/" style="font-size: 12.86px;">机械</a> <a href="/tags/%E6%A0%91%E6%B4%9E/" style="font-size: 10px;">树洞</a> <a href="/tags/%E6%A0%91%E8%8E%93%E6%B4%BE/" style="font-size: 10px;">树莓派</a> <a href="/tags/%E6%B0%B4%E5%86%B7/" style="font-size: 10px;">水冷</a> <a href="/tags/%E6%B5%81%E5%9C%BA/" style="font-size: 10px;">流场</a> <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" style="font-size: 10px;">深度学习</a> <a href="/tags/%E7%94%9F%E6%B4%BB/" style="font-size: 10px;">生活</a> <a href="/tags/%E7%94%B5%E6%8E%A7/" style="font-size: 17.14px;">电控</a> <a href="/tags/%E7%9B%AE%E6%A0%87/" style="font-size: 11.43px;">目标</a> <a href="/tags/%E7%A9%BA%E6%B0%94%E5%8A%A8%E5%8A%9B%E5%AD%A6/" style="font-size: 10px;">空气动力学</a> <a href="/tags/%E7%AE%80%E5%8F%B2/" style="font-size: 10px;">简史</a> <a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 18.57px;">算法</a> <a href="/tags/%E7%BC%96%E7%A8%8B/" style="font-size: 10px;">编程</a> <a href="/tags/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/" style="font-size: 10px;">编程语言</a> <a href="/tags/%E8%A7%84%E5%88%92/" style="font-size: 10px;">规划</a> <a href="/tags/%E8%A7%86%E8%A7%89/" style="font-size: 15.71px;">视觉</a> <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/" style="font-size: 11.43px;">计算机</a> <a href="/tags/%E8%AE%BA%E6%96%87/" style="font-size: 10px;">论文</a> <a href="/tags/%E8%AF%84%E8%AE%BA%E5%8C%BA/" style="font-size: 10px;">评论区</a> <a href="/tags/%E8%AF%BB%E4%B9%A6/" style="font-size: 10px;">读书</a> <a href="/tags/%E8%BD%A6%E8%BE%86/" style="font-size: 11.43px;">车辆</a> <a href="/tags/%E9%97%AE%E9%A2%98/" style="font-size: 10px;">问题</a> <a href="/tags/%E9%98%85%E8%AF%BB/" style="font-size: 11.43px;">阅读</a> <a href="/tags/%E9%99%80%E8%9E%BA%E4%BB%AA/" style="font-size: 10px;">陀螺仪</a> <a href="/tags/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1/" style="font-size: 10px;">面向对象</a> <a href="/tags/%E9%9D%A2%E5%90%91%E8%BF%87%E7%A8%8B/" style="font-size: 10px;">面向过程</a> <a href="/tags/%E9%A6%99%E6%A9%99%E6%B4%BE/" style="font-size: 10px;">香橙派</a>
+    </div>
+    
+      <script>
+        var maxTagcloud = parseInt(17);
+        var tags_length = parseInt(82);
+        var tags_arr = [];
+        for(var i = 0; i < tags_length; i++){
+          tags_arr.push(i);
+        }
+        tags_arr.sort(function (l, r) {
+          return Math.random() > 0.5 ? -1 : 1;
+        });
+        tags_arr = tags_arr.slice(0, maxTagcloud < tags_length ? tags_length - maxTagcloud : 0);
+        for(var tag_i = 0; tag_i < tags_arr.length; tag_i++){
+          document.getElementById("randomtagcloud").children[tags_arr[tag_i]].style.display = 'none';
+        }
+      </script>
+    
+  </div>
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章归档</h3>
+    <div class="nexmoe-widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/">2026</a><span class="archive-list-count">37</span></li></ul>
+    </div>
+  </div>
+
+
+
+    
+        
+   
+    <div class="nexmoe-copyright">
+        &copy; 2026 HSQ
+        Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+        & <a href="https://github.com/theme-nexmoe/hexo-theme-nexmoe" target="_blank">Nexmoe</a>
+        
+    </div>
+</div><!-- .nexmoe-drawer --></div><div id="nexmoe-content"><div class="nexmoe-primary"><div class="nexmoe-post">
+  <article>
+    
+        <div class="nexmoe-post-cover absolute" style="padding-top: NaN%;"> 
+            <img src="/images/tech/program/深度学习入门-斋藤康毅.jpg" alt="深度学习基本流程（了解基础架构）" loading="lazy">
+            <h1>深度学习基本流程（了解基础架构）</h1>
+        </div>
+    
+    
+    <div class="nexmoe-post-meta">
+    <div class="nexmoe-rainbow">
+        <a class="nexmoefont icon-calendar-fill">2026年08月04日</a>
+        
+            <a class="nexmoefont icon-appstore-fill -link" href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">深度学习</a>
+        
+        
+    <a><i class="nexmoefont icon-areachart"></i>约3.2k字</a>
+    <a><i class="nexmoefont icon-time-circle-fill"></i>预计需要12分钟</a>
+
+    </div>
+    
+    
+    
+    
+    
+</div>
+
+    <p><em>参考学习《深度学习入门：基于Python的理论与实现》（鱼书）总结</em></p>
+<h2 id="一、-机器学习全局地图：范式、工具与目标"><a href="#一、-机器学习全局地图：范式、工具与目标" class="headerlink" title="一、 机器学习全局地图：范式、工具与目标"></a>一、 机器学习全局地图：范式、工具与目标</h2><p>你的笔记第一页用一个极其优雅的矩阵表，把“怎么学（范式）”、“用什么算（算法）”和“做啥任务（目标）”给完全串联了起来：</p>
+<h3 id="1-三大核心学习范式（How-to-learn）"><a href="#1-三大核心学习范式（How-to-learn）" class="headerlink" title="1. 三大核心学习范式（How to learn）"></a>1. 三大核心学习范式（How to learn）</h3><ul>
+<li><p><strong>监督学习（Supervised Learning）</strong>：训练数据<strong>包含输入 $X$ 和真实标签 $Y$</strong>，目标是学习 $X \to Y$ 的映射。</p>
+</li>
+<li><p><strong>无监督学习（Unsupervised Learning）</strong>：训练数据<strong>只有输入 $X$，无标签</strong>，目标是发现数据的潜在结构、规律或聚类模式。</p>
+</li>
+<li><p><strong>强化学习（Reinforcement Learning）</strong>：智能体（Agent）在环境（Environment）中通过“试错”与环境交互，基于<strong>奖励（Reward）&#x2F;惩罚</strong>信号来学习最优决策策略。</p>
+</li>
+</ul>
+<h3 id="2-任务目标与典型算法对照表（笔记内容精炼）"><a href="#2-任务目标与典型算法对照表（笔记内容精炼）" class="headerlink" title="2. 任务目标与典型算法对照表（笔记内容精炼）"></a>2. 任务目标与典型算法对照表（笔记内容精炼）</h3><p>根据你的笔记，不同算法在分类、回归与聚类任务中的能力分布如下：</p>
+<table>
+<thead>
+<tr>
+<th><strong>算法模型 PDF</strong></th>
+<th><strong>回归（Regression） PDF</strong></th>
+<th><strong>分类（Classification） PDF</strong></th>
+<th><strong>聚类（Clustering） PDF</strong></th>
+<th><strong>核心机制 &#x2F; 补充拓展</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>线性模型 (Linear)</strong></td>
+<td><strong>✓</strong></td>
+<td><strong>✓</strong></td>
+<td><strong>✗</strong></td>
+<td>线性回归 &#x2F; 逻辑回归（Sigmoid 映射）</td>
+</tr>
+<tr>
+<td><strong>支持向量机 (SVM)</strong></td>
+<td><strong>✓</strong></td>
+<td><strong>✓</strong></td>
+<td><strong>✗</strong></td>
+<td>寻找“最大间隔超平面”，可结合核函数（Kernel）处理非线性数据</td>
+</tr>
+<tr>
+<td><strong>决策树 (Decision Tree)</strong></td>
+<td><strong>✓</strong></td>
+<td><strong>✓</strong></td>
+<td><strong>✗</strong></td>
+<td>基于信息熵&#x2F;基尼系数分割特征树，是随机森林和 XGBoost 的基石</td>
+</tr>
+<tr>
+<td><strong>神经网络 (NN&#x2F;CNN&#x2F;GAN)</strong></td>
+<td><strong>✓</strong></td>
+<td><strong>✓</strong></td>
+<td><strong>✗</strong></td>
+<td>万能近似器，多层非线性映射；可拟合极度复杂的函数</td>
+</tr>
+<tr>
+<td><strong>K-Means</strong></td>
+<td><strong>✗</strong></td>
+<td><strong>✗</strong></td>
+<td><strong>✓</strong></td>
+<td>基于欧氏距离的经典迭代聚类算法</td>
+</tr>
+</tbody></table>
+<h2 id="二、-从感知机（Perceptron）到现代神经元"><a href="#二、-从感知机（Perceptron）到现代神经元" class="headerlink" title="二、 从感知机（Perceptron）到现代神经元"></a>二、 从感知机（Perceptron）到现代神经元</h2><p>你的笔记第二页清晰地呈现了神经网络的进化起点：</p>
+<h3 id="1-单层感知机-vs-现代神经元"><a href="#1-单层感知机-vs-现代神经元" class="headerlink" title="1. 单层感知机 vs 现代神经元"></a>1. 单层感知机 vs 现代神经元</h3><table>
+<thead>
+<tr>
+<th><strong>特性 PDF</strong></th>
+<th><strong>单层感知机 (Perceptron) PDF</strong></th>
+<th><strong>现代神经元 (Neuron) PDF</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>层数</strong></td>
+<td>单层</td>
+<td>多层（深层深度学习）</td>
+</tr>
+<tr>
+<td><strong>激活函数</strong></td>
+<td>阶跃函数（非 0 即 1，不连续）</td>
+<td><strong>Sigmoid &#x2F; ReLU</strong>（平滑、连续、可微）</td>
+</tr>
+<tr>
+<td><strong>解决问题</strong></td>
+<td>只能解决<strong>线性可分</strong>问题（画直线）</td>
+<td>能拟合极复杂的<strong>非线性</strong>空间（画曲线）</td>
+</tr>
+<tr>
+<td><strong>学习目标</strong></td>
+<td>只要全部分对即可</td>
+<td>追求<strong>误差&#x2F;损失函数最小化</strong></td>
+</tr>
+</tbody></table>
+<h3 id="2-数学表达与逻辑门（与门-或门-与非门-异或门）"><a href="#2-数学表达与逻辑门（与门-或门-与非门-异或门）" class="headerlink" title="2. 数学表达与逻辑门（与门&#x2F;或门&#x2F;与非门&#x2F;异或门）"></a>2. 数学表达与逻辑门（与门&#x2F;或门&#x2F;与非门&#x2F;异或门）</h3><ul>
+<li><p><strong>阈值表达</strong>：$y &#x3D; \begin{cases} 0 &amp; (w_1 x_1 + w_2 x_2 \le \Theta) \ 1 &amp; (w_1 x_1 + w_2 x_2 &gt; \Theta) \end{cases}$</p>
+</li>
+<li><p><strong>引入偏置（Bias, $b$）</strong>：将阈值 $\Theta$ 移到等式左边，记为 $b &#x3D; -\Theta$：</p>
+<p>  $$y &#x3D; \begin{cases} 0 &amp; (w_1 x_1 + w_2 x_2 + b \le 0) \ 1 &amp; (w_1 x_1 + w_2 x_2 + b &gt; 0) \end{cases}$$</p>
+</li>
+</ul>
+<blockquote>
+<p>💡 <strong>AI 历史上的关键转折点（异或问题 XOR）</strong>：</p>
+<ul>
+<li><p><strong>单层感知机局限</strong>：只能用一条直线分割空间，因此可以轻松实现 AND（与）、OR（或）、NAND（与非）逻辑门，但<strong>绝对无法用一条直线分隔 XOR（异或）</strong>。</p>
+</li>
+<li><p><strong>多层感知机（MLP）的突破</strong>：通过组合 NAND 和 OR，再接一个 AND（即<strong>多层感知机&#x2F;三层感知机</strong>），成功用多条直线交叠解决了 XOR 异或问题！</p>
+</li>
+</ul>
+</blockquote>
+<h2 id="三、-神经网络的核心：激活函数（Activation-Functions）"><a href="#三、-神经网络的核心：激活函数（Activation-Functions）" class="headerlink" title="三、 神经网络的核心：激活函数（Activation Functions）"></a>三、 神经网络的核心：激活函数（Activation Functions）</h2><p>笔记中详细梳理了三种最基础也最重要的激活函数及其优缺点：</p>
+<h3 id="1-阶跃函数（Step-Function）"><a href="#1-阶跃函数（Step-Function）" class="headerlink" title="1. 阶跃函数（Step Function）"></a>1. 阶跃函数（Step Function）</h3><ul>
+<li><p><strong>公式</strong>：$h(x) &#x3D; \begin{cases} 0 &amp; (x \le 0) \ 1 &amp; (x &gt; 0) \end{cases}$</p>
+</li>
+<li><p><strong>致命缺点</strong>：导数处处为 0（在 0 点不可导），<strong>无法进行反向传播梯度计算</strong>。</p>
+</li>
+</ul>
+<h3 id="2-Sigmoid-函数"><a href="#2-Sigmoid-函数" class="headerlink" title="2. Sigmoid 函数"></a>2. Sigmoid 函数</h3><ul>
+<li><p><strong>公式</strong>：$h(x) &#x3D; \frac{1}{1 + e^{-x}}$</p>
+</li>
+<li><p><strong>笔记中总结的 4 大特性</strong>：</p>
+<ol>
+<li><p><strong>可微性与梯度计算</strong>：光滑、处处可微，能够平滑传播梯度，满足反向传播链式法则。</p>
+</li>
+<li><p><strong>避免震荡</strong>：平滑的梯度变化使权重更新平稳，防止训练剧烈波动。</p>
+</li>
+<li><p><strong>输出连续性与概率归一化</strong>：输出有界（$0 \sim 1$），天生适合作为<strong>二分类任务</strong>的概率预测。</p>
+</li>
+<li><p><strong>致命缺陷（梯度消失）</strong>：当 $\vert{}x\vert{}$ 很大时，导数趋近于 0（饱和区）。在深层网络中反向传播时，多个小于 1 的导数连乘会导致前层<strong>梯度消失（Vanishing Gradient）</strong>，因此现代深层网络中很少用在中间隐藏层。</p>
+</li>
+</ol>
+</li>
+</ul>
+<h3 id="3-ReLU-函数（修正线性单元）"><a href="#3-ReLU-函数（修正线性单元）" class="headerlink" title="3. ReLU 函数（修正线性单元）"></a>3. ReLU 函数（修正线性单元）</h3><ul>
+<li><p><strong>公式</strong>：$h(x) &#x3D; \begin{cases} x &amp; (x \ge 0) \ 0 &amp; (x &lt; 0) \end{cases}$</p>
+</li>
+<li><p><strong>优点</strong>：计算极快；在 $x &gt; 0$ 时导数恒为 1，<strong>完美解决了正半轴的梯度消失问题</strong>，是现代深度学习隐藏层的标准配置。</p>
+</li>
+</ul>
+<h2 id="四、-输出层激活函数与代码实现"><a href="#四、-输出层激活函数与代码实现" class="headerlink" title="四、 输出层激活函数与代码实现"></a>四、 输出层激活函数与代码实现</h2><p>你的笔记第三页展示了网络层的组合策略与代码：</p>
+<h3 id="1-任务类型与输出层激活函数的选择"><a href="#1-任务类型与输出层激活函数的选择" class="headerlink" title="1. 任务类型与输出层激活函数的选择"></a>1. 任务类型与输出层激活函数的选择</h3><ul>
+<li><p><strong>中间隐藏层</strong>：统一使用 <strong>ReLU</strong> 或 Sigmoid 激活。</p>
+</li>
+<li><p><strong>输出层选择</strong>：</p>
+<ul>
+<li><p><strong>回归问题</strong>：使用<strong>恒等函数（Identity Function）</strong>，直接输出连续实数。</p>
+</li>
+<li><p><strong>二分类问题</strong>：使用 <strong>Sigmoid 函数</strong>，输出单一类别概率 $p \in (0, 1)$。</p>
+</li>
+<li><p><strong>多分类问题</strong>：使用 <strong>Softmax 函数</strong>，输出概率和为 1 的概率分布向量。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-Softmax-函数的防溢出改进（防-Overflow）"><a href="#2-Softmax-函数的防溢出改进（防-Overflow）" class="headerlink" title="2. Softmax 函数的防溢出改进（防 Overflow）"></a>2. Softmax 函数的防溢出改进（防 Overflow）</h3><ul>
+<li><p><strong>标准公式</strong>：$y_k &#x3D; \frac{\exp(a_k)}{\sum_{i&#x3D;1}^n \exp(a_i)}$</p>
+</li>
+<li><p><strong>数值溢出问题</strong>：当输入 $a_k$ 很大时（如 $e^{1000}$），计算 $\exp$ 会导致计算机内存溢出（返回 <code>inf</code> 或 <code>nan</code>）。</p>
+</li>
+<li><p><strong>代码改进原理</strong>：分子分母同乘常数 $C’ &#x3D; \exp(-C)$（其中 $C &#x3D; \max(a)$）：</p>
+<p>  $$y_k &#x3D; \frac{\exp(a_k - C)}{\sum_{i&#x3D;1}^n \exp(a_i - C)}$$</p>
+</li>
+<li><p><strong>Python 实现代码（对应笔记）</strong>：</p>
+<p>  Python</p>
+  <figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs livecodeserver">import numpy <span class="hljs-keyword">as</span> np<br><br><br>def softmax(<span class="hljs-keyword">a</span>):<br>  c = np.<span class="hljs-built_in">max</span>(<span class="hljs-keyword">a</span>)  <span class="hljs-comment"># 找到输入中的最大值</span><br>  exp_a = np.<span class="hljs-built_in">exp</span>(<span class="hljs-keyword">a</span> - c)  <span class="hljs-comment"># 减去最大值后求 exp，防止溢出[cite: 1]</span><br>  sum_exp_a = np.<span class="hljs-built_in">sum</span>(exp_a)<br>  y = exp_a / sum_exp_a<br>  <span class="hljs-literal">return</span> y<br></code></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="五、-深度学习训练全流程（The-Loop-Pipeline）"><a href="#五、-深度学习训练全流程（The-Loop-Pipeline）" class="headerlink" title="五、 深度学习训练全流程（The Loop &amp; Pipeline）"></a>五、 深度学习训练全流程（The Loop &amp; Pipeline）</h2><table>
+<thead>
+<tr>
+<th><strong>阶段</strong></th>
+<th><strong>核心步骤</strong></th>
+<th><strong>关键操作与数学含义</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>一、数据准备</strong></td>
+<td><strong>1. 数据预处理</strong></td>
+<td>数据清洗、归一化 &#x2F; 标准化</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>2. 数据集拆分</strong></td>
+<td>划分为 Train 训练集与 Val 验证集</td>
+</tr>
+<tr>
+<td><strong>二、训练循环 (The Loop)</strong></td>
+<td><strong>1. Forward Pass</strong></td>
+<td>输入 $X \to$ 矩阵乘法 + 激活函数 $\to$ 得到预测值 $y_{\text{pred}}$</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>2. Compute Loss</strong></td>
+<td>计算预测值与真实值的误差 $L(y_{\text{true}}, y_{\text{pred}})$</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>3. Backward Pass</strong></td>
+<td>链式法则求导，计算参数梯度 $\frac{\partial L}{\partial W}$</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>4. Update Weights</strong></td>
+<td>优化器更新参数：$W \leftarrow W - \eta \cdot \text{Grad}$</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>5. Iteration</strong></td>
+<td>切换至下一个 Batch &#x2F; Epoch，重复训练</td>
+</tr>
+<tr>
+<td><strong>三、模型评估</strong></td>
+<td><strong>评估与验证</strong></td>
+<td>在 Val 验证集上测试泛化性能，检查是否过拟合</td>
+</tr>
+</tbody></table>
+<h3 id="1-常用损失函数（Loss-Functions）"><a href="#1-常用损失函数（Loss-Functions）" class="headerlink" title="1. 常用损失函数（Loss Functions）"></a>1. 常用损失函数（Loss Functions）</h3><ul>
+<li><strong>回归任务（均方误差 MSE）</strong>：$\text{MSE} &#x3D; \frac{1}{n}\sum (y_{\text{true}} - y_{\text{pred}})^2$</li>
+<li><strong>分类任务（交叉熵损失 Cross-Entropy Loss）</strong>：$\text{L} &#x3D; -\sum y_{\text{true}} \log(y_{\text{pred}})$</li>
+</ul>
+<h3 id="2-常用优化器迭代进化（Optimizers）"><a href="#2-常用优化器迭代进化（Optimizers）" class="headerlink" title="2. 常用优化器迭代进化（Optimizers）"></a>2. 常用优化器迭代进化（Optimizers）</h3><ul>
+<li><strong>SGD（随机梯度下降）</strong>：$W \leftarrow W - \eta \frac{\partial L}{\partial W}$（易陷入局部最优或鞍点）。 </li>
+<li><strong>Momentum（动量法）</strong>：引入惯性，加速沿梯度方向的更新，减少震荡。 </li>
+<li><strong>Adam（自适应矩估计）</strong>：结合了 <strong>Momentum（一阶动量）</strong> 和 <strong>RMSProp（二阶动量）</strong>，自适应调整每个参数的学习率，是目前深度学习中最主流的默认优化器。</li>
+</ul>
+<h2 id="六：反向传播与计算图（Computational-Graph）"><a href="#六：反向传播与计算图（Computational-Graph）" class="headerlink" title="六：反向传播与计算图（Computational Graph）"></a>六：反向传播与计算图（Computational Graph）</h2><p>反向传播（Backpropagation）的本质，就是利用<strong>计算图</strong>和<strong>微积分的链式法则（Chain Rule）</strong>，以极高的效率计算损失函数对模型中每一个权重参数 W 的梯度 $\frac{\partial L}{\partial W}$。</p>
+<h3 id="1-计算图的核心原理：正向-vs-反向"><a href="#1-计算图的核心原理：正向-vs-反向" class="headerlink" title="1. 计算图的核心原理：正向 vs 反向"></a>1. 计算图的核心原理：正向 vs 反向</h3><p>计算图将复杂的数学公式拆解为节点（算子，如 +, ×）和边（数据向量）：</p>
+<ul>
+<li><p><strong>正向传播（Forward Pass）</strong>：从左往右计算，算 also 预测值和最终 Loss。</p>
+<p>  PDF</p>
+</li>
+<li><p><strong>反向传播（Backward Pass）</strong>：从右往左传递，利用链式法则计算局部偏导数，并与上游传过来的梯度<strong>相乘</strong>。</p>
+</li>
+</ul>
+<p>Plaintext</p>
+<figure class="highlight gml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs gml">正向： 输入 <span class="hljs-variable language_">x</span>, <span class="hljs-variable language_">y</span> ──► [ 节点 (如乘法) ] ──► 输出 z = <span class="hljs-variable language_">x</span> * <span class="hljs-variable language_">y</span><br>                                             │<br>反向： 局部梯度 ∂z/∂<span class="hljs-variable language_">x</span> = <span class="hljs-variable language_">y</span> ◄── [ 节点 ] ◄──────┴── 上游梯度 (如 ∂L/∂z)<br>       最终梯度 ∂L/∂<span class="hljs-variable language_">x</span> = (∂L/∂z) * <span class="hljs-variable language_">y</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="2-两个最基础算子的反向传播规则"><a href="#2-两个最基础算子的反向传播规则" class="headerlink" title="2. 两个最基础算子的反向传播规则"></a>2. 两个最基础算子的反向传播规则</h3><p>理解这两个基础节点的导数传递规律，就能推导整个神经网络：</p>
+<table>
+<thead>
+<tr>
+<th><strong>节点类型</strong></th>
+<th><strong>正向计算</strong></th>
+<th><strong>反向传播计算（设上游梯度为 ∂z∂L​）</strong></th>
+<th><strong>核心物理含义</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>加法节点 (+)</strong></td>
+<td>$z &#x3D; x + y$</td>
+<td>$\frac{\partial L}{\partial x} &#x3D; \frac{\partial L}{\partial z} \times 1$</td>
+<td><strong>梯度原封不动照搬传递</strong>（相当于把上游信号直接分流发给每一个输入端）</td>
+</tr>
+<tr>
+<td><strong>乘法节点 ($\times$)</strong></td>
+<td>$z &#x3D; x \times y$</td>
+<td>$\frac{\partial L}{\partial x} &#x3D; \frac{\partial L}{\partial z} \times y$<br><br>  <br><br>$\frac{\partial L}{\partial y} &#x3D; \frac{\partial L}{\partial z} \times x$</td>
+<td><strong>梯度翻转相乘</strong>（把上游梯度乘以“另一个输入端的值”）</td>
+</tr>
+</tbody></table>
+<h3 id="3-矩阵乘法（Affine-层）的反向传播"><a href="#3-矩阵乘法（Affine-层）的反向传播" class="headerlink" title="3. 矩阵乘法（Affine 层）的反向传播"></a>3. 矩阵乘法（Affine 层）的反向传播</h3><p>在神经网络中，数据是以矩阵&#x2F;张量形式流动的：$\mathbf{Y} &#x3D; \mathbf{X} \cdot \mathbf{W} + \mathbf{B}$。</p>
+<ul>
+<li><p><strong>梯度推导公式</strong>（注意矩阵乘法的维度匹配与转置）：</p>
+<p>  $$\frac{\partial L}{\partial \mathbf{X}} &#x3D; \frac{\partial L}{\partial \mathbf{Y}} \cdot \mathbf{W}^T$$</p>
+<p>  $$\frac{\partial L}{\partial \mathbf{W}} &#x3D; \mathbf{X}^T \cdot \frac{\partial L}{\partial \mathbf{Y}}$$</p>
+<p>  $$\frac{\partial L}{\partial \mathbf{B}} &#x3D; \sum_{\text{batch}} \frac{\partial L}{\partial \mathbf{Y}}$$</p>
+</li>
+</ul>
+<blockquote>
+<p>💡 <strong>为什么反向传播比直接求导快？</strong> 如果用传统数值微分（如给每一个 w 加 0.0001 算变动），如果有 100 万个参数，就需要跑 100 万次前向传播！而反向传播只需要<strong>一次正向 + 一次反向</strong>，就能瞬间一次性算出所有 100 万个参数的梯度。</p>
+</blockquote>
+<h2 id="模块五：卷积神经网络（CNN）空间特征提取"><a href="#模块五：卷积神经网络（CNN）空间特征提取" class="headerlink" title="模块五：卷积神经网络（CNN）空间特征提取"></a>模块五：卷积神经网络（CNN）空间特征提取</h2><p>传统全连接网络（Affine&#x2F;FFN）处理图像时有两个致命缺点：<strong>参数量爆炸</strong> 且 <strong>破坏了图像的二维空间结构信息</strong>。为了解决这个问题，CNN 引入了卷积核（Filter&#x2F;Kernel）。</p>
+<h3 id="1-CNN-的三大核心组件"><a href="#1-CNN-的三大核心组件" class="headerlink" title="1. CNN 的三大核心组件"></a>1. CNN 的三大核心组件</h3><p>一个标准的 CNN 架构主要由以下三种层交替堆叠而成：</p>
+<h4 id="①-卷积层（Convolutional-Layer）：提取空间特征"><a href="#①-卷积层（Convolutional-Layer）：提取空间特征" class="headerlink" title="① 卷积层（Convolutional Layer）：提取空间特征"></a>① 卷积层（Convolutional Layer）：提取空间特征</h4><ul>
+<li><p><strong>工作方式</strong>：用一个固定大小的卷积核（Kernel）在输入图像上做滑动窗口内积计算（局部感受野）。</p>
+</li>
+<li><p><strong>三大核心超参数</strong>：</p>
+<ul>
+<li><p><strong>卷积核大小（Kernel Size）</strong>：如 $3 \times 3$ 或 $5 \times 5$。</p>
+</li>
+<li><p><strong>步长（Stride）</strong>：卷积核每次移动的像素跨度（如 Stride&#x3D;1 或 2）。</p>
+</li>
+<li><p><strong>填充（Padding）</strong>：在图像外围补一圈 0，用于防止图像边缘边缘信息丢失，并控制输出大小。</p>
+</li>
+</ul>
+</li>
+<li><p><strong>输出特征图（Feature Map）尺寸计算公式</strong>（必须熟记）：</p>
+<p>  假设输入尺寸为 $H \times W$，Padding 为 $P$，Stride 为 $S$，Kernel 尺寸为 $K$：</p>
+<p>  $$H_{\text{out}} &#x3D; \frac{H + 2P - K}{S} + 1$$</p>
+<p>  $$W_{\text{out}} &#x3D; \frac{W + 2P - K}{S} + 1$$</p>
+</li>
+</ul>
+<h4 id="②-激活层（ReLU-Layer）：注入非线性"><a href="#②-激活层（ReLU-Layer）：注入非线性" class="headerlink" title="② 激活层（ReLU Layer）：注入非线性"></a>② 激活层（ReLU Layer）：注入非线性</h4><ul>
+<li>在卷积计算之后紧跟非线性激活（通常用 ReLU），保留空间特征的同时赋予网络拟合复杂曲面的能力。</li>
+</ul>
+<h4 id="③-池化层（Pooling-Layer）：降维与抗平移不变性"><a href="#③-池化层（Pooling-Layer）：降维与抗平移不变性" class="headerlink" title="③ 池化层（Pooling Layer）：降维与抗平移不变性"></a>③ 池化层（Pooling Layer）：降维与抗平移不变性</h4><ul>
+<li><p><strong>干了什么</strong>：在局部区域内做下采样，把特征图变小（例如将 2×2 区域变成 1×1）。</p>
+</li>
+<li><p><strong>两大主流池化</strong>：</p>
+<ul>
+<li><p><strong>最大池化（Max Pooling）</strong>：取区域内最大值，提取最显著的特征（最常用）。</p>
+</li>
+<li><p><strong>平均池化（Average Pooling）</strong>：取区域内平均值，平滑特征。</p>
+</li>
+</ul>
+</li>
+<li><p><strong>特点</strong>：池化层<strong>没有需要学习的权重参数</strong>，通道数（Channel）保持不变，且对微小的平移&#x2F;变形具有很强的鲁棒性。</p>
+</li>
+</ul>
+<h3 id="2-CNN-的特征提取分层演进逻辑"><a href="#2-CNN-的特征提取分层演进逻辑" class="headerlink" title="2. CNN 的特征提取分层演进逻辑"></a>2. CNN 的特征提取分层演进逻辑</h3><p>CNN 之所以能在计算机视觉（CV）领域大放异彩，是因为它的多层叠加天然符合<strong>人类视觉系统的分级认知规律</strong>：</p>
+<p>Plaintext</p>
+<figure class="highlight prolog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs prolog">[ 原始图像输入 ]<br>       │<br>       ▼<br>[ 浅层卷积层 ] ──► 提取低级局部细节特征（边缘、线条、颜色斑块、角点）<br>       │<br>       ▼<br>[ 中层卷积层 ] ──► 将低级特征组合（纹理、局部轮廓、形状、眼睛/轮胎等局部器官）<br>       │<br>       ▼<br>[ 深层卷积层 ] ──► 抽象出高级语义特征（完整的人脸、汽车、猫/狗整体特征）<br>       │<br>       ▼<br>[ 全连接/<span class="hljs-symbol">Softmax</span> ] ──► 输出分类概率（例如：<span class="hljs-number">98</span><span class="hljs-comment">% 概率是猫）</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="知识体系全景收官地图"><a href="#知识体系全景收官地图" class="headerlink" title="知识体系全景收官地图"></a>知识体系全景收官地图</h2><p>将你之前整理的手写笔记 与本次补充的内容衔接起来，就构成了完整的基础深度学习栈：</p>
+<p>PDF</p>
+<ol>
+<li><p><strong>基础思想</strong>：感知机 → 激活函数（Sigmoid&#x2F;ReLU） → 多层感知机（解决非线性与异或问题）。</p>
+</li>
+<li><p><strong>训练框架</strong>：数据预处理 → 前向传播 → Loss 计算 → 反向传播（计算图与链式法则） → 优化器更新（SGD&#x2F;Momentum&#x2F;Adam）。</p>
+</li>
+<li><p><strong>架构分化</strong>：</p>
+<ul>
+<li><p><strong>处理一维表格&#x2F;向量数据</strong> → 全连接网络（MLP&#x2F;FFN）。</p>
+</li>
+<li><p><strong>处理二维&#x2F;三维网格数据（图像&#x2F;视频）</strong> → 卷积神经网络（CNN，利用局部感受野与权重共享）。</p>
+</li>
+<li><p><strong>处理序列数据&#x2F;文本</strong> → RNN&#x2F;Attention → <strong>Transformer</strong>。</p>
+</li>
+</ul>
+</li>
+</ol>
+
+    
+  </article>
+
+  
+      
+    <div class="nexmoe-post-copyright">
+        <strong>本文作者：</strong>HSQ<br>
+        <strong>本文链接：</strong><a href="https://hsqhere.github.io/2026/08/04/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%9F%BA%E6%9C%AC%E6%B5%81%E7%A8%8B%EF%BC%88%E4%BA%86%E8%A7%A3%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84%EF%BC%89/" title="https:&#x2F;&#x2F;hsqhere.github.io&#x2F;2026&#x2F;08&#x2F;04&#x2F;%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%9F%BA%E6%9C%AC%E6%B5%81%E7%A8%8B%EF%BC%88%E4%BA%86%E8%A7%A3%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84%EF%BC%89&#x2F;" target="_blank" rel="noopener">https:&#x2F;&#x2F;hsqhere.github.io&#x2F;2026&#x2F;08&#x2F;04&#x2F;%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%9F%BA%E6%9C%AC%E6%B5%81%E7%A8%8B%EF%BC%88%E4%BA%86%E8%A7%A3%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84%EF%BC%89&#x2F;</a><br>
+        
+            # <strong>版权声明：</strong>本文采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/cn/deed.zh" target="_blank">CC BY-NC-SA 3.0 CN</a> 协议进行许可
+
+        
+    </div>
+
+
+  
+  
+  <div class="nexmoe-post-meta nexmoe-rainbow">
+   
+    
+        <a class="nexmoefont icon-tag-fill -none-link" href="/tags/CNN/" rel="tag">CNN</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E9%98%85%E8%AF%BB/" rel="tag">阅读</a>
+    
+</div>
+  
+  
+    <script async src="/js/copy-codeblock.js?v=1787046489538"></script>
+  
+
+  
+      <div class="nexmoe-post-footer">
+          
+      </div>
+  
+</div></div><div class="nexmoe-post-right">    <div class="nexmoe-fixed">
+        <div class="nexmoe-tool">
+
+            
+
+            
+            
+            <button class="mdui-fab catalog" style="overflow:unset;">
+                <i class="nexmoefont icon-i-catalog"></i>
+                <div class="nexmoe-toc">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81-%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%85%A8%E5%B1%80%E5%9C%B0%E5%9B%BE%EF%BC%9A%E8%8C%83%E5%BC%8F%E3%80%81%E5%B7%A5%E5%85%B7%E4%B8%8E%E7%9B%AE%E6%A0%87"><span class="toc-number">1.</span> <span class="toc-text">一、 机器学习全局地图：范式、工具与目标</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%B8%89%E5%A4%A7%E6%A0%B8%E5%BF%83%E5%AD%A6%E4%B9%A0%E8%8C%83%E5%BC%8F%EF%BC%88How-to-learn%EF%BC%89"><span class="toc-number">1.1.</span> <span class="toc-text">1. 三大核心学习范式（How to learn）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E4%BB%BB%E5%8A%A1%E7%9B%AE%E6%A0%87%E4%B8%8E%E5%85%B8%E5%9E%8B%E7%AE%97%E6%B3%95%E5%AF%B9%E7%85%A7%E8%A1%A8%EF%BC%88%E7%AC%94%E8%AE%B0%E5%86%85%E5%AE%B9%E7%B2%BE%E7%82%BC%EF%BC%89"><span class="toc-number">1.2.</span> <span class="toc-text">2. 任务目标与典型算法对照表（笔记内容精炼）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81-%E4%BB%8E%E6%84%9F%E7%9F%A5%E6%9C%BA%EF%BC%88Perceptron%EF%BC%89%E5%88%B0%E7%8E%B0%E4%BB%A3%E7%A5%9E%E7%BB%8F%E5%85%83"><span class="toc-number">2.</span> <span class="toc-text">二、 从感知机（Perceptron）到现代神经元</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%8D%95%E5%B1%82%E6%84%9F%E7%9F%A5%E6%9C%BA-vs-%E7%8E%B0%E4%BB%A3%E7%A5%9E%E7%BB%8F%E5%85%83"><span class="toc-number">2.1.</span> <span class="toc-text">1. 单层感知机 vs 现代神经元</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%95%B0%E5%AD%A6%E8%A1%A8%E8%BE%BE%E4%B8%8E%E9%80%BB%E8%BE%91%E9%97%A8%EF%BC%88%E4%B8%8E%E9%97%A8-%E6%88%96%E9%97%A8-%E4%B8%8E%E9%9D%9E%E9%97%A8-%E5%BC%82%E6%88%96%E9%97%A8%EF%BC%89"><span class="toc-number">2.2.</span> <span class="toc-text">2. 数学表达与逻辑门（与门&#x2F;或门&#x2F;与非门&#x2F;异或门）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81-%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E6%A0%B8%E5%BF%83%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%EF%BC%88Activation-Functions%EF%BC%89"><span class="toc-number">3.</span> <span class="toc-text">三、 神经网络的核心：激活函数（Activation Functions）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E9%98%B6%E8%B7%83%E5%87%BD%E6%95%B0%EF%BC%88Step-Function%EF%BC%89"><span class="toc-number">3.1.</span> <span class="toc-text">1. 阶跃函数（Step Function）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Sigmoid-%E5%87%BD%E6%95%B0"><span class="toc-number">3.2.</span> <span class="toc-text">2. Sigmoid 函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-ReLU-%E5%87%BD%E6%95%B0%EF%BC%88%E4%BF%AE%E6%AD%A3%E7%BA%BF%E6%80%A7%E5%8D%95%E5%85%83%EF%BC%89"><span class="toc-number">3.3.</span> <span class="toc-text">3. ReLU 函数（修正线性单元）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81-%E8%BE%93%E5%87%BA%E5%B1%82%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E4%B8%8E%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="toc-number">4.</span> <span class="toc-text">四、 输出层激活函数与代码实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%BB%BB%E5%8A%A1%E7%B1%BB%E5%9E%8B%E4%B8%8E%E8%BE%93%E5%87%BA%E5%B1%82%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E7%9A%84%E9%80%89%E6%8B%A9"><span class="toc-number">4.1.</span> <span class="toc-text">1. 任务类型与输出层激活函数的选择</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Softmax-%E5%87%BD%E6%95%B0%E7%9A%84%E9%98%B2%E6%BA%A2%E5%87%BA%E6%94%B9%E8%BF%9B%EF%BC%88%E9%98%B2-Overflow%EF%BC%89"><span class="toc-number">4.2.</span> <span class="toc-text">2. Softmax 函数的防溢出改进（防 Overflow）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81-%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AE%AD%E7%BB%83%E5%85%A8%E6%B5%81%E7%A8%8B%EF%BC%88The-Loop-Pipeline%EF%BC%89"><span class="toc-number">5.</span> <span class="toc-text">五、 深度学习训练全流程（The Loop &amp; Pipeline）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%B8%B8%E7%94%A8%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%EF%BC%88Loss-Functions%EF%BC%89"><span class="toc-number">5.1.</span> <span class="toc-text">1. 常用损失函数（Loss Functions）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%B8%B8%E7%94%A8%E4%BC%98%E5%8C%96%E5%99%A8%E8%BF%AD%E4%BB%A3%E8%BF%9B%E5%8C%96%EF%BC%88Optimizers%EF%BC%89"><span class="toc-number">5.2.</span> <span class="toc-text">2. 常用优化器迭代进化（Optimizers）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%EF%BC%9A%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E4%B8%8E%E8%AE%A1%E7%AE%97%E5%9B%BE%EF%BC%88Computational-Graph%EF%BC%89"><span class="toc-number">6.</span> <span class="toc-text">六：反向传播与计算图（Computational Graph）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E8%AE%A1%E7%AE%97%E5%9B%BE%E7%9A%84%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86%EF%BC%9A%E6%AD%A3%E5%90%91-vs-%E5%8F%8D%E5%90%91"><span class="toc-number">6.1.</span> <span class="toc-text">1. 计算图的核心原理：正向 vs 反向</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E4%B8%A4%E4%B8%AA%E6%9C%80%E5%9F%BA%E7%A1%80%E7%AE%97%E5%AD%90%E7%9A%84%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E8%A7%84%E5%88%99"><span class="toc-number">6.2.</span> <span class="toc-text">2. 两个最基础算子的反向传播规则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E7%9F%A9%E9%98%B5%E4%B9%98%E6%B3%95%EF%BC%88Affine-%E5%B1%82%EF%BC%89%E7%9A%84%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD"><span class="toc-number">6.3.</span> <span class="toc-text">3. 矩阵乘法（Affine 层）的反向传播</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A8%A1%E5%9D%97%E4%BA%94%EF%BC%9A%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%EF%BC%88CNN%EF%BC%89%E7%A9%BA%E9%97%B4%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96"><span class="toc-number">7.</span> <span class="toc-text">模块五：卷积神经网络（CNN）空间特征提取</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-CNN-%E7%9A%84%E4%B8%89%E5%A4%A7%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6"><span class="toc-number">7.1.</span> <span class="toc-text">1. CNN 的三大核心组件</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E2%91%A0-%E5%8D%B7%E7%A7%AF%E5%B1%82%EF%BC%88Convolutional-Layer%EF%BC%89%EF%BC%9A%E6%8F%90%E5%8F%96%E7%A9%BA%E9%97%B4%E7%89%B9%E5%BE%81"><span class="toc-number">7.1.1.</span> <span class="toc-text">① 卷积层（Convolutional Layer）：提取空间特征</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E2%91%A1-%E6%BF%80%E6%B4%BB%E5%B1%82%EF%BC%88ReLU-Layer%EF%BC%89%EF%BC%9A%E6%B3%A8%E5%85%A5%E9%9D%9E%E7%BA%BF%E6%80%A7"><span class="toc-number">7.1.2.</span> <span class="toc-text">② 激活层（ReLU Layer）：注入非线性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E2%91%A2-%E6%B1%A0%E5%8C%96%E5%B1%82%EF%BC%88Pooling-Layer%EF%BC%89%EF%BC%9A%E9%99%8D%E7%BB%B4%E4%B8%8E%E6%8A%97%E5%B9%B3%E7%A7%BB%E4%B8%8D%E5%8F%98%E6%80%A7"><span class="toc-number">7.1.3.</span> <span class="toc-text">③ 池化层（Pooling Layer）：降维与抗平移不变性</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-CNN-%E7%9A%84%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96%E5%88%86%E5%B1%82%E6%BC%94%E8%BF%9B%E9%80%BB%E8%BE%91"><span class="toc-number">7.2.</span> <span class="toc-text">2. CNN 的特征提取分层演进逻辑</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E4%BD%93%E7%B3%BB%E5%85%A8%E6%99%AF%E6%94%B6%E5%AE%98%E5%9C%B0%E5%9B%BE"><span class="toc-number">8.</span> <span class="toc-text">知识体系全景收官地图</span></a></li></ol>
+                </div>
+            </button>
+            
+
+            
+
+            <a href="#nexmoe-content" class="backtop toc-link" aria-label="Back To Top" title="top"><button class="mdui-fab mdui-ripple"><i class="nexmoefont icon-caret-top"></i></button></a>
+        </div>
+    </div>
+</div></div><div id="nexmoe-footer"><!--!--></div><div id="nexmoe-search-space"><div class="search-container"><div class="search-header"><div class="search-input-container"><input class="search-input" type="text" placeholder="搜索" onInput="sinput();"></div><a class="search-close" onclick="sclose();">×</a></div><div class="search-body"></div></div></div><div><div id="aplayer" style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;"></div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // --- APlayer 音乐播放器部分 ---
+    const ap = new APlayer({
+      container: document.getElementById('aplayer'),
+      fixed: true,
+      autoplay: false,
+      theme: '#22d9df',
+      loop: 'all',
+      order: 'random',
+      preload: 'auto',
+      volume: 0.2,
+      mutex: true,
+      lrcType: 0,
+      audio: [
+        {
+          name: '那么骄傲',
+          artist: '茜茜',
+          url: '/music/那么骄傲 - 茜茜.mp3', 
+          cover: '/music/cover茜茜.jpg',
+          lrc: '[00:00.00]暂无歌词'
+        }
+      ]
+    });
+
+    // --- Twikoo 评论系统部分 ---
+    if (window.location.pathname.match(/\/\d{4}\/\d{2}\/\d{2}\//) || 
+        document.querySelector('article.post') || 
+        document.body.classList.contains('post-template')) {
+      
+      let talkContainer = document.getElementById('tcomment');
+      if (!talkContainer) {
+        const article = document.querySelector('article') || 
+                        document.querySelector('.nexmoe-post') || 
+                        document.querySelector('.post-content') ||
+                        document.querySelector('main');
+        if (article) {
+          talkContainer = document.createElement('div');
+          talkContainer.id = 'tcomment';
+          article.insertAdjacentElement('afterend', talkContainer);
+        }
+      }
+      
+      if (talkContainer && typeof twikoo !== 'undefined') {
+        twikoo.init({
+          envId: 'https://hsqblog.netlify.app/.netlify/functions/twikoo',
+          el: '#tcomment',
+          path: window.location.pathname,
+          lang: 'zh-CN'
+        });
+      }
+    }
+  });
+
+  // --- 朋友卡片解锁逻辑 ---
+  async function unlock(id, correctHash) {
+    const input = document.getElementById('input-' + id).value;
+    const msgUint8 = new TextEncoder().encode(input);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+    if (hashHex === correctHash) {
+        document.getElementById('lock-' + id).style.display = 'none';
+        const imgDiv = document.getElementById('img-' + id);
+        imgDiv.style.display = 'block';
+        setTimeout(() => imgDiv.style.opacity = "1", 10);
+    } else {
+        const err = document.getElementById('err-' + id);
+        err.style.display = 'block';
+        setTimeout(() => err.style.display = 'none', 2000);
+    }
+  }
+</script>
+</div></body></html>

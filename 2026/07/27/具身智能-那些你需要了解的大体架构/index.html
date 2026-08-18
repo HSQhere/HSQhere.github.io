@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="zh"><head>
+<title>具身智能----那些你需要了解的大体架构 - HSQ 的个人博客</title>
+<meta charset="UTF-8">
+<meta name="keywords" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+
+<link rel="shortcut icon" href="/hexo_init/images/avatar.jpg" type="image/jpg" />
+<meta name="description" content="具身智能完整知识架构（单智体 + 多集群双主线融合）一、发展历史以及未来展望Key technological models of embodied AI 阶段 1：理论奠基与早期传统具身智能（1950s–2010s）1. 理论起源（思想根基）1950 年图提出具身图灵测试，确立智能依托物理交互；80 年代具身认知理论成型，证明感知 - 认知 - 行动耦合是智能核心；Harnad 提出符号接地难题">
+<meta property="og:type" content="article">
+<meta property="og:title" content="具身智能----那些你需要了解的大体架构">
+<meta property="og:url" content="https://hsqhere.github.io/2026/07/27/%E5%85%B7%E8%BA%AB%E6%99%BA%E8%83%BD-%E9%82%A3%E4%BA%9B%E4%BD%A0%E9%9C%80%E8%A6%81%E4%BA%86%E8%A7%A3%E7%9A%84%E5%A4%A7%E4%BD%93%E6%9E%B6%E6%9E%84/index.html">
+<meta property="og:site_name" content="HSQ 的个人博客">
+<meta property="og:description" content="具身智能完整知识架构（单智体 + 多集群双主线融合）一、发展历史以及未来展望Key technological models of embodied AI 阶段 1：理论奠基与早期传统具身智能（1950s–2010s）1. 理论起源（思想根基）1950 年图提出具身图灵测试，确立智能依托物理交互；80 年代具身认知理论成型，证明感知 - 认知 - 行动耦合是智能核心；Harnad 提出符号接地难题">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hsqhere.github.io/images/tech/robot/Key-technological-models-of-embodied-AI.png">
+<meta property="og:image" content="https://hsqhere.github.io/images/tech/robot/Unimodal-embodied-AI-and-multimodal-embodied-AI.png">
+<meta property="og:image" content="https://hsqhere.github.io/images/tech/robot/MLLMs-for-embodied-AI.png">
+<meta property="og:image" content="https://hsqhere.github.io/images/tech/robot/WMs-for-embodied-AI.png">
+<meta property="og:image" content="https://hsqhere.github.io/images/tech/robot/Embodied-AI-with-MLLMs-and-WMs.png">
+<meta property="og:image" content="https://hsqhere.github.io/images/tech/robot/Qualitative-comparison-of-MLLM-only,WM-only,and-joint-MLLM-WM.png">
+<meta property="article:published_time" content="2026-07-27T11:11:46.000Z">
+<meta property="article:modified_time" content="2026-08-18T08:45:20.466Z">
+<meta property="article:author" content="HSQ">
+<meta property="article:tag" content="世界模型">
+<meta property="article:tag" content="具身智能">
+<meta property="article:tag" content="多模态">
+<meta property="article:tag" content="大语言模型">
+<meta property="article:tag" content="智能体">
+<meta property="article:tag" content="机器人">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hsqhere.github.io/images/tech/robot/Key-technological-models-of-embodied-AI.png">
+
+<link rel="stylesheet" href="/lib/fancybox/fancybox.css">
+<link rel="stylesheet" href="/lib/mdui_043tiny/mdui.css">
+
+
+<link rel="stylesheet" href="/lib/iconfont/iconfont.css?v=1787046489671">
+
+<link rel="stylesheet" href="/css/style.css?v=1787046489671">
+
+
+
+
+    
+        <link rel="stylesheet" href="/custom.css?v=1787046489671">
+    
+
+
+
+<script src="/lib/mdui_043tiny/mdui.js" async></script>
+<script src="/lib/fancybox/fancybox.umd.js" async></script>
+<script src="/lib/lax.min.js" async></script>
+
+
+<script async src="/js/app.js?v=1787046489671"></script>
+
+ 
+
+<!-- highlight.js CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<!-- APlayer 音乐播放器 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+<!-- Twikoo 评论系统 -->
+<script src="https://cdn.jsdelivr.net/npm/twikoo@1.6.39/dist/twikoo.all.min.js"></script>
+<!-- MathJax 数学公式渲染 -->
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true,
+    processEnvironments: true
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<!-- APlayer 音乐播放器 JS -->
+<script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+
+
+<link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+<meta name="generator" content="Hexo 8.1.1"></head><body class="nexmoe mdui-drawer-body-left"><div id="nexmoe-background"><div class="nexmoe-bg" style="background-image: url(/hexo_init/images/background_mainpage.png)"></div><div class="mdui-appbar mdui-shadow-0"><div class="mdui-toolbar"><a class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: &#039;#drawer&#039;, swipe: true}" title="menu"><i class="mdui-icon nexmoefont icon-menu"></i></a><div class="mdui-toolbar-spacer"></div><a class="mdui-btn mdui-btn-icon" href="/" title="HSQ"><img src="/hexo_init/images/avatar.jpg" alt="HSQ"></a></div></div></div><div id="nexmoe-header"><div class="nexmoe-drawer mdui-drawer" id="drawer">
+    <div class="nexmoe-avatar mdui-ripple">
+        <a href="/" title="HSQ">
+            <img src="/hexo_init/images/avatar.jpg" alt="HSQ" alt="HSQ">
+        </a>
+    </div>
+    <div class="nexmoe-count">
+        <div><span>文章</span>37</div>
+        <div><span>标签</span>82</div>
+        <div><span>分类</span>20</div>
+    </div>
+    <div class="nexmoe-list mdui-list" mdui-collapse="{accordion: true}">
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/" title="首页">
+            <i class="mdui-list-item-icon nexmoefont icon-home"></i>
+            <div class="mdui-list-item-content">
+                首页
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/archive.html" title="文章归档">
+            <i class="mdui-list-item-icon nexmoefont icon-container"></i>
+            <div class="mdui-list-item-content">
+                文章归档
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/gallery/" title="图库">
+            <i class="mdui-list-item-icon nexmoefont icon-gallery"></i>
+            <div class="mdui-list-item-content">
+                图库
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/plan/" title="规划">
+            <i class="mdui-list-item-icon nexmoefont icon-chart"></i>
+            <div class="mdui-list-item-content">
+                规划
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/friends/" title="朋友们">
+            <i class="mdui-list-item-icon nexmoefont icon-friends"></i>
+            <div class="mdui-list-item-content">
+                朋友们
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/about/" title="关于">
+            <i class="mdui-list-item-icon nexmoefont icon-info-circle"></i>
+            <div class="mdui-list-item-content">
+                关于
+            </div>
+        </a>
+        
+    </div>
+    
+    
+        
+        <div class="nexmoe-widget-wrap">
+    <div class="nexmoe-widget nexmoe-search">
+        
+            <form id="search_form">
+                <label><input class="st-default-search-input" id="search_value" name="q" type="search" placeholder="搜索" style="
+                    font-size: 15px !important;
+                    height: 56px !important;
+                    background-image: none;
+                "></label>
+            </form>
+         
+    </div>
+</div>
+
+
+	<script async src="/js/search.js?v=1787046489671"></script>
+
+
+
+    
+        
+        <div class="nexmoe-widget-wrap">
+	<div class="nexmoe-widget nexmoe-social">
+		<a
+			class="mdui-ripple"
+			href="https://space.bilibili.com/1382035035?spm_id_from=333.1007.0.0"
+			target="_blank"
+			mdui-tooltip="{content: '哔哩哔哩'}"
+			style="
+				color: rgb(231, 106, 141);
+				background-color: rgba(231, 106, 141, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-bilibili"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://github.com/HSQhere"
+			target="_blank"
+			mdui-tooltip="{content: 'GitHub'}"
+			style="
+				color: rgb(25, 23, 23);
+				background-color: rgba(25, 23, 23, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-github"
+			></i> </a
+		>
+	</div>
+</div>
+
+    
+        
+        <!-- 一言 -->
+<div class="nexmoe-widget-wrap">
+  <h3 class="nexmoe-widget-title">
+    一言
+  </h3>
+  <div class="nexmoe-widget">
+    <ul class="hitokoto-box">
+      <li id="hitokoto_text_parent" class="hitokoto-text" hitokotoCategory="">
+        <a href="#" id="hitokoto_text">
+          
+        </a>
+        <a href="#" id="hitokoto_error_text" style="display: none;">
+          
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  let hitokotoText = document.getElementById('hitokoto_text')
+  let hitokotoErroText = document.getElementById('hitokoto_error_text')
+  let hitokotoCategory = document.getElementById('hitokoto_text_parent').getAttribute('hitokotoCategory')
+  window.addEventListener('load', function () {
+    let url = 'https://v1.hitokoto.cn'
+    if (hitokotoCategory) {
+      url += '?c=' + hitokotoCategory
+    }
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        hitokotoText.innerText = "「 " + data.hitokoto + " 」 from " + data.from
+        hitokotoText.href = 'https://hitokoto.cn/?uuid=' + data.uuid
+      })
+      .catch((reason) => {
+        console.error(11, reason)
+        hitokotoText.style.display = 'none'
+        hitokotoErroText.style.display = 'block'
+      })
+  })
+</script>
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章分类</h3>
+    <div class="nexmoe-widget">
+
+      <ul class="category-list">
+
+        
+
+
+        
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/CLIP/">CLIP</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/LQR/">LQR</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/ROS2/">ROS2</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/Transformer/">Transformer</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/ViT/">ViT</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/人脸算法/">人脸算法</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/仿真/">仿真</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/大模型/">大模型</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/嵌入式/">嵌入式</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/日记/">日记</a>
+          <span class="category-list-count">3</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/机器人/">机器人</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/机器学习/">机器学习</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/机械/">机械</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/树洞/">树洞</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/深度学习/">深度学习</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/电控/">电控</a>
+          <span class="category-list-count">6</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/目标/">目标</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/编程语言/">编程语言</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/计算机/">计算机</a>
+          <span class="category-list-count">8</span>
+        </li>
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/车辆/">车辆</a>
+          <span class="category-list-count">2</span>
+        </li>
+
+        
+      </ul>
+
+    </div>
+  </div>
+
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <div id="randomtagcloud" class="nexmoe-widget tagcloud nexmoe-rainbow">
+      <a href="/tags/ANSYS/" style="font-size: 10px;">ANSYS</a> <a href="/tags/CAD/" style="font-size: 10px;">CAD</a> <a href="/tags/CLIP/" style="font-size: 11.43px;">CLIP</a> <a href="/tags/CNN/" style="font-size: 10px;">CNN</a> <a href="/tags/GPU/" style="font-size: 10px;">GPU</a> <a href="/tags/Hough%E5%9C%86/" style="font-size: 10px;">Hough圆</a> <a href="/tags/LLM/" style="font-size: 10px;">LLM</a> <a href="/tags/LQR/" style="font-size: 10px;">LQR</a> <a href="/tags/Linux/" style="font-size: 11.43px;">Linux</a> <a href="/tags/PID/" style="font-size: 10px;">PID</a> <a href="/tags/ROS2/" style="font-size: 10px;">ROS2</a> <a href="/tags/STAR-CCM/" style="font-size: 10px;">STAR-CCM</a> <a href="/tags/Transformer/" style="font-size: 10px;">Transformer</a> <a href="/tags/ViT/" style="font-size: 10px;">ViT</a> <a href="/tags/cv/" style="font-size: 11.43px;">cv</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/foc/" style="font-size: 11.43px;">foc</a> <a href="/tags/humble/" style="font-size: 10px;">humble</a> <a href="/tags/jetson/" style="font-size: 11.43px;">jetson</a> <a href="/tags/keysking/" style="font-size: 10px;">keysking</a> <a href="/tags/pbc/" style="font-size: 10px;">pbc</a> <a href="/tags/pid/" style="font-size: 10px;">pid</a> <a href="/tags/pnp/" style="font-size: 10px;">pnp</a> <a href="/tags/ros2/" style="font-size: 10px;">ros2</a> <a href="/tags/simulink/" style="font-size: 10px;">simulink</a> <a href="/tags/stm32/" style="font-size: 11.43px;">stm32</a> <a href="/tags/%E4%B8%96%E7%95%8C%E6%A8%A1%E5%9E%8B/" style="font-size: 10px;">世界模型</a> <a href="/tags/%E4%BA%92%E5%8A%A8/" style="font-size: 10px;">互动</a> <a href="/tags/%E4%BA%BA%E8%84%B8%E6%A3%80%E6%B5%8B/" style="font-size: 10px;">人脸检测</a> <a href="/tags/%E4%BA%BA%E8%84%B8%E8%AF%86%E5%88%AB/" style="font-size: 10px;">人脸识别</a> <a href="/tags/%E4%BB%BF%E7%9C%9F/" style="font-size: 14.29px;">仿真</a> <a href="/tags/%E5%85%B7%E8%BA%AB%E6%99%BA%E8%83%BD/" style="font-size: 10px;">具身智能</a> <a href="/tags/%E5%88%B6%E5%9B%BE/" style="font-size: 11.43px;">制图</a> <a href="/tags/%E5%88%B7%E6%9C%BA/" style="font-size: 10px;">刷机</a> <a href="/tags/%E5%8A%A0%E9%80%9F%E5%BA%A6%E8%AE%A1/" style="font-size: 10px;">加速度计</a> <a href="/tags/%E5%8F%8D%E6%80%9D/" style="font-size: 10px;">反思</a> <a href="/tags/%E5%98%89%E7%AB%8B%E5%88%9B/" style="font-size: 10px;">嘉立创</a> <a href="/tags/%E5%A4%9A%E6%A8%A1%E6%80%81/" style="font-size: 14.29px;">多模态</a> <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/" style="font-size: 14.29px;">大模型</a> <a href="/tags/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B/" style="font-size: 10px;">大语言模型</a> <a href="/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/" style="font-size: 11.43px;">嵌入式</a> <a href="/tags/%E5%B9%B3%E8%A1%A1%E5%B0%8F%E8%BD%A6/" style="font-size: 11.43px;">平衡小车</a> <a href="/tags/%E5%BB%BA%E6%A8%A1/" style="font-size: 11.43px;">建模</a> <a href="/tags/%E6%84%9F%E6%83%85/" style="font-size: 11.43px;">感情</a> <a href="/tags/%E6%8A%A5%E9%94%99/" style="font-size: 12.86px;">报错</a> <a href="/tags/%E6%8E%A7%E5%88%B6%E7%AE%97%E6%B3%95/" style="font-size: 14.29px;">控制算法</a> <a href="/tags/%E6%8E%A9%E8%86%9C/" style="font-size: 10px;">掩膜</a> <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" style="font-size: 14.29px;">操作系统</a> <a href="/tags/%E6%95%99%E7%A8%8B/" style="font-size: 10px;">教程</a> <a href="/tags/%E6%97%A0%E5%88%B7%E7%94%B5%E6%9C%BA/" style="font-size: 11.43px;">无刷电机</a> <a href="/tags/%E6%97%A5%E8%AE%B0/" style="font-size: 20px;">日记</a> <a href="/tags/%E6%99%BA%E8%83%BD%E4%BD%93/" style="font-size: 10px;">智能体</a> <a href="/tags/%E6%9B%B4%E6%96%B0/" style="font-size: 10px;">更新</a> <a href="/tags/%E6%9C%BA%E5%99%A8%E4%BA%BA/" style="font-size: 12.86px;">机器人</a> <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" style="font-size: 10px;">机器学习</a> <a href="/tags/%E6%9C%BA%E6%A2%B0/" style="font-size: 12.86px;">机械</a> <a href="/tags/%E6%A0%91%E6%B4%9E/" style="font-size: 10px;">树洞</a> <a href="/tags/%E6%A0%91%E8%8E%93%E6%B4%BE/" style="font-size: 10px;">树莓派</a> <a href="/tags/%E6%B0%B4%E5%86%B7/" style="font-size: 10px;">水冷</a> <a href="/tags/%E6%B5%81%E5%9C%BA/" style="font-size: 10px;">流场</a> <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" style="font-size: 10px;">深度学习</a> <a href="/tags/%E7%94%9F%E6%B4%BB/" style="font-size: 10px;">生活</a> <a href="/tags/%E7%94%B5%E6%8E%A7/" style="font-size: 17.14px;">电控</a> <a href="/tags/%E7%9B%AE%E6%A0%87/" style="font-size: 11.43px;">目标</a> <a href="/tags/%E7%A9%BA%E6%B0%94%E5%8A%A8%E5%8A%9B%E5%AD%A6/" style="font-size: 10px;">空气动力学</a> <a href="/tags/%E7%AE%80%E5%8F%B2/" style="font-size: 10px;">简史</a> <a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 18.57px;">算法</a> <a href="/tags/%E7%BC%96%E7%A8%8B/" style="font-size: 10px;">编程</a> <a href="/tags/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/" style="font-size: 10px;">编程语言</a> <a href="/tags/%E8%A7%84%E5%88%92/" style="font-size: 10px;">规划</a> <a href="/tags/%E8%A7%86%E8%A7%89/" style="font-size: 15.71px;">视觉</a> <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/" style="font-size: 11.43px;">计算机</a> <a href="/tags/%E8%AE%BA%E6%96%87/" style="font-size: 10px;">论文</a> <a href="/tags/%E8%AF%84%E8%AE%BA%E5%8C%BA/" style="font-size: 10px;">评论区</a> <a href="/tags/%E8%AF%BB%E4%B9%A6/" style="font-size: 10px;">读书</a> <a href="/tags/%E8%BD%A6%E8%BE%86/" style="font-size: 11.43px;">车辆</a> <a href="/tags/%E9%97%AE%E9%A2%98/" style="font-size: 10px;">问题</a> <a href="/tags/%E9%98%85%E8%AF%BB/" style="font-size: 11.43px;">阅读</a> <a href="/tags/%E9%99%80%E8%9E%BA%E4%BB%AA/" style="font-size: 10px;">陀螺仪</a> <a href="/tags/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1/" style="font-size: 10px;">面向对象</a> <a href="/tags/%E9%9D%A2%E5%90%91%E8%BF%87%E7%A8%8B/" style="font-size: 10px;">面向过程</a> <a href="/tags/%E9%A6%99%E6%A9%99%E6%B4%BE/" style="font-size: 10px;">香橙派</a>
+    </div>
+    
+      <script>
+        var maxTagcloud = parseInt(17);
+        var tags_length = parseInt(82);
+        var tags_arr = [];
+        for(var i = 0; i < tags_length; i++){
+          tags_arr.push(i);
+        }
+        tags_arr.sort(function (l, r) {
+          return Math.random() > 0.5 ? -1 : 1;
+        });
+        tags_arr = tags_arr.slice(0, maxTagcloud < tags_length ? tags_length - maxTagcloud : 0);
+        for(var tag_i = 0; tag_i < tags_arr.length; tag_i++){
+          document.getElementById("randomtagcloud").children[tags_arr[tag_i]].style.display = 'none';
+        }
+      </script>
+    
+  </div>
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章归档</h3>
+    <div class="nexmoe-widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/">2026</a><span class="archive-list-count">37</span></li></ul>
+    </div>
+  </div>
+
+
+
+    
+        
+   
+    <div class="nexmoe-copyright">
+        &copy; 2026 HSQ
+        Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+        & <a href="https://github.com/theme-nexmoe/hexo-theme-nexmoe" target="_blank">Nexmoe</a>
+        
+    </div>
+</div><!-- .nexmoe-drawer --></div><div id="nexmoe-content"><div class="nexmoe-primary"><div class="nexmoe-post">
+  <article>
+    
+        <div class="nexmoe-post-cover absolute" style="padding-top: NaN%;"> 
+            <img src="/images/tech/robot/具身智能整体闭环结构.jpg" alt="具身智能----那些你需要了解的大体架构" loading="lazy">
+            <h1>具身智能----那些你需要了解的大体架构</h1>
+        </div>
+    
+    
+    <div class="nexmoe-post-meta">
+    <div class="nexmoe-rainbow">
+        <a class="nexmoefont icon-calendar-fill">2026年07月27日</a>
+        
+            <a class="nexmoefont icon-appstore-fill -link" href="/categories/%E6%9C%BA%E5%99%A8%E4%BA%BA/">机器人</a>
+        
+        
+    <a><i class="nexmoefont icon-areachart"></i>约4.6k字</a>
+    <a><i class="nexmoefont icon-time-circle-fill"></i>预计需要15分钟</a>
+
+    </div>
+    
+    
+    
+    
+    
+</div>
+
+    <h2 id="具身智能完整知识架构（单智体-多集群双主线融合）"><a href="#具身智能完整知识架构（单智体-多集群双主线融合）" class="headerlink" title="具身智能完整知识架构（单智体 + 多集群双主线融合）"></a>具身智能完整知识架构（单智体 + 多集群双主线融合）</h2><h2 id="一、发展历史以及未来展望"><a href="#一、发展历史以及未来展望" class="headerlink" title="一、发展历史以及未来展望"></a>一、发展历史以及未来展望</h2><p><img onerror="imgOnError(this);" data-fancybox="gallery" src="/../images/tech/robot/Key-technological-models-of-embodied-AI.png" alt="Key-technological-models-of-embodied-AI" data-caption="Key-technological-models-of-embodied-AI" loading="lazy"><br><em>Key technological models of embodied AI</em></p>
+<h3 id="阶段-1：理论奠基与早期传统具身智能（1950s–2010s）"><a href="#阶段-1：理论奠基与早期传统具身智能（1950s–2010s）" class="headerlink" title="阶段 1：理论奠基与早期传统具身智能（1950s–2010s）"></a>阶段 1：理论奠基与早期传统具身智能（1950s–2010s）</h3><h4 id="1-理论起源（思想根基）"><a href="#1-理论起源（思想根基）" class="headerlink" title="1. 理论起源（思想根基）"></a>1. 理论起源（思想根基）</h4><p>1950 年图提出具身图灵测试，确立智能依托物理交互；80 年代具身认知理论成型，证明感知 - 认知 - 行动耦合是智能核心；Harnad 提出符号接地难题，指出纯符号 AI 无法理解物理世界。<br>同时，多智能体雏形同步诞生：分布式机器人、集群无人机早期理论被提出，但受限于算力，仅停留在理论仿真，无实体落地。</p>
+<h4 id="2-工程落地：行为机器人时代"><a href="#2-工程落地：行为机器人时代" class="headerlink" title="2. 工程落地：行为机器人时代"></a>2. 工程落地：行为机器人时代</h4><ul>
+<li>Brooks 分层包容架构：传感器 - 反应单机器人闭环，扫地机、单移动底盘落地；</li>
+<li>Cog 人形机器人：单机器人模仿学习、简单人机交互；</li>
+<li>单智能体局限：感知 &#x2F; 认知 &#x2F; 交互三大模块割裂、单模态；</li>
+<li>多智能体局限：仅集中式路径规划（Grid-MAP 初代网格算法），异构机器人协同完全无法实现，无统一通信机制。</li>
+</ul>
+<h4 id="3-核心局限"><a href="#3-核心局限" class="headerlink" title="3. 核心局限"></a>3. 核心局限</h4><ol>
+<li>单智能体：人工规则驱动、无自然语言理解、无环境预测；</li>
+<li>多智能体额外短板：全局集中计算算力爆炸，局部观测缺失，机器人间无信息互通，仅适用于简单静态网格场景，无法适配动态真实环境。</li>
+</ol>
+<h3 id="阶段-2：单模态向多模态转型，深度学习赋能传统具身（2010–2022）"><a href="#阶段-2：单模态向多模态转型，深度学习赋能传统具身（2010–2022）" class="headerlink" title="阶段 2：单模态向多模态转型，深度学习赋能传统具身（2010–2022）"></a>阶段 2：单模态向多模态转型，深度学习赋能传统具身（2010–2022）</h3><p><img onerror="imgOnError(this);" data-fancybox="gallery" src="/../images/tech/robot/Unimodal-embodied-AI-and-multimodal-embodied-AI.png" alt="Unimodal-embodied-AI-and-multimodal-embodied-AI" data-caption="Unimodal-embodied-AI-and-multimodal-embodied-AI" loading="lazy"></p>
+<h4 id="1-技术变革：深度学习打通单模块"><a href="#1-技术变革：深度学习打通单模块" class="headerlink" title="1. 技术变革：深度学习打通单模块"></a>1. 技术变革：深度学习打通单模块</h4><p>计算机视觉、NLP、强化学习（DQN&#x2F;PPO）分别优化<strong>主动感知、具身认知、动态交互</strong>三大模块。</p>
+<ul>
+<li><strong>感知层</strong>：ORB-SLAM、3D 场景理解成熟，单机器人 RGB-D &#x2F; 点云多模态起步；多智能体出现协同 SLAM，但融合算法简陋。</li>
+<li><strong>认知层</strong>：小型 NLP + 传统 RL 实现单机器人简单任务拆解；多智能体仅具备简单全局规划，无分层任务分配能力。</li>
+<li><strong>交互层</strong><br>  单机器人：强化学习实现抓取、导航，模仿学习 IL 成为主流；<br>  新增<strong>多智能协同决策分支</strong>（表格内置分类）：CTDE 集中训练分布式执行 MARL 框架（QMIX、MADDPG）问世，支持少量同构机器人协同，但异构机器人、异步交互难以处理。</li>
+</ul>
+<h4 id="2-范式升级：多模态具身诞生"><a href="#2-范式升级：多模态具身诞生" class="headerlink" title="2. 范式升级：多模态具身诞生"></a>2. 范式升级：多模态具身诞生</h4><p>单模态缺陷暴露，学界融合视觉 &#x2F; 语言 &#x2F; 触觉搭建单机器人感知 - 认知 - 交互闭环；多智能体领域初步实现多传感器跨机器人共享，但模态对齐差、通信延迟问题突出。</p>
+<h4 id="3-核心痛点（承上启下，同时覆盖单-多智能体）"><a href="#3-核心痛点（承上启下，同时覆盖单-多智能体）" class="headerlink" title="3. 核心痛点（承上启下，同时覆盖单 &#x2F; 多智能体）"></a>3. 核心痛点（承上启下，同时覆盖单 &#x2F; 多智能体）</h4><ol>
+<li>单智能体共性痛点<br> 模块割裂、无统一大模型底座；语义 - 物理鸿沟；无世界模型、无法预判动作后果；</li>
+<li>多智能体新增特有痛点<br> （1）联合动作空间指数级膨胀，训练成本极高；<br> （2）Dec-POMDP 局部观测问题，每个机器人仅能获取局部环境信息；<br> （3）多智能体非平稳性：其他机器人同步学习，环境策略持续变化；<br> （4）异构机器人（机械臂 &#x2F; 无人机 &#x2F; 无人车）观测、动作空间不统一，无法协同；<br> （5）无高层语义能力，无法用自然语言完成集群任务分配。<blockquote>
+<p>上述单 &#x2F; 多智能体双重痛点，共同催生 LLM&#x2F;MLLM、世界模型两大技术路线，同时推动集群具身智能成为独立研究方向。</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="阶段-3：LLM-MLLM-驱动具身智能（2022–2024，语义能力爆发期）"><a href="#阶段-3：LLM-MLLM-驱动具身智能（2022–2024，语义能力爆发期）" class="headerlink" title="阶段 3：LLM&#x2F;MLLM 驱动具身智能（2022–2024，语义能力爆发期）"></a>阶段 3：LLM&#x2F;MLLM 驱动具身智能（2022–2024，语义能力爆发期）</h3><p>分为<strong>单智能体 MLLM</strong>、<strong>多智能体大模型集群</strong>两条并行路线</p>
+<h4 id="3-1-纯-LLM-单智能体路线（SayCan）"><a href="#3-1-纯-LLM-单智能体路线（SayCan）" class="headerlink" title="3.1 纯 LLM 单智能体路线（SayCan）"></a>3.1 纯 LLM 单智能体路线（SayCan）</h4><p>LLM 负责高层任务拆解，短板：脱离感知、无视物理约束。</p>
+<h4 id="3-2-MLLM-VLA-单智能体路线（RT-2、PaLM-E、Octo）"><a href="#3-2-MLLM-VLA-单智能体路线（RT-2、PaLM-E、Octo）" class="headerlink" title="3.2 MLLM&#x2F;VLA 单智能体路线（RT-2、PaLM-E、Octo）"></a>3.2 MLLM&#x2F;VLA 单智能体路线（RT-2、PaLM-E、Octo）</h4><p><img onerror="imgOnError(this);" data-fancybox="gallery" src="/../images/tech/robot/MLLMs-for-embodied-AI.png" alt="MLLMs-for-embodied-AI" data-caption="MLLMs-for-embodied-AI" loading="lazy"><br>端到端多模态融合，零 &#x2F; 少样本操控；缺陷：无显式物理建模，缺少环境推演。</p>
+<h4 id="3-3-LLM-驱动多智能集群（同期并行发展）"><a href="#3-3-LLM-驱动多智能集群（同期并行发展）" class="headerlink" title="3.3 LLM 驱动多智能集群（同期并行发展）"></a>3.3 LLM 驱动多智能集群（同期并行发展）</h4><h5 id="核心能力"><a href="#核心能力" class="headerlink" title="核心能力"></a>核心能力</h5><p>利用 LLM 全局语义推理，完成集群任务拆解、机器人能力匹配、任务分区分配；机器人间通过自然语言通信协商，解决传统 MARL 无高层理解的缺陷。代表：SMART-LLM、COHERENT、LLaMAC。</p>
+<h5 id="固有缺陷"><a href="#固有缺陷" class="headerlink" title="固有缺陷"></a>固有缺陷</h5><ol>
+<li>无统一共享环境表征，每个机器人独立感知，信息冗余；</li>
+<li>LLM 不具备物理动力学知识，分配的协同动作易发生碰撞、运动冲突；</li>
+<li>异构机器人模态不统一，语言指令难以适配不同硬件执行器；</li>
+<li>无法仿真集群交互后果，只能静态分配任务，无法动态调整协作策略。</li>
+</ol>
+<h3 id="阶段-4：世界模型（WM）独立驱动具身（2018–2025，并行路线）"><a href="#阶段-4：世界模型（WM）独立驱动具身（2018–2025，并行路线）" class="headerlink" title="阶段 4：世界模型（WM）独立驱动具身（2018–2025，并行路线）"></a>阶段 4：世界模型（WM）独立驱动具身（2018–2025，并行路线）</h3><h4 id="1-单智能世界模型两大核心能力"><a href="#1-单智能世界模型两大核心能力" class="headerlink" title="1. 单智能世界模型两大核心能力"></a>1. 单智能世界模型两大核心能力</h4><p><img onerror="imgOnError(this);" data-fancybox="gallery" src="/../images/tech/robot/WMs-for-embodied-AI.png" alt="WMs-for-embodied-AI" data-caption="WMs-for-embodied-AI" loading="lazy"><br>环境隐空间表征、长时序动作预测（Dreamer、JEPA、Transformer-WM）；缺陷：无语言语义，无法接收人类复杂指令。</p>
+<h4 id="2-多智能协同世界模型（同期衍生方向）"><a href="#2-多智能协同世界模型（同期衍生方向）" class="headerlink" title="2. 多智能协同世界模型（同期衍生方向）"></a>2. 多智能协同世界模型（同期衍生方向）</h4><h5 id="核心能力-1"><a href="#核心能力-1" class="headerlink" title="核心能力"></a>核心能力</h5><p>构建全局共享环境动力学模型，仿真多机器人同步交互、群体运动轨迹；提前预判集群碰撞、路径冲突，大幅降低真机集群试错成本。代表：GAWM、COMBO。</p>
+<h5 id="独立使用致命缺陷"><a href="#独立使用致命缺陷" class="headerlink" title="独立使用致命缺陷"></a>独立使用致命缺陷</h5><ol>
+<li>无 LLM 高层语义，无法完成集群任务拆解与分工；</li>
+<li>无法理解人类自然语言下达的集群协同指令；</li>
+<li>机器人动态增减、开放环境下全局世界模型更新开销巨大。</li>
+</ol>
+<h3 id="阶段-5：下一代核心范式-——MLLM-世界模型融合架构（单-多智能通用）"><a href="#阶段-5：下一代核心范式-——MLLM-世界模型融合架构（单-多智能通用）" class="headerlink" title="阶段 5：下一代核心范式 ——MLLM + 世界模型融合架构（单 &#x2F; 多智能通用）"></a>阶段 5：下一代核心范式 ——MLLM + 世界模型融合架构（单 &#x2F; 多智能通用）</h3><h4 id="5-1-单智能体融合互补逻辑"><a href="#5-1-单智能体融合互补逻辑" class="headerlink" title="5.1 单智能体融合互补逻辑"></a>5.1 单智能体融合互补逻辑</h4><p><img onerror="imgOnError(this);" data-fancybox="gallery" src="/../images/tech/robot/Embodied-AI-with-MLLMs-and-WMs.png" alt="Embodied-AI-with-MLLMs-and-WMs" data-caption="Embodied-AI-with-MLLMs-and-WMs" loading="lazy"></p>
+<table>
+<thead>
+<tr>
+<th>MLLM 单独</th>
+<th>世界模型单独</th>
+<th>融合协同增益</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>强语义任务拆解，无视物理</td>
+<td>精通物理仿真，无高层理解</td>
+<td>MLLM 生成计划，WM 校验物理可行性，双向迭代修正</td>
+</tr>
+</tbody></table>
+<h4 id="5-2-多智能集群融合拓展逻辑（新增集群维度）"><a href="#5-2-多智能集群融合拓展逻辑（新增集群维度）" class="headerlink" title="5.2 多智能集群融合拓展逻辑（新增集群维度）"></a>5.2 多智能集群融合拓展逻辑（新增集群维度）</h4><table>
+<thead>
+<tr>
+<th>纯 LLM 集群</th>
+<th>纯多智能世界模型</th>
+<th>MLLM+WM 集群融合</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>擅长任务分配、语言通信，不懂群体物理约束</td>
+<td>擅长仿真机器人交互、规避冲突，无任务规划能力</td>
+<td>MLLM 负责全局集群分工、人机语言交互；共享多智能世界模型仿真全体机器人协同轨迹，动态调整子任务，适配动态增减机器人团队</td>
+</tr>
+</tbody></table>
+<h4 id="5-3-统一完整闭环工作流（兼容单-多智能体）"><a href="#5-3-统一完整闭环工作流（兼容单-多智能体）" class="headerlink" title="5.3 统一完整闭环工作流（兼容单 &#x2F; 多智能体）"></a>5.3 统一完整闭环工作流（兼容单 &#x2F; 多智能体）</h4><ol>
+<li>所有机器人多模态感知数据统一汇总，分别送入集群 MLLM 与共享世界模型；</li>
+<li>MLLM 解析人类全局指令，拆解并行 &#x2F; 串行子任务，分配至对应异构机器人；</li>
+<li>共享多智能世界模型仿真全体机器人协同运动，检测碰撞、资源冲突、任务时序矛盾；</li>
+<li>WM 将冲突修正方案回传给 MLLM，重新调整集群分工与机器人轨迹；</li>
+<li>各机器人下发修正后目标轨迹，由底层控制器执行；</li>
+<li>集群交互产生新环境变化，同步更新全局世界模型与所有机器人记忆库，实现集群终身自主进化。</li>
+</ol>
+<h4 id="5-4-融合架构统一现存挑战（含单-多智能特有问题）"><a href="#5-4-融合架构统一现存挑战（含单-多智能特有问题）" class="headerlink" title="5.4 融合架构统一现存挑战（含单 + 多智能特有问题）"></a>5.4 融合架构统一现存挑战（含单 + 多智能特有问题）</h4><ol>
+<li>通用挑战：MLLM 与 WM 推理时延不匹配、语义 - 物理错位、海量记忆存储成本高；</li>
+<li>多智能集群专属挑战：<br> （1）大规模机器人并行推理算力开销爆炸；<br> （2）异构机器人感知 &#x2F; 动作空间对齐困难；<br> （3）开放环境下团队成员动态变化，共享世界模型实时更新难度大；<br> （4）多机器人通信延迟、观测噪声导致仿真与现实存在集群虚实鸿沟；<br> （5）多智能体信用分配困难，难以界定单个机器人任务贡献。</li>
+</ol>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="/../images/tech/robot/Qualitative-comparison-of-MLLM-only,WM-only,and-joint-MLLM-WM.png" alt="Qualitative-comparison-of-MLLM-only,WM-only,and-joint-MLLM-WM" data-caption="Qualitative-comparison-of-MLLM-only,WM-only,and-joint-MLLM-WM" loading="lazy"><br><em>Qualitative comparison of MLLM-only, WM-only, and joint MLLM-WM</em></p>
+<h3 id="六、论文完整未来研究展望（七大核心方向，整合集群具身）"><a href="#六、论文完整未来研究展望（七大核心方向，整合集群具身）" class="headerlink" title="六、论文完整未来研究展望（七大核心方向，整合集群具身）"></a>六、论文完整未来研究展望（七大核心方向，整合集群具身）</h3><h4 id="（一）通用自主单具身智能（基础底座）"><a href="#（一）通用自主单具身智能（基础底座）" class="headerlink" title="（一）通用自主单具身智能（基础底座）"></a>（一）通用自主单具身智能（基础底座）</h4><p>无人工干预下，单机器人在开放环境长期自主运行；自适应多模态感知、因果推理、轻量化 MLLM-WM 融合推理。</p>
+<h4 id="（二）具身智能软硬件协同（单-集群通用）"><a href="#（二）具身智能软硬件协同（单-集群通用）" class="headerlink" title="（二）具身智能软硬件协同（单 &#x2F; 集群通用）"></a>（二）具身智能软硬件协同（单 &#x2F; 集群通用）</h4><p>轻量化模型、专用边缘加速器、ROS2 集群分布式调度，降低单 &#x2F; 多机器人算力与功耗成本。</p>
+<h4 id="（三）集群多智能体具身智能（新增独立核心方向）"><a href="#（三）集群多智能体具身智能（新增独立核心方向）" class="headerlink" title="（三）集群多智能体具身智能（新增独立核心方向）"></a>（三）集群多智能体具身智能（新增独立核心方向）</h4><ol>
+<li>多智能共享协同世界模型，分布式感知融合，全局环境统一表征；</li>
+<li>异构机器人分层协同框架，适配机械臂 &#x2F; 无人机 &#x2F; 无人车混合集群；</li>
+<li>LLM 驱动群体协商、动态任务分配，支持机器人实时加入 &#x2F; 退出团队；</li>
+<li>集群专用仿真基准（SMARTS、MAP-THOR、CARIC）与真机集群验证；<br> 落地场景：仓储机器人集群、无人机搜救编队、多机械臂协同装配、城市自动驾驶车流。</li>
+</ol>
+<h4 id="（四）可解释、可信具身-AI（单-集群通用）"><a href="#（四）可解释、可信具身-AI（单-集群通用）" class="headerlink" title="（四）可解释、可信具身 AI（单 &#x2F; 集群通用）"></a>（四）可解释、可信具身 AI（单 &#x2F; 集群通用）</h4><p>单机器人行为可追溯；集群协同决策、分工逻辑可解释；高风险场景（救援、工业集群）安全约束与标准化验证体系。</p>
+<h4 id="（五）终身持续学习"><a href="#（五）终身持续学习" class="headerlink" title="（五）终身持续学习"></a>（五）终身持续学习</h4><p>单机器人持续更新环境知识；集群实现群体经验共享、跨机器人知识迁移，避免灾难性遗忘。</p>
+<h4 id="（六）人在回路协同学习"><a href="#（六）人在回路协同学习" class="headerlink" title="（六）人在回路协同学习"></a>（六）人在回路协同学习</h4><p>单机器人：少量人类反馈优化操作；集群：人类作为团队管理者 &#x2F; 协作个体，自然语言调整集群任务、干预机器人分工。</p>
+<h4 id="（七）道德、安全与价值对齐"><a href="#（七）道德、安全与价值对齐" class="headerlink" title="（七）道德、安全与价值对齐"></a>（七）道德、安全与价值对齐</h4><p>单机器人规避危险操作；多智能集群杜绝资源抢占、冲突行为，人机协同符合人类伦理安全标准。</p>
+<h1 id="2-工作架构（单智能基础-多集群拓展）"><a href="#2-工作架构（单智能基础-多集群拓展）" class="headerlink" title="2. 工作架构（单智能基础 + 多集群拓展）"></a>2. 工作架构（单智能基础 + 多集群拓展）</h1><h2 id="一、整体两大主流架构路线"><a href="#一、整体两大主流架构路线" class="headerlink" title="一、整体两大主流架构路线"></a>一、整体两大主流架构路线</h2><h3 id="路线-1：传统模块化流水线（2010-年前，单-多智能早期）"><a href="#路线-1：传统模块化流水线（2010-年前，单-多智能早期）" class="headerlink" title="路线 1：传统模块化流水线（2010 年前，单 &#x2F; 多智能早期）"></a>路线 1：传统模块化流水线（2010 年前，单 &#x2F; 多智能早期）</h3><ol>
+<li>单机器人：传感器→SLAM→人工规划→底层控制</li>
+<li>多机器人拓展：多机独立感知→集中式全局规划→各机独立执行<br> 共同痛点：模块割裂、无语义、无物理预判；集群版本算力爆炸、局部观测缺失。</li>
+</ol>
+<h3 id="路线-2：MLLM-世界模型融合端到端架构（2022-至今，单-集群通用）"><a href="#路线-2：MLLM-世界模型融合端到端架构（2022-至今，单-集群通用）" class="headerlink" title="路线 2：MLLM + 世界模型融合端到端架构（2022 至今，单 &#x2F; 集群通用）"></a>路线 2：MLLM + 世界模型融合端到端架构（2022 至今，单 &#x2F; 集群通用）</h3><ol>
+<li>单智能基础链路：多模态感知 ⇌ 大脑 MLLM ⇌ 单智能世界模型 ⇌ 小脑控制 ⇌ 物理环境</li>
+<li>多智能集群拓展链路：全体机器人分布式感知汇总 ⇌ 集群 MLLM 大脑 ⇌ 共享多智能世界模型 ⇌ 各机器人独立小脑控制器 ⇌ 共享物理环境<br> 统一特点：双向循环、语义 + 物理双重约束，支持单机器人自主与多机器人集群协同。</li>
+</ol>
+<h2 id="二、六层完整分层工作架构（含集群拓展）"><a href="#二、六层完整分层工作架构（含集群拓展）" class="headerlink" title="二、六层完整分层工作架构（含集群拓展）"></a>二、六层完整分层工作架构（含集群拓展）</h2><h3 id="第-1-层：硬件本体层（单-集群硬件底座）"><a href="#第-1-层：硬件本体层（单-集群硬件底座）" class="headerlink" title="第 1 层：硬件本体层（单 &#x2F; 集群硬件底座）"></a>第 1 层：硬件本体层（单 &#x2F; 集群硬件底座）</h3><ol>
+<li>单机器人硬件：RGB-D、LiDAR、机械臂、Jetson 边缘算力；</li>
+<li>集群拓展：异构硬件混合集群（无人机 &#x2F; 移动底盘 &#x2F; 机械臂）、分布式边缘计算节点、机器人通信组网模块；<br> 驱动统一适配 ROS2 分布式集群框架。</li>
+</ol>
+<h3 id="第-2-层：主动感知输入层（Table1，分布式感知拓展）"><a href="#第-2-层：主动感知输入层（Table1，分布式感知拓展）" class="headerlink" title="第 2 层：主动感知输入层（Table1，分布式感知拓展）"></a>第 2 层：主动感知输入层（Table1，分布式感知拓展）</h3><p>单机器人：SLAM、3D 场景理解、主动探索；<br>集群拓展：多机器人协同 SLAM、跨机器人特征融合、局部观测信息互通，统一汇总至多模态特征池，同步送入集群 MLLM 与共享世界模型。</p>
+<h3 id="第-3-层：大脑高层具身认知层（Table2，集群大模型拓展）"><a href="#第-3-层：大脑高层具身认知层（Table2，集群大模型拓展）" class="headerlink" title="第 3 层：大脑高层具身认知层（Table2，集群大模型拓展）"></a>第 3 层：大脑高层具身认知层（Table2，集群大模型拓展）</h3><p>单智能：任务自规划、记忆反思、MLLM 单机器人推理；<br>集群拓展：集群 LLM&#x2F;MLLM 新增三大模块</p>
+<ol>
+<li>全局任务拆解：将人类集群指令拆分为并行子任务；</li>
+<li>异构机器人能力匹配：根据各机器人硬件分配对应工作；</li>
+<li>多智能自然语言通信：机器人间互相求助、交换观测信息。</li>
+</ol>
+<h3 id="第-4-层：世界模型-WM-推演层（单-多双分支）"><a href="#第-4-层：世界模型-WM-推演层（单-多双分支）" class="headerlink" title="第 4 层：世界模型 WM 推演层（单 &#x2F; 多双分支）"></a>第 4 层：世界模型 WM 推演层（单 &#x2F; 多双分支）</h3><ol>
+<li>单智能 WM：建模单个物体、局部环境动力学；</li>
+<li>多智能共享 WM：全局统一环境表征，建模所有机器人运动交互、物体与机器人耦合动力学，批量仿真全体机器人协同轨迹，预判碰撞、时序冲突。</li>
+</ol>
+<h3 id="第-5-层：小脑动态交互控制层（Table3，含多智能协同决策）"><a href="#第-5-层：小脑动态交互控制层（Table3，含多智能协同决策）" class="headerlink" title="第 5 层：小脑动态交互控制层（Table3，含多智能协同决策）"></a>第 5 层：小脑动态交互控制层（Table3，含多智能协同决策）</h3><p>单机器人：底层力矩控制、模仿学习动作生成；<br>集群拓展：多智能协同决策分支，分为</p>
+<ol>
+<li>分布式动作输出：各机器人独立执行本地轨迹；</li>
+<li>协同约束修正：根据共享 WM 仿真结果，实时微调所有机器人运动，避免群体冲突；<br> 代表算法：MAPPO、HetGPPO、COMAT。</li>
+</ol>
+<h3 id="第-6-层：环境闭环与终身数据迭代层（集群共享迭代）"><a href="#第-6-层：环境闭环与终身数据迭代层（集群共享迭代）" class="headerlink" title="第 6 层：环境闭环与终身数据迭代层（集群共享迭代）"></a>第 6 层：环境闭环与终身数据迭代层（集群共享迭代）</h3><p>单机器人：自身交互数据更新本地记忆；<br>集群拓展：所有机器人交互数据全局共享，统一更新<strong>共享多智能世界模型</strong>与集群 MLLM 知识库，实现群体经验互通、跨机器人知识迁移；配套集群仿真数据集（Megaverse、Bi-DexHands）用于批量训练。</p>
+<h2 id="三、单机器人-多集群统一协同工作流（示例指令：三台机器人协同整理仓库）"><a href="#三、单机器人-多集群统一协同工作流（示例指令：三台机器人协同整理仓库）" class="headerlink" title="三、单机器人 &#x2F; 多集群统一协同工作流（示例指令：三台机器人协同整理仓库）"></a>三、单机器人 &#x2F; 多集群统一协同工作流（示例指令：三台机器人协同整理仓库）</h2><ol>
+<li>三台机器人分布式采集货架、货物 RGB-D &#x2F; 点云感知数据，汇总至全局特征池；</li>
+<li>集群 MLLM 大脑解析 “三台机器人分区整理货架” 指令，分配 1 号搬运、2 号分拣、3 号堆叠；</li>
+<li>共享多智能世界模型仿真三台机器人同步运动，预判 1、2 号机器人通道交汇碰撞；</li>
+<li>WM 反馈冲突，集群 MLLM 重新调整分区路径与工作时序；</li>
+<li>修正后轨迹下发三台机器人各自小脑控制器，高频平滑执行；</li>
+<li>完成整理后，三台机器人新增环境、货物交互数据全局同步，更新共享世界模型与集群记忆，完成集群学习闭环。</li>
+</ol>
+<h2 id="四、架构对比（新增多智能集群维度）"><a href="#四、架构对比（新增多智能集群维度）" class="headerlink" title="四、架构对比（新增多智能集群维度）"></a>四、架构对比（新增多智能集群维度）</h2><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>传统单机器人模块化</th>
+<th>传统集中式多机器人架构</th>
+<th>MLLM+WM 单智能融合</th>
+<th>MLLM+WM 集群融合架构</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>推理分层</td>
+<td>无大脑小脑</td>
+<td>集中全局规划，无分层</td>
+<td>MLLM 大脑 + WM 物理校验 + 小脑控制</td>
+<td>集群 MLLM 全局大脑 + 共享世界模型 + 各机器人独立小脑</td>
+</tr>
+<tr>
+<td>语义能力</td>
+<td>仅简单规则</td>
+<td>无自然语言理解</td>
+<td>开放域单任务语义</td>
+<td>全局集群指令拆解、机器人语言协商</td>
+</tr>
+<tr>
+<td>物理预判</td>
+<td>无单环境仿真</td>
+<td>无法仿真群体交互</td>
+<td>单动作物理校验</td>
+<td>批量仿真全体机器人协同轨迹，规避集群冲突</td>
+</tr>
+<tr>
+<td>模块耦合</td>
+<td>完全割裂</td>
+<td>中心节点算力瓶颈</td>
+<td>端到端双向闭环</td>
+<td>分布式感知 + 全局统一推演，兼顾算力与协同</td>
+</tr>
+<tr>
+<td>泛化性</td>
+<td>固定场景失效</td>
+<td>仅同构小规模机器人</td>
+<td>单机器人零 &#x2F; 少样本</td>
+<td>支持异构、动态增减机器人团队</td>
+</tr>
+<tr>
+<td>自主进化</td>
+<td>无记忆迭代</td>
+<td>无群体经验共享</td>
+<td>单机终身学习</td>
+<td>集群经验互通，跨机器人知识迁移</td>
+</tr>
+</tbody></table>
+<h2 id="五、架构与论文章节完整映射"><a href="#五、架构与论文章节完整映射" class="headerlink" title="五、架构与论文章节完整映射"></a>五、架构与论文章节完整映射</h2><ol>
+<li>硬件层 + 感知层：论文 II 主动感知 Table1（含多智能协同感知拓展）</li>
+<li>大脑认知层：论文 III MLLM 具身 Table2（新增集群大模型任务分配）</li>
+<li>世界模型层：论文 IV 单 &#x2F; 多智能世界模型</li>
+<li>小脑交互层：论文 VI 动态交互 Table3（多智能协同决策分支）</li>
+<li>MLLM+WM 融合核心：论文 V（单智能）+ 第四章集群具身综述（多智能拓展）</li>
+<li>未来方向：论文第七大方向「集群多智能体具身智能」</li>
+</ol>
+<h1 id="3-搭建具身-AI-全链路实现流程（NVIDIA-流程兼容单-集群）"><a href="#3-搭建具身-AI-全链路实现流程（NVIDIA-流程兼容单-集群）" class="headerlink" title="3. 搭建具身 AI 全链路实现流程（NVIDIA 流程兼容单 &#x2F; 集群）"></a>3. 搭建具身 AI 全链路实现流程（NVIDIA 流程兼容单 &#x2F; 集群）</h1><h2 id="整体三阶段流水线：预训练→后训练仿真微调→实时推理部署"><a href="#整体三阶段流水线：预训练→后训练仿真微调→实时推理部署" class="headerlink" title="整体三阶段流水线：预训练→后训练仿真微调→实时推理部署"></a>整体三阶段流水线：预训练→后训练仿真微调→实时推理部署</h2><h3 id="阶段-1：Pre-training-预训练（单-集群数据统一供给）"><a href="#阶段-1：Pre-training-预训练（单-集群数据统一供给）" class="headerlink" title="阶段 1：Pre-training 预训练（单 &#x2F; 集群数据统一供给）"></a>阶段 1：Pre-training 预训练（单 &#x2F; 集群数据统一供给）</h3><ol>
+<li>互联网通用多模态数据：学习基础视觉、语言常识；</li>
+<li>真机采集数据<br> 单机：机械臂、底盘交互轨迹；<br> 集群：异构机器人协同操作、编队真机数据集；</li>
+<li>仿真 + 世界模型合成数据<br> 单机：单物体、单场景仿真样本；<br> 集群：数字孪生大规模仓储 &#x2F; 车流 &#x2F; 无人机场景，共享多智能世界模型生成海量集群协同合成数据，解决真机集群采集成本极高问题。</li>
+</ol>
+<h3 id="阶段-2：Post-training-仿真专项微调（单-集群双路线）"><a href="#阶段-2：Post-training-仿真专项微调（单-集群双路线）" class="headerlink" title="阶段 2：Post-training 仿真专项微调（单 &#x2F; 集群双路线）"></a>阶段 2：Post-training 仿真专项微调（单 &#x2F; 集群双路线）</h3><ol>
+<li>合成数据扩充：单机随机物体扰动；集群随机机器人数量、位置、任务变更；</li>
+<li>强化学习 RL<br> 单机：单机械臂、导航策略优化；<br> 集群：MARL 多智能强化学习，CTDE 框架训练协同策略；</li>
+<li>模仿学习 IL<br> 单机：人类单设备操作演示；<br> 集群：人类操控多台机器人完成协同任务的演示数据。</li>
+</ol>
+<h3 id="阶段-3：Inferencing-实时推理部署"><a href="#阶段-3：Inferencing-实时推理部署" class="headerlink" title="阶段 3：Inferencing 实时推理部署"></a>阶段 3：Inferencing 实时推理部署</h3><ol>
+<li>单机推理：CV+LLM+VLA 实现单机器人感知规划控制；</li>
+<li>集群分布式推理：<br> 各机器人本地边缘端运行轻量化感知 &#x2F; 小脑控制模块；<br> 云端 &#x2F; 中心算力部署集群 MLLM + 共享多智能世界模型，下发全局协同规划；<br> 通信模块完成机器人间观测、指令实时交互，实现分布式集群端到端推理。</li>
+</ol>
+
+    
+  </article>
+
+  
+      
+    <div class="nexmoe-post-copyright">
+        <strong>本文作者：</strong>HSQ<br>
+        <strong>本文链接：</strong><a href="https://hsqhere.github.io/2026/07/27/%E5%85%B7%E8%BA%AB%E6%99%BA%E8%83%BD-%E9%82%A3%E4%BA%9B%E4%BD%A0%E9%9C%80%E8%A6%81%E4%BA%86%E8%A7%A3%E7%9A%84%E5%A4%A7%E4%BD%93%E6%9E%B6%E6%9E%84/" title="https:&#x2F;&#x2F;hsqhere.github.io&#x2F;2026&#x2F;07&#x2F;27&#x2F;%E5%85%B7%E8%BA%AB%E6%99%BA%E8%83%BD-%E9%82%A3%E4%BA%9B%E4%BD%A0%E9%9C%80%E8%A6%81%E4%BA%86%E8%A7%A3%E7%9A%84%E5%A4%A7%E4%BD%93%E6%9E%B6%E6%9E%84&#x2F;" target="_blank" rel="noopener">https:&#x2F;&#x2F;hsqhere.github.io&#x2F;2026&#x2F;07&#x2F;27&#x2F;%E5%85%B7%E8%BA%AB%E6%99%BA%E8%83%BD-%E9%82%A3%E4%BA%9B%E4%BD%A0%E9%9C%80%E8%A6%81%E4%BA%86%E8%A7%A3%E7%9A%84%E5%A4%A7%E4%BD%93%E6%9E%B6%E6%9E%84&#x2F;</a><br>
+        
+            # <strong>版权声明：</strong>本文采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/cn/deed.zh" target="_blank">CC BY-NC-SA 3.0 CN</a> 协议进行许可
+
+        
+    </div>
+
+
+  
+  
+  <div class="nexmoe-post-meta nexmoe-rainbow">
+   
+    
+        <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E4%B8%96%E7%95%8C%E6%A8%A1%E5%9E%8B/" rel="tag">世界模型</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E5%85%B7%E8%BA%AB%E6%99%BA%E8%83%BD/" rel="tag">具身智能</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E5%A4%9A%E6%A8%A1%E6%80%81/" rel="tag">多模态</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B/" rel="tag">大语言模型</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E6%99%BA%E8%83%BD%E4%BD%93/" rel="tag">智能体</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/%E6%9C%BA%E5%99%A8%E4%BA%BA/" rel="tag">机器人</a>
+    
+</div>
+  
+  
+    <script async src="/js/copy-codeblock.js?v=1787046489540"></script>
+  
+
+  
+      <div class="nexmoe-post-footer">
+          
+      </div>
+  
+</div></div><div class="nexmoe-post-right">    <div class="nexmoe-fixed">
+        <div class="nexmoe-tool">
+
+            
+
+            
+            
+            <button class="mdui-fab catalog" style="overflow:unset;">
+                <i class="nexmoefont icon-i-catalog"></i>
+                <div class="nexmoe-toc">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B7%E8%BA%AB%E6%99%BA%E8%83%BD%E5%AE%8C%E6%95%B4%E7%9F%A5%E8%AF%86%E6%9E%B6%E6%9E%84%EF%BC%88%E5%8D%95%E6%99%BA%E4%BD%93-%E5%A4%9A%E9%9B%86%E7%BE%A4%E5%8F%8C%E4%B8%BB%E7%BA%BF%E8%9E%8D%E5%90%88%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">具身智能完整知识架构（单智体 + 多集群双主线融合）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%8F%91%E5%B1%95%E5%8E%86%E5%8F%B2%E4%BB%A5%E5%8F%8A%E6%9C%AA%E6%9D%A5%E5%B1%95%E6%9C%9B"><span class="toc-number">2.</span> <span class="toc-text">一、发展历史以及未来展望</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5-1%EF%BC%9A%E7%90%86%E8%AE%BA%E5%A5%A0%E5%9F%BA%E4%B8%8E%E6%97%A9%E6%9C%9F%E4%BC%A0%E7%BB%9F%E5%85%B7%E8%BA%AB%E6%99%BA%E8%83%BD%EF%BC%881950s%E2%80%932010s%EF%BC%89"><span class="toc-number">2.1.</span> <span class="toc-text">阶段 1：理论奠基与早期传统具身智能（1950s–2010s）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E7%90%86%E8%AE%BA%E8%B5%B7%E6%BA%90%EF%BC%88%E6%80%9D%E6%83%B3%E6%A0%B9%E5%9F%BA%EF%BC%89"><span class="toc-number">2.1.1.</span> <span class="toc-text">1. 理论起源（思想根基）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E5%B7%A5%E7%A8%8B%E8%90%BD%E5%9C%B0%EF%BC%9A%E8%A1%8C%E4%B8%BA%E6%9C%BA%E5%99%A8%E4%BA%BA%E6%97%B6%E4%BB%A3"><span class="toc-number">2.1.2.</span> <span class="toc-text">2. 工程落地：行为机器人时代</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E6%A0%B8%E5%BF%83%E5%B1%80%E9%99%90"><span class="toc-number">2.1.3.</span> <span class="toc-text">3. 核心局限</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5-2%EF%BC%9A%E5%8D%95%E6%A8%A1%E6%80%81%E5%90%91%E5%A4%9A%E6%A8%A1%E6%80%81%E8%BD%AC%E5%9E%8B%EF%BC%8C%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%B5%8B%E8%83%BD%E4%BC%A0%E7%BB%9F%E5%85%B7%E8%BA%AB%EF%BC%882010%E2%80%932022%EF%BC%89"><span class="toc-number">2.2.</span> <span class="toc-text">阶段 2：单模态向多模态转型，深度学习赋能传统具身（2010–2022）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E6%8A%80%E6%9C%AF%E5%8F%98%E9%9D%A9%EF%BC%9A%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%89%93%E9%80%9A%E5%8D%95%E6%A8%A1%E5%9D%97"><span class="toc-number">2.2.1.</span> <span class="toc-text">1. 技术变革：深度学习打通单模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E8%8C%83%E5%BC%8F%E5%8D%87%E7%BA%A7%EF%BC%9A%E5%A4%9A%E6%A8%A1%E6%80%81%E5%85%B7%E8%BA%AB%E8%AF%9E%E7%94%9F"><span class="toc-number">2.2.2.</span> <span class="toc-text">2. 范式升级：多模态具身诞生</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E6%A0%B8%E5%BF%83%E7%97%9B%E7%82%B9%EF%BC%88%E6%89%BF%E4%B8%8A%E5%90%AF%E4%B8%8B%EF%BC%8C%E5%90%8C%E6%97%B6%E8%A6%86%E7%9B%96%E5%8D%95-%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93%EF%BC%89"><span class="toc-number">2.2.3.</span> <span class="toc-text">3. 核心痛点（承上启下，同时覆盖单 &#x2F; 多智能体）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5-3%EF%BC%9ALLM-MLLM-%E9%A9%B1%E5%8A%A8%E5%85%B7%E8%BA%AB%E6%99%BA%E8%83%BD%EF%BC%882022%E2%80%932024%EF%BC%8C%E8%AF%AD%E4%B9%89%E8%83%BD%E5%8A%9B%E7%88%86%E5%8F%91%E6%9C%9F%EF%BC%89"><span class="toc-number">2.3.</span> <span class="toc-text">阶段 3：LLM&#x2F;MLLM 驱动具身智能（2022–2024，语义能力爆发期）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-%E7%BA%AF-LLM-%E5%8D%95%E6%99%BA%E8%83%BD%E4%BD%93%E8%B7%AF%E7%BA%BF%EF%BC%88SayCan%EF%BC%89"><span class="toc-number">2.3.1.</span> <span class="toc-text">3.1 纯 LLM 单智能体路线（SayCan）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-MLLM-VLA-%E5%8D%95%E6%99%BA%E8%83%BD%E4%BD%93%E8%B7%AF%E7%BA%BF%EF%BC%88RT-2%E3%80%81PaLM-E%E3%80%81Octo%EF%BC%89"><span class="toc-number">2.3.2.</span> <span class="toc-text">3.2 MLLM&#x2F;VLA 单智能体路线（RT-2、PaLM-E、Octo）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-LLM-%E9%A9%B1%E5%8A%A8%E5%A4%9A%E6%99%BA%E8%83%BD%E9%9B%86%E7%BE%A4%EF%BC%88%E5%90%8C%E6%9C%9F%E5%B9%B6%E8%A1%8C%E5%8F%91%E5%B1%95%EF%BC%89"><span class="toc-number">2.3.3.</span> <span class="toc-text">3.3 LLM 驱动多智能集群（同期并行发展）</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B"><span class="toc-number">2.3.3.1.</span> <span class="toc-text">核心能力</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%9B%BA%E6%9C%89%E7%BC%BA%E9%99%B7"><span class="toc-number">2.3.3.2.</span> <span class="toc-text">固有缺陷</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5-4%EF%BC%9A%E4%B8%96%E7%95%8C%E6%A8%A1%E5%9E%8B%EF%BC%88WM%EF%BC%89%E7%8B%AC%E7%AB%8B%E9%A9%B1%E5%8A%A8%E5%85%B7%E8%BA%AB%EF%BC%882018%E2%80%932025%EF%BC%8C%E5%B9%B6%E8%A1%8C%E8%B7%AF%E7%BA%BF%EF%BC%89"><span class="toc-number">2.4.</span> <span class="toc-text">阶段 4：世界模型（WM）独立驱动具身（2018–2025，并行路线）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%8D%95%E6%99%BA%E8%83%BD%E4%B8%96%E7%95%8C%E6%A8%A1%E5%9E%8B%E4%B8%A4%E5%A4%A7%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B"><span class="toc-number">2.4.1.</span> <span class="toc-text">1. 单智能世界模型两大核心能力</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E5%A4%9A%E6%99%BA%E8%83%BD%E5%8D%8F%E5%90%8C%E4%B8%96%E7%95%8C%E6%A8%A1%E5%9E%8B%EF%BC%88%E5%90%8C%E6%9C%9F%E8%A1%8D%E7%94%9F%E6%96%B9%E5%90%91%EF%BC%89"><span class="toc-number">2.4.2.</span> <span class="toc-text">2. 多智能协同世界模型（同期衍生方向）</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B-1"><span class="toc-number">2.4.2.1.</span> <span class="toc-text">核心能力</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%8B%AC%E7%AB%8B%E4%BD%BF%E7%94%A8%E8%87%B4%E5%91%BD%E7%BC%BA%E9%99%B7"><span class="toc-number">2.4.2.2.</span> <span class="toc-text">独立使用致命缺陷</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5-5%EF%BC%9A%E4%B8%8B%E4%B8%80%E4%BB%A3%E6%A0%B8%E5%BF%83%E8%8C%83%E5%BC%8F-%E2%80%94%E2%80%94MLLM-%E4%B8%96%E7%95%8C%E6%A8%A1%E5%9E%8B%E8%9E%8D%E5%90%88%E6%9E%B6%E6%9E%84%EF%BC%88%E5%8D%95-%E5%A4%9A%E6%99%BA%E8%83%BD%E9%80%9A%E7%94%A8%EF%BC%89"><span class="toc-number">2.5.</span> <span class="toc-text">阶段 5：下一代核心范式 ——MLLM + 世界模型融合架构（单 &#x2F; 多智能通用）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#5-1-%E5%8D%95%E6%99%BA%E8%83%BD%E4%BD%93%E8%9E%8D%E5%90%88%E4%BA%92%E8%A1%A5%E9%80%BB%E8%BE%91"><span class="toc-number">2.5.1.</span> <span class="toc-text">5.1 单智能体融合互补逻辑</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-2-%E5%A4%9A%E6%99%BA%E8%83%BD%E9%9B%86%E7%BE%A4%E8%9E%8D%E5%90%88%E6%8B%93%E5%B1%95%E9%80%BB%E8%BE%91%EF%BC%88%E6%96%B0%E5%A2%9E%E9%9B%86%E7%BE%A4%E7%BB%B4%E5%BA%A6%EF%BC%89"><span class="toc-number">2.5.2.</span> <span class="toc-text">5.2 多智能集群融合拓展逻辑（新增集群维度）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-3-%E7%BB%9F%E4%B8%80%E5%AE%8C%E6%95%B4%E9%97%AD%E7%8E%AF%E5%B7%A5%E4%BD%9C%E6%B5%81%EF%BC%88%E5%85%BC%E5%AE%B9%E5%8D%95-%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93%EF%BC%89"><span class="toc-number">2.5.3.</span> <span class="toc-text">5.3 统一完整闭环工作流（兼容单 &#x2F; 多智能体）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-4-%E8%9E%8D%E5%90%88%E6%9E%B6%E6%9E%84%E7%BB%9F%E4%B8%80%E7%8E%B0%E5%AD%98%E6%8C%91%E6%88%98%EF%BC%88%E5%90%AB%E5%8D%95-%E5%A4%9A%E6%99%BA%E8%83%BD%E7%89%B9%E6%9C%89%E9%97%AE%E9%A2%98%EF%BC%89"><span class="toc-number">2.5.4.</span> <span class="toc-text">5.4 融合架构统一现存挑战（含单 + 多智能特有问题）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E8%AE%BA%E6%96%87%E5%AE%8C%E6%95%B4%E6%9C%AA%E6%9D%A5%E7%A0%94%E7%A9%B6%E5%B1%95%E6%9C%9B%EF%BC%88%E4%B8%83%E5%A4%A7%E6%A0%B8%E5%BF%83%E6%96%B9%E5%90%91%EF%BC%8C%E6%95%B4%E5%90%88%E9%9B%86%E7%BE%A4%E5%85%B7%E8%BA%AB%EF%BC%89"><span class="toc-number">2.6.</span> <span class="toc-text">六、论文完整未来研究展望（七大核心方向，整合集群具身）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%88%E4%B8%80%EF%BC%89%E9%80%9A%E7%94%A8%E8%87%AA%E4%B8%BB%E5%8D%95%E5%85%B7%E8%BA%AB%E6%99%BA%E8%83%BD%EF%BC%88%E5%9F%BA%E7%A1%80%E5%BA%95%E5%BA%A7%EF%BC%89"><span class="toc-number">2.6.1.</span> <span class="toc-text">（一）通用自主单具身智能（基础底座）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%88%E4%BA%8C%EF%BC%89%E5%85%B7%E8%BA%AB%E6%99%BA%E8%83%BD%E8%BD%AF%E7%A1%AC%E4%BB%B6%E5%8D%8F%E5%90%8C%EF%BC%88%E5%8D%95-%E9%9B%86%E7%BE%A4%E9%80%9A%E7%94%A8%EF%BC%89"><span class="toc-number">2.6.2.</span> <span class="toc-text">（二）具身智能软硬件协同（单 &#x2F; 集群通用）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%88%E4%B8%89%EF%BC%89%E9%9B%86%E7%BE%A4%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93%E5%85%B7%E8%BA%AB%E6%99%BA%E8%83%BD%EF%BC%88%E6%96%B0%E5%A2%9E%E7%8B%AC%E7%AB%8B%E6%A0%B8%E5%BF%83%E6%96%B9%E5%90%91%EF%BC%89"><span class="toc-number">2.6.3.</span> <span class="toc-text">（三）集群多智能体具身智能（新增独立核心方向）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%88%E5%9B%9B%EF%BC%89%E5%8F%AF%E8%A7%A3%E9%87%8A%E3%80%81%E5%8F%AF%E4%BF%A1%E5%85%B7%E8%BA%AB-AI%EF%BC%88%E5%8D%95-%E9%9B%86%E7%BE%A4%E9%80%9A%E7%94%A8%EF%BC%89"><span class="toc-number">2.6.4.</span> <span class="toc-text">（四）可解释、可信具身 AI（单 &#x2F; 集群通用）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%88%E4%BA%94%EF%BC%89%E7%BB%88%E8%BA%AB%E6%8C%81%E7%BB%AD%E5%AD%A6%E4%B9%A0"><span class="toc-number">2.6.5.</span> <span class="toc-text">（五）终身持续学习</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%88%E5%85%AD%EF%BC%89%E4%BA%BA%E5%9C%A8%E5%9B%9E%E8%B7%AF%E5%8D%8F%E5%90%8C%E5%AD%A6%E4%B9%A0"><span class="toc-number">2.6.6.</span> <span class="toc-text">（六）人在回路协同学习</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%88%E4%B8%83%EF%BC%89%E9%81%93%E5%BE%B7%E3%80%81%E5%AE%89%E5%85%A8%E4%B8%8E%E4%BB%B7%E5%80%BC%E5%AF%B9%E9%BD%90"><span class="toc-number">2.6.7.</span> <span class="toc-text">（七）道德、安全与价值对齐</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%B7%A5%E4%BD%9C%E6%9E%B6%E6%9E%84%EF%BC%88%E5%8D%95%E6%99%BA%E8%83%BD%E5%9F%BA%E7%A1%80-%E5%A4%9A%E9%9B%86%E7%BE%A4%E6%8B%93%E5%B1%95%EF%BC%89"><span class="toc-number">3.</span> <span class="toc-text">2. 工作架构（单智能基础 + 多集群拓展）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%95%B4%E4%BD%93%E4%B8%A4%E5%A4%A7%E4%B8%BB%E6%B5%81%E6%9E%B6%E6%9E%84%E8%B7%AF%E7%BA%BF"><span class="toc-number">3.1.</span> <span class="toc-text">一、整体两大主流架构路线</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B7%AF%E7%BA%BF-1%EF%BC%9A%E4%BC%A0%E7%BB%9F%E6%A8%A1%E5%9D%97%E5%8C%96%E6%B5%81%E6%B0%B4%E7%BA%BF%EF%BC%882010-%E5%B9%B4%E5%89%8D%EF%BC%8C%E5%8D%95-%E5%A4%9A%E6%99%BA%E8%83%BD%E6%97%A9%E6%9C%9F%EF%BC%89"><span class="toc-number">3.1.1.</span> <span class="toc-text">路线 1：传统模块化流水线（2010 年前，单 &#x2F; 多智能早期）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B7%AF%E7%BA%BF-2%EF%BC%9AMLLM-%E4%B8%96%E7%95%8C%E6%A8%A1%E5%9E%8B%E8%9E%8D%E5%90%88%E7%AB%AF%E5%88%B0%E7%AB%AF%E6%9E%B6%E6%9E%84%EF%BC%882022-%E8%87%B3%E4%BB%8A%EF%BC%8C%E5%8D%95-%E9%9B%86%E7%BE%A4%E9%80%9A%E7%94%A8%EF%BC%89"><span class="toc-number">3.1.2.</span> <span class="toc-text">路线 2：MLLM + 世界模型融合端到端架构（2022 至今，单 &#x2F; 集群通用）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%85%AD%E5%B1%82%E5%AE%8C%E6%95%B4%E5%88%86%E5%B1%82%E5%B7%A5%E4%BD%9C%E6%9E%B6%E6%9E%84%EF%BC%88%E5%90%AB%E9%9B%86%E7%BE%A4%E6%8B%93%E5%B1%95%EF%BC%89"><span class="toc-number">3.2.</span> <span class="toc-text">二、六层完整分层工作架构（含集群拓展）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC-1-%E5%B1%82%EF%BC%9A%E7%A1%AC%E4%BB%B6%E6%9C%AC%E4%BD%93%E5%B1%82%EF%BC%88%E5%8D%95-%E9%9B%86%E7%BE%A4%E7%A1%AC%E4%BB%B6%E5%BA%95%E5%BA%A7%EF%BC%89"><span class="toc-number">3.2.1.</span> <span class="toc-text">第 1 层：硬件本体层（单 &#x2F; 集群硬件底座）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC-2-%E5%B1%82%EF%BC%9A%E4%B8%BB%E5%8A%A8%E6%84%9F%E7%9F%A5%E8%BE%93%E5%85%A5%E5%B1%82%EF%BC%88Table1%EF%BC%8C%E5%88%86%E5%B8%83%E5%BC%8F%E6%84%9F%E7%9F%A5%E6%8B%93%E5%B1%95%EF%BC%89"><span class="toc-number">3.2.2.</span> <span class="toc-text">第 2 层：主动感知输入层（Table1，分布式感知拓展）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC-3-%E5%B1%82%EF%BC%9A%E5%A4%A7%E8%84%91%E9%AB%98%E5%B1%82%E5%85%B7%E8%BA%AB%E8%AE%A4%E7%9F%A5%E5%B1%82%EF%BC%88Table2%EF%BC%8C%E9%9B%86%E7%BE%A4%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%8B%93%E5%B1%95%EF%BC%89"><span class="toc-number">3.2.3.</span> <span class="toc-text">第 3 层：大脑高层具身认知层（Table2，集群大模型拓展）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC-4-%E5%B1%82%EF%BC%9A%E4%B8%96%E7%95%8C%E6%A8%A1%E5%9E%8B-WM-%E6%8E%A8%E6%BC%94%E5%B1%82%EF%BC%88%E5%8D%95-%E5%A4%9A%E5%8F%8C%E5%88%86%E6%94%AF%EF%BC%89"><span class="toc-number">3.2.4.</span> <span class="toc-text">第 4 层：世界模型 WM 推演层（单 &#x2F; 多双分支）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC-5-%E5%B1%82%EF%BC%9A%E5%B0%8F%E8%84%91%E5%8A%A8%E6%80%81%E4%BA%A4%E4%BA%92%E6%8E%A7%E5%88%B6%E5%B1%82%EF%BC%88Table3%EF%BC%8C%E5%90%AB%E5%A4%9A%E6%99%BA%E8%83%BD%E5%8D%8F%E5%90%8C%E5%86%B3%E7%AD%96%EF%BC%89"><span class="toc-number">3.2.5.</span> <span class="toc-text">第 5 层：小脑动态交互控制层（Table3，含多智能协同决策）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC-6-%E5%B1%82%EF%BC%9A%E7%8E%AF%E5%A2%83%E9%97%AD%E7%8E%AF%E4%B8%8E%E7%BB%88%E8%BA%AB%E6%95%B0%E6%8D%AE%E8%BF%AD%E4%BB%A3%E5%B1%82%EF%BC%88%E9%9B%86%E7%BE%A4%E5%85%B1%E4%BA%AB%E8%BF%AD%E4%BB%A3%EF%BC%89"><span class="toc-number">3.2.6.</span> <span class="toc-text">第 6 层：环境闭环与终身数据迭代层（集群共享迭代）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%8D%95%E6%9C%BA%E5%99%A8%E4%BA%BA-%E5%A4%9A%E9%9B%86%E7%BE%A4%E7%BB%9F%E4%B8%80%E5%8D%8F%E5%90%8C%E5%B7%A5%E4%BD%9C%E6%B5%81%EF%BC%88%E7%A4%BA%E4%BE%8B%E6%8C%87%E4%BB%A4%EF%BC%9A%E4%B8%89%E5%8F%B0%E6%9C%BA%E5%99%A8%E4%BA%BA%E5%8D%8F%E5%90%8C%E6%95%B4%E7%90%86%E4%BB%93%E5%BA%93%EF%BC%89"><span class="toc-number">3.3.</span> <span class="toc-text">三、单机器人 &#x2F; 多集群统一协同工作流（示例指令：三台机器人协同整理仓库）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%9E%B6%E6%9E%84%E5%AF%B9%E6%AF%94%EF%BC%88%E6%96%B0%E5%A2%9E%E5%A4%9A%E6%99%BA%E8%83%BD%E9%9B%86%E7%BE%A4%E7%BB%B4%E5%BA%A6%EF%BC%89"><span class="toc-number">3.4.</span> <span class="toc-text">四、架构对比（新增多智能集群维度）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%9E%B6%E6%9E%84%E4%B8%8E%E8%AE%BA%E6%96%87%E7%AB%A0%E8%8A%82%E5%AE%8C%E6%95%B4%E6%98%A0%E5%B0%84"><span class="toc-number">3.5.</span> <span class="toc-text">五、架构与论文章节完整映射</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%90%AD%E5%BB%BA%E5%85%B7%E8%BA%AB-AI-%E5%85%A8%E9%93%BE%E8%B7%AF%E5%AE%9E%E7%8E%B0%E6%B5%81%E7%A8%8B%EF%BC%88NVIDIA-%E6%B5%81%E7%A8%8B%E5%85%BC%E5%AE%B9%E5%8D%95-%E9%9B%86%E7%BE%A4%EF%BC%89"><span class="toc-number">4.</span> <span class="toc-text">3. 搭建具身 AI 全链路实现流程（NVIDIA 流程兼容单 &#x2F; 集群）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E4%B8%89%E9%98%B6%E6%AE%B5%E6%B5%81%E6%B0%B4%E7%BA%BF%EF%BC%9A%E9%A2%84%E8%AE%AD%E7%BB%83%E2%86%92%E5%90%8E%E8%AE%AD%E7%BB%83%E4%BB%BF%E7%9C%9F%E5%BE%AE%E8%B0%83%E2%86%92%E5%AE%9E%E6%97%B6%E6%8E%A8%E7%90%86%E9%83%A8%E7%BD%B2"><span class="toc-number">4.1.</span> <span class="toc-text">整体三阶段流水线：预训练→后训练仿真微调→实时推理部署</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5-1%EF%BC%9APre-training-%E9%A2%84%E8%AE%AD%E7%BB%83%EF%BC%88%E5%8D%95-%E9%9B%86%E7%BE%A4%E6%95%B0%E6%8D%AE%E7%BB%9F%E4%B8%80%E4%BE%9B%E7%BB%99%EF%BC%89"><span class="toc-number">4.1.1.</span> <span class="toc-text">阶段 1：Pre-training 预训练（单 &#x2F; 集群数据统一供给）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5-2%EF%BC%9APost-training-%E4%BB%BF%E7%9C%9F%E4%B8%93%E9%A1%B9%E5%BE%AE%E8%B0%83%EF%BC%88%E5%8D%95-%E9%9B%86%E7%BE%A4%E5%8F%8C%E8%B7%AF%E7%BA%BF%EF%BC%89"><span class="toc-number">4.1.2.</span> <span class="toc-text">阶段 2：Post-training 仿真专项微调（单 &#x2F; 集群双路线）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5-3%EF%BC%9AInferencing-%E5%AE%9E%E6%97%B6%E6%8E%A8%E7%90%86%E9%83%A8%E7%BD%B2"><span class="toc-number">4.1.3.</span> <span class="toc-text">阶段 3：Inferencing 实时推理部署</span></a></li></ol></li></ol></li></ol>
+                </div>
+            </button>
+            
+
+            
+
+            <a href="#nexmoe-content" class="backtop toc-link" aria-label="Back To Top" title="top"><button class="mdui-fab mdui-ripple"><i class="nexmoefont icon-caret-top"></i></button></a>
+        </div>
+    </div>
+</div></div><div id="nexmoe-footer"><!--!--></div><div id="nexmoe-search-space"><div class="search-container"><div class="search-header"><div class="search-input-container"><input class="search-input" type="text" placeholder="搜索" onInput="sinput();"></div><a class="search-close" onclick="sclose();">×</a></div><div class="search-body"></div></div></div><div><div id="aplayer" style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;"></div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // --- APlayer 音乐播放器部分 ---
+    const ap = new APlayer({
+      container: document.getElementById('aplayer'),
+      fixed: true,
+      autoplay: false,
+      theme: '#22d9df',
+      loop: 'all',
+      order: 'random',
+      preload: 'auto',
+      volume: 0.2,
+      mutex: true,
+      lrcType: 0,
+      audio: [
+        {
+          name: '那么骄傲',
+          artist: '茜茜',
+          url: '/music/那么骄傲 - 茜茜.mp3', 
+          cover: '/music/cover茜茜.jpg',
+          lrc: '[00:00.00]暂无歌词'
+        }
+      ]
+    });
+
+    // --- Twikoo 评论系统部分 ---
+    if (window.location.pathname.match(/\/\d{4}\/\d{2}\/\d{2}\//) || 
+        document.querySelector('article.post') || 
+        document.body.classList.contains('post-template')) {
+      
+      let talkContainer = document.getElementById('tcomment');
+      if (!talkContainer) {
+        const article = document.querySelector('article') || 
+                        document.querySelector('.nexmoe-post') || 
+                        document.querySelector('.post-content') ||
+                        document.querySelector('main');
+        if (article) {
+          talkContainer = document.createElement('div');
+          talkContainer.id = 'tcomment';
+          article.insertAdjacentElement('afterend', talkContainer);
+        }
+      }
+      
+      if (talkContainer && typeof twikoo !== 'undefined') {
+        twikoo.init({
+          envId: 'https://hsqblog.netlify.app/.netlify/functions/twikoo',
+          el: '#tcomment',
+          path: window.location.pathname,
+          lang: 'zh-CN'
+        });
+      }
+    }
+  });
+
+  // --- 朋友卡片解锁逻辑 ---
+  async function unlock(id, correctHash) {
+    const input = document.getElementById('input-' + id).value;
+    const msgUint8 = new TextEncoder().encode(input);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+    if (hashHex === correctHash) {
+        document.getElementById('lock-' + id).style.display = 'none';
+        const imgDiv = document.getElementById('img-' + id);
+        imgDiv.style.display = 'block';
+        setTimeout(() => imgDiv.style.opacity = "1", 10);
+    } else {
+        const err = document.getElementById('err-' + id);
+        err.style.display = 'block';
+        setTimeout(() => err.style.display = 'none', 2000);
+    }
+  }
+</script>
+</div></body></html>
