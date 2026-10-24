@@ -314,26 +314,66 @@ function initGrowthLine() {
 }
 
 /* ------------------------------------------------------------------ *
- * 5. digital clock — text, not a clock face
+ * 5. LED clock — seven-segment digits, never a clock face
  * ------------------------------------------------------------------ */
 
 const WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 const pad = (n: number) => String(n).padStart(2, '0');
+
+/** which of the seven segments each glyph lights up */
+const SEG_MAP: Record<string, string> = {
+  '0': 'abcdef',
+  '1': 'bc',
+  '2': 'abdeg',
+  '3': 'abcdg',
+  '4': 'bcfg',
+  '5': 'acdfg',
+  '6': 'acdefg',
+  '7': 'abc',
+  '8': 'abcdefg',
+  '9': 'abcdfg',
+  '-': 'g',
+  ' ': '',
+};
+
+function paintDigit(el: HTMLElement, ch: string) {
+  const lit = SEG_MAP[ch] ?? '';
+  el.querySelectorAll<HTMLElement>('[data-sg]').forEach((seg) => {
+    seg.classList.toggle('on', lit.includes(seg.dataset.sg || ''));
+  });
+}
+
+function paintColon(el: HTMLElement, on: boolean) {
+  el.classList.toggle('is-on', on);
+}
 
 function tickClock() {
   const now = new Date();
   const hh = pad(now.getHours());
   const mm = pad(now.getMinutes());
   const ss = pad(now.getSeconds());
+  const stamp = `${hh}:${mm}`;
+
+  /* seven-segment digits: h1 h2 m1 m2 s1 s2 */
+  const digits = hh + mm + ss;
+  document.querySelectorAll<HTMLElement>('[data-led]').forEach((el, i) => {
+    paintDigit(el, digits[i] ?? ' ');
+  });
+
+  /* the two colons blink once a second — the classic digital-watch tell */
+  const blink = now.getSeconds() % 2 === 0;
+  document.querySelectorAll<HTMLElement>('[data-colon]').forEach((el, i) => {
+    paintColon(el, i === 1 ? true : blink);
+  });
 
   document.querySelectorAll<HTMLElement>('[data-clock-time]').forEach((el) => {
-    el.textContent = `${hh}:${mm}`;
+    el.textContent = stamp;
   });
   document.querySelectorAll<HTMLElement>('[data-clock-sec]').forEach((el) => {
     el.textContent = ss;
   });
   document.querySelectorAll<HTMLElement>('[data-clock-date]').forEach((el) => {
-    el.textContent = `${now.getFullYear()} 年 ${now.getMonth() + 1} 月 ${now.getDate()} 日 · ${WEEK[now.getDay()]}`;
+    el.textContent = `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())} ${WEEK[now.getDay()]}`;
   });
   document.querySelectorAll<HTMLElement>('[data-clock-greet]').forEach((el) => {
     const h = now.getHours();
@@ -346,7 +386,6 @@ function initClock() {
   tickClock();
   window.setInterval(tickClock, 1000);
 }
-
 /* ------------------------------------------------------------------ *
  * 6. 一言 — local fallback paints first, network never blocks
  * ------------------------------------------------------------------ */
@@ -496,38 +535,211 @@ function initIntro() {
 }
 
 /* ------------------------------------------------------------------ *
- * 8. tape widget — local audio, three-bar meter
+ * 8. cassette — three local tracks, spinning reels, prev / next
  * ------------------------------------------------------------------ */
 
+type Track = { title: string; artist: string; src: string; cover: string };
+
 function initTape() {
-  const btn = document.querySelector<HTMLButtonElement>('[data-tape-toggle]');
-  const audio = document.querySelector<HTMLAudioElement>('[data-tape-audio]');
   const shell = document.querySelector<HTMLElement>('[data-tape]');
-  if (!btn || !audio) return;
+  const audio = document.querySelector<HTMLAudioElement>('[data-tape-audio]');
+  const listEl = document.querySelector<HTMLElement>('[data-tape-list]');
+  const btn = document.querySelector<HTMLButtonElement>('[data-tape-toggle]');
+  const prevBtn = document.querySelector<HTMLButtonElement>('[data-tape-prev]');
+  const nextBtn = document.querySelector<HTMLButtonElement>('[data-tape-next]');
+  if (!shell || !audio || !btn) return;
+
+  let tracks: Track[] = [];
+  try {
+    tracks = JSON.parse(listEl?.textContent || '[]') as Track[];
+  } catch {
+    tracks = [];
+  }
+  if (!tracks.length) return;
+
+  const titleEl = shell.querySelector<HTMLElement>('[data-tape-title]');
+  const artistEl = shell.querySelector<HTMLElement>('[data-tape-artist]');
+  const idxEl = shell.querySelector<HTMLElement>('[data-tape-idx]');
+  const reels = Array.from(shell.querySelectorAll<HTMLElement>('[data-reel]'));
+
+  let index = 0;
+  let spin = 0;
+  let reelTimer = 0;
+  let reelRunning = false;
+  let colonTimer = 0;
+
+  const paintTrack = () => {
+    const t = tracks[index];
+    if (titleEl) titleEl.textContent = t.title;
+    if (artistEl) artistEl.textContent = t.artist;
+    if (idxEl) idxEl.textContent = `${index + 1} / ${tracks.length}`;
+    audio.src = t.src;
+    shell.dataset.tapeIndex = String(index);
+  };
+
+  /* reels advance only while audio is actually running; the loop kills itself */
+  const spinReels = () => {
+    if (reelRunning) return;
+    reelRunning = true;
+    const perFrame = 2.6;
+    reelTimer = window.setInterval(() => {
+      spin = (spin + perFrame) % 360;
+      reels.forEach((r, i) => {
+        r.style.setProperty('--spin', `${(i === 0 ? spin : spin * 0.86).toFixed(1)}deg`);
+      });
+      if (audio.paused || audio.ended) {
+        reelRunning = false;
+        clearInterval(reelTimer);
+      }
+    }, 16);
+  };
+
+  const stopReels = () => {
+    reelRunning = false;
+    clearInterval(reelTimer);
+  };
 
   const sync = () => {
     const playing = !audio.paused && !audio.ended;
     btn.setAttribute('aria-pressed', String(playing));
     btn.setAttribute('aria-label', playing ? '暂停音乐' : '播放音乐');
-    shell?.classList.toggle('is-playing', playing);
+    shell.classList.toggle('is-playing', playing);
+    if (playing) {
+      spinReels();
+      /* the LED-ish "REC" dot next to the counter blinks while playing */
+      clearInterval(colonTimer);
+      let on = true;
+      colonTimer = window.setInterval(() => {
+        on = !on;
+        shell.style.setProperty('--rec', on ? '1' : '.25');
+      }, 620);
+    } else {
+      stopReels();
+      clearInterval(colonTimer);
+      shell.style.setProperty('--rec', '1');
+    }
+  };
+
+  const play = () => {
+    void audio.play().catch(() => {
+      /* autoplay policies — the user can try again */
+    });
+  };
+
+  const step = (dir: number) => {
+    const wasPlaying = !audio.paused && !audio.ended;
+    index = (index + dir + tracks.length) % tracks.length;
+    paintTrack();
+    if (wasPlaying) play();
   };
 
   btn.addEventListener('click', () => {
-    if (audio.paused) {
-      void audio.play().catch(() => {
-        /* autoplay policies — the user can try again */
-      });
-    } else {
-      audio.pause();
-    }
+    if (audio.paused) play();
+    else audio.pause();
   });
+  prevBtn?.addEventListener('click', () => step(-1));
+  nextBtn?.addEventListener('click', () => step(1));
 
   audio.addEventListener('play', sync);
   audio.addEventListener('pause', sync);
-  audio.addEventListener('ended', sync);
+  audio.addEventListener('ended', () => {
+    /* a cassette auto-reverses: roll on to the next track */
+    index = (index + 1) % tracks.length;
+    paintTrack();
+    play();
+  });
+
+  paintTrack();
   sync();
 }
 
+/* ------------------------------------------------------------------ *
+ * 8b. sticky note — the TODO list drifts down, holds, drifts back up
+ * ------------------------------------------------------------------ */
+
+function initNoteScroll() {
+  const view = document.querySelector<HTMLElement>('[data-note-view]');
+  const list = document.querySelector<HTMLElement>('[data-note-list]');
+  if (!view || !list || prefersReduced()) return;
+
+  if (list.children.length < 2) return;
+
+  const SPEED = 0.28;   /* px per 16ms frame */
+  const HOLD = 1100;    /* ms parked at each end */
+
+  let offset = 0;
+  let dir = -1;         /* -1 = drifting up (content moves up), 1 = back down */
+  let hold = HOLD;
+  let running = false;
+  let id = 0;
+  let hovering = false;
+
+  const span = () => Math.max(0, list.scrollHeight - view.clientHeight);
+
+  const apply = () => {
+    const limit = span();
+    if (limit <= 0) {
+      running = false;
+      clearInterval(id);
+      return;
+    }
+
+    if (hold > 0) {
+      hold -= 16;
+      return;
+    }
+
+    offset += dir * SPEED;
+
+    if (offset <= -limit) {
+      offset = -limit;
+      dir = 1;
+      hold = HOLD;
+    } else if (offset >= 0) {
+      offset = 0;
+      dir = -1;
+      hold = HOLD;
+    }
+
+    view.style.setProperty('--nt', `${offset.toFixed(2)}px`);
+  };
+
+  const kick = () => {
+    if (running || hovering) return;
+    running = true;
+    id = window.setInterval(apply, 16);
+  };
+
+  const stop = () => {
+    running = false;
+    clearInterval(id);
+  };
+
+  view.addEventListener('pointerenter', () => {
+    hovering = true;
+    stop();
+  });
+  view.addEventListener('pointerleave', () => {
+    hovering = false;
+    kick();
+  });
+  view.addEventListener('focusin', () => {
+    hovering = true;
+    stop();
+  });
+  view.addEventListener('focusout', () => {
+    hovering = false;
+    kick();
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop();
+    else kick();
+  });
+
+  /* let the note land before it starts moving */
+  later(kick, 1800);
+}
 /* ------------------------------------------------------------------ *
  * 9. progress bars — width written from data-value
  * ------------------------------------------------------------------ */
@@ -564,6 +776,7 @@ export function initMotion() {
   initQuote();
   initIntro();
   initTape();
+  initNoteScroll();
   initBars();
 }
 

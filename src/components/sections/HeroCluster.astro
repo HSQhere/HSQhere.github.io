@@ -285,7 +285,7 @@ const quotes = site.quotes.map((q) => `${q.text}##${q.from}`).join('|||');
     left: 50%;
     top: 50%;
     z-index: 2;
-    width: clamp(196px, 17vw, 236px);
+    width: clamp(250px, 22vw, 330px);
     transform:
       translate(-50%, -50%)
       translate(calc(var(--x) * var(--rs, 1)), calc(var(--y) * var(--rs, 1)))
@@ -399,36 +399,48 @@ const quotes = site.quotes.map((q) => `${q.text}##${q.from}`).join('|||');
     }
     .hero__pet {
       position: static;
-      width: min(280px, 100%);
+      width: min(320px, 100%);
       transform: none;
       margin-top: var(--s-7);
       justify-self: center;
     }
 
-    /* The scatter cannot survive a narrow screen, but the widgets themselves
-       should not vanish: they become an overlapping strip under the name,
-       still at their own angles so the desk feeling is kept. */
+    /* The scatter cannot survive a narrow screen. Instead of an overlapping
+       strip (which let the polaroid slide under the note) the desk becomes a
+       plain two-column grid: no negative margins, no collision, the angles are
+       kept only as a slight tilt. */
     .hero__ring {
       position: static;
-      width: min(34rem, 100% - var(--s-6));
+      width: min(36rem, 100% - var(--s-6));
       height: auto;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
-      gap: var(--s-3);
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      justify-items: center;
+      align-items: start;
+      gap: var(--s-4) var(--s-3);
       margin-top: var(--s-6);
       pointer-events: auto;
     }
     .hero__ring :global(.w) {
       position: static;
-      transform: rotate(var(--rot)) scale(calc(var(--scale) * .92));
-      margin-inline: -6px;
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      transform: rotate(calc(var(--rot) * .5));
     }
     .hero__ring :global(.w--tag),
-    .hero__ring :global(.w--pin),
     .hero__ring :global(.w--search) { display: none; }
-    .hero__ring :global(.w--note) { order: 3; }
+  }
+  @media (max-width: 620px) {
+    .hero__ring {
+      width: 100%;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--s-3);
+      /* the polaroid's photo slides out ~88px below its box — reserve room
+         so .hero { overflow: clip } never cuts it off on phones */
+      padding-bottom: 96px;
+    }
+    .hero__ring :global(.w) { transform: none; }
   }
   @media (max-width: 620px) {
     .hero__title { font-size: clamp(1.8rem, 8vw, 2.4rem); }

@@ -33,7 +33,6 @@ export const site = {
     { href: '/archive/', label: '日志' },
     { href: '/gallery/', label: '图库' },
     { href: '/plan/', label: '计划' },
-    { href: '/friends/', label: '朋友' },
     { href: '/about/', label: '关于' },
   ],
   /** 便当格板块入口 —— 首页下滑区域 */
@@ -41,7 +40,6 @@ export const site = {
     { id: 'archive', href: '/archive/', label: '日志', desc: '电控、算法、机器人，还有一些不太好分类的东西。', accent: 'mint' },
     { id: 'gallery', href: '/gallery/', label: '图库', desc: '用色彩和明暗记录的一瞬间。', accent: 'peach' },
     { id: 'plan', href: '/plan/', label: '计划', desc: '正在进行和已经完成的事。', accent: 'lilac' },
-    { id: 'friends', href: '/friends/', label: '朋友', desc: '每一个朋友都是我与世界的羁绊。', accent: 'sky' },
     { id: 'about', href: '/about/', label: '关于', desc: '我是谁，在做什么。', accent: 'sun' },
     { id: 'search', href: '/search/', label: '搜索', desc: '快速找到一篇文章。', accent: 'mint' },
   ],

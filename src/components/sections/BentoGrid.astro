@@ -5,7 +5,6 @@
  */
 import { Image } from 'astro:assets';
 import lakeSm from '../../assets/lake-sm.webp';
-import catAvatar from '../../assets/cat-avatar.webp';
 import { site } from '../../lib/site';
 import { getEntry } from 'astro:content';
 import { getPosts, postPath, collectTags, readingTime } from '../../lib/posts';
@@ -74,14 +73,9 @@ const planTop = planGroups.flatMap((g) => g.tasks).slice(0, 4);
 
     <!-- 图库 -->
     <article class="card card--gallery" data-reveal="2">
-      <div class="card__shots">
-        <a class="shot shot--wide" href="/gallery/">
-          <Image src={lakeSm} alt="山与湖" widths={[240, 480]} sizes="240px" loading="lazy" />
-        </a>
-        <a class="shot shot--tall" href="/gallery/">
-          <Image src={catAvatar} alt="猫" widths={[160, 320]} sizes="160px" loading="lazy" />
-        </a>
-      </div>
+      <a class="card__shot" href="/gallery/">
+        <Image src={lakeSm} alt="山与湖" widths={[320, 640]} sizes="(max-width: 620px) 100vw, 40vw" loading="lazy" />
+      </a>
       <p class="card__badge">图库</p>
       <p class="card__desc">用色彩和明暗记录的一瞬间。</p>
       <a class="card__go" href="/gallery/">去看看 →</a>
@@ -100,18 +94,9 @@ const planTop = planGroups.flatMap((g) => g.tasks).slice(0, 4);
       <a class="card__go" href="/plan/">看全部 →</a>
     </article>
 
-    <!-- 朋友 -->
-    <article class="card card--friends" data-reveal="4">
-      <p class="card__badge">朋友</p>
-      <ul class="card__faces" aria-hidden="true">
-        <li>🐱</li><li>🐻</li><li>🐹</li><li>🦊</li><li>+</li>
-      </ul>
-      <p class="card__desc">每一个朋友都是我与世界的羁绊。</p>
-      <a class="card__go" href="/friends/">串门 →</a>
-    </article>
 
     <!-- 关于 -->
-    <article class="card card--about" data-reveal="5">
+    <article class="card card--about" data-reveal="4">
       <p class="card__badge">关于</p>
       <p class="card__desc">{site.author.bio}</p>
       <ul class="card__meta">
@@ -123,14 +108,14 @@ const planTop = planGroups.flatMap((g) => g.tasks).slice(0, 4);
     </article>
 
     <!-- 搜索 -->
-    <article class="card card--search" data-reveal="6">
+    <article class="card card--search" data-reveal="5">
       <p class="card__badge">搜索</p>
       <p class="card__desc">标题、标签、摘要都能搜。</p>
       <a class="card__searchbtn" href="/search/">打开搜索 ⌘K</a>
     </article>
 
     <!-- 成长路径 -->
-    <article class="card card--path" data-reveal="7">
+    <article class="card card--path" data-reveal="6">
       <p class="card__badge">成长路径</p>
       <div class="card__track">
         <i class="card__line" data-growth-line aria-hidden="true"></i>
@@ -220,7 +205,6 @@ const planTop = planGroups.flatMap((g) => g.tasks).slice(0, 4);
   }
   .card--gallery .card__badge { background: var(--peach-soft); color: #b46a4a; }
   .card--plan .card__badge { background: var(--lilac); color: #5b5680; }
-  .card--friends .card__badge { background: var(--sky); color: #46698f; }
   .card--about .card__badge { background: var(--sun); color: #96702f; }
   .card--search .card__badge { background: var(--mint-soft); color: var(--mint-deep); }
   .card--path .card__badge { background: var(--paper-3); color: var(--ink-soft); }
@@ -236,7 +220,7 @@ const planTop = planGroups.flatMap((g) => g.tasks).slice(0, 4);
   .card__big em { font-size: var(--fs-sm); font-style: normal; color: var(--ink-faint); }
   .card__desc { margin: 0; font-size: var(--fs-xs); color: var(--ink-soft); line-height: 1.7; }
 
-  .card__tags, .card__latest, .card__faces, .card__meta, .card__tasks, .card__steps {
+  .card__tags, .card__latest, .card__meta, .card__tasks, .card__steps {
     list-style: none; margin: 0; padding: 0;
   }
   .card__tags { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -295,12 +279,15 @@ const planTop = planGroups.flatMap((g) => g.tasks).slice(0, 4);
   }
   .card__go:hover { text-decoration: underline; }
 
-  /* gallery shots */
-  .card__shots { display: flex; gap: var(--s-2); margin-bottom: var(--s-2); }
-  .shot { display: block; border-radius: var(--r-sm); overflow: hidden; }
-  .shot :global(img) { display: block; width: 100%; height: 100%; object-fit: cover; }
-  .shot--wide { flex: 1; height: 84px; }
-  .shot--tall { width: 66px; height: 84px; }
+  /* gallery shot */
+  .card__shot {
+    display: block;
+    border-radius: var(--r-sm);
+    overflow: hidden;
+    margin-bottom: var(--s-2);
+    background: var(--paper-3);
+  }
+  .card__shot :global(img) { display: block; width: 100%; height: 104px; object-fit: cover; }
 
   /* plan */
   .card__tasks { font-size: var(--fs-xs); line-height: 1.95; color: var(--ink-soft); }
@@ -312,19 +299,6 @@ const planTop = planGroups.flatMap((g) => g.tasks).slice(0, 4);
   .card__progress i { display: block; height: 100%; width: 100%; transform-origin: left; border-radius: var(--r-pill); background: var(--mint); }
   .card__pct { margin: 0; font-size: 11px; color: var(--ink-faint); }
 
-  /* friends */
-  .card__faces { display: flex; }
-  .card__faces li {
-    width: 32px; height: 32px;
-    display: grid; place-items: center;
-    margin-left: -8px;
-    border-radius: var(--r-pill);
-    background: var(--paper);
-    border: 2px solid var(--paper);
-    box-shadow: 0 2px 8px rgba(52, 56, 63, .1);
-    font-size: var(--fs-sm);
-  }
-  .card__faces li:first-child { margin-left: 0; }
 
   /* about */
   .card__meta { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -366,16 +340,18 @@ const planTop = planGroups.flatMap((g) => g.tasks).slice(0, 4);
   /* spans */
   .card--log { grid-column: span 2; grid-row: span 2; }
   .card--gallery { grid-column: span 2; }
+  .card--search { grid-column: span 2; }
   .card--path { grid-column: span 2; }
 
   @media (max-width: 1024px) {
     .bento__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .card--log { grid-column: span 2; grid-row: auto; }
-    .card--gallery { grid-column: span 1; }
+    .card--gallery { grid-column: span 2; }
+    .card--search { grid-column: span 2; }
     .card--path { grid-column: span 2; }
   }
   @media (max-width: 620px) {
     .bento__grid { grid-template-columns: minmax(0, 1fr); }
-    .card--log, .card--gallery, .card--path { grid-column: span 1; }
+    .card--log, .card--gallery, .card--search, .card--path { grid-column: span 1; }
   }
 </style>

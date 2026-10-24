@@ -1,22 +1,18 @@
 /**
  * gallery.ts — album metadata plus the asset map.
  *
- * Only two albums actually have photos on disk (`sun`, `friends`); the other
- * five albums in the old site referenced images that were never committed, so
- * they are simply not listed. Nothing here ever points at a missing file: every
- * entry is resolved through import.meta.glob and dropped when absent.
+ * Only one album actually has photos on disk (`sun`); the other six albums in
+ * the old site referenced images that were never committed, so they are simply
+ * not listed. Nothing here ever points at a missing file: every entry is
+ * resolved through import.meta.glob and dropped when absent.
  */
 import type { ImageMetadata } from 'astro';
 
-// Negation patterns keep the 17 never-referenced 微信图片_* originals out of the
+// A negation pattern keeps the never-referenced 微信图片_* originals out of the
 // bundle: an eager glob pulls every match through the image pipeline, so files
 // that no album lists would otherwise ship ~3.7 MB of dead weight to dist.
 const sunFiles = import.meta.glob<ImageMetadata>(
   ['../assets/gallery/sun/*.{jpg,jpeg,png,webp}', '!../assets/gallery/sun/微信图片_*'],
-  { eager: true, import: 'default' }
-);
-const friendFiles = import.meta.glob<ImageMetadata>(
-  ['../assets/gallery/friends/**/*.{jpg,jpeg,png,webp}', '!../assets/gallery/friends/微信图片_*'],
   { eager: true, import: 'default' }
 );
 
@@ -30,7 +26,6 @@ const byBase = (files: Record<string, ImageMetadata>) => {
 };
 
 const sun = byBase(sunFiles);
-const friends = byBase(friendFiles);
 
 export type Photo = { src: ImageMetadata; caption: string };
 
@@ -72,29 +67,9 @@ const sunGroups: AlbumGroup[] = [
   { title: '天与树', photos: pick(sun, ['天1', '天2', '天3', '天4', '树与日1']) },
 ];
 
-const friendGroups: AlbumGroup[] = [
-  {
-    title: '么么 · 么宇枫',
-    photos: pick(friends, ['yyf骑车1', 'yyf睡觉1', 'yyf唱歌1', 'yyf鄙视1'], (n) => n.replace('yyf', '')),
-  },
-  {
-    title: '欣欣 · 郭欣蕾',
-    photos: pick(
-      friends,
-      ['gxl眯眯眼', 'gxl嗷呜', 'gxl小狗狗', 'gxl帅帅的小时候', 'gxl我与守宫', 'gxl好帅', 'gxl蜡笔小新', 'gxl可爱1', 'gxl你挡我路了', 'gxl可爱2', 'gxl双重气质', 'gxl与你相伴', 'gxlOOTD1', 'gxl超级烟熏妆'],
-      (n) => n.replace('gxl', '')
-    ),
-  },
-  {
-    title: '贴贴 · 贴怡情',
-    photos: pick(friends, ['tyq你的化身', 'tyq我们的开始', 'tyq我们的热情'], (n) => n.replace('tyq', '')),
-  },
-];
-
 const count = (groups: AlbumGroup[]) => groups.reduce((n, g) => n + g.photos.length, 0);
 
 const sunAll = sunGroups.flatMap((g) => g.photos);
-const friendAll = friendGroups.flatMap((g) => g.photos);
 
 export const albums: Album[] = [
   {
@@ -105,15 +80,6 @@ export const albums: Album[] = [
     cover: sunAll[0].src,
     groups: sunGroups.filter((g) => g.photos.length),
     count: count(sunGroups),
-  },
-  {
-    slug: 'friends',
-    title: '好友联结',
-    emoji: '🫂',
-    tagline: '每一个朋友都是我与世界的羁绊。',
-    cover: friendAll[0].src,
-    groups: friendGroups.filter((g) => g.photos.length),
-    count: count(friendGroups),
   },
 ];
 

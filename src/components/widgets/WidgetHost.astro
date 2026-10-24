@@ -19,24 +19,33 @@ const { widget } = Astro.props;
 const { id, x, y, rotate, size, z, label } = widget;
 
 const style = `--x:${x}px; --y:${y}px; --rot:${rotate}deg; --scale:${size}; --z:${z}`;
-const task = site.music;
 
-// The sticky note mirrors the live /plan/ data instead of a hard-coded list.
+/* The sticky note mirrors the live /plan/ data instead of a hard-coded list. */
 const planGroups = parseTasks((await getEntry('posts', 'To-Do'))?.body ?? '');
 const planStats = taskStats(planGroups);
-const planTop = planGroups
-  .flatMap((g) => g.tasks)
-  .filter((t) => t.status !== 'canceled')
-  .slice(0, 3);
+const planList = planGroups.flatMap((g) => g.tasks).filter((t) => t.status !== 'canceled');
+
+/* seven-segment display scaffolding */
+const LED_KEYS = ['h1', 'h2', 'm1', 'm2', 's1', 's2'];
+const SEGS = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+const SPOKES = [0, 60, 120, 180, 240, 300];
+const first = site.playlist[0];
 ---
 
 <div class:list={['w', `w--${id}`]} style={style} data-widget={id} aria-label={label}>
   {id === 'clock' && (
     <div class="w__card w__clock">
-      <span class="w__pin" aria-hidden="true"></span>
-      <p class="w__time">
-        <span data-clock-time>--:--</span><span class="w__sec" data-clock-sec>--</span>
-      </p>
+      <div class="led" aria-hidden="true">
+        {LED_KEYS.map((key, i) => (
+          <>
+            {(i === 2 || i === 4) && <span class="led__colon" data-colon><i></i><i></i></span>}
+            <span class="led__d" data-led={key}>
+              {SEGS.map((s) => <i data-sg={s}></i>)}
+            </span>
+          </>
+        ))}
+      </div>
+      <span class="u-visually-hidden" data-clock-time>--:--</span>
       <p class="w__date" data-clock-date>正在校准…</p>
       <p class="w__greet" data-clock-greet>你好</p>
     </div>
@@ -44,40 +53,81 @@ const planTop = planGroups
 
   {id === 'tape' && (
     <div class="w__card w__tape" data-tape>
-      <span class="w__pin" aria-hidden="true"></span>
-      <div class="w__reels" aria-hidden="true">
-        <span class="w__reel"></span>
-        <span class="w__reel"></span>
+      <div class="cass">
+        <span class="cass__screw tl" aria-hidden="true"></span>
+        <span class="cass__screw tr" aria-hidden="true"></span>
+        <span class="cass__screw bl" aria-hidden="true"></span>
+        <span class="cass__screw br" aria-hidden="true"></span>
+
+        <div class="cass__label">
+          <span class="cass__side" aria-hidden="true">A</span>
+          <span class="cass__titles">
+            <span class="cass__song" data-tape-title>{first.title}</span>
+            <span class="cass__artist" data-tape-artist>{first.artist}</span>
+          </span>
+          <span class="cass__idx" data-tape-idx>1 / {site.playlist.length}</span>
+        </div>
+
+        <div class="cass__window" aria-hidden="true">
+          <span class="cass__ribbon"></span>
+          <span class="reel" data-reel>
+            {SPOKES.map((d) => <i style={`transform: rotate(${d}deg)`}></i>)}
+            <b></b>
+          </span>
+          <span class="reel" data-reel>
+            {SPOKES.map((d) => <i style={`transform: rotate(${d}deg)`}></i>)}
+            <b></b>
+          </span>
+        </div>
+
+        <div class="cass__foot" aria-hidden="true"></div>
       </div>
-      <p class="w__song">{task.title}</p>
-      <p class="w__artist">{task.artist}</p>
-      <div class="w__eq" aria-hidden="true"><i></i><i></i><i></i></div>
-      <audio data-tape-audio preload="none" loop src={task.src}></audio>
-      <button class="w__play" type="button" data-tape-toggle aria-pressed="false" aria-label="播放音乐">
-        <span class="w__ico" aria-hidden="true"></span>
-      </button>
+
+      <div class="w__deck">
+        <button class="w__tbtn" type="button" data-tape-prev aria-label="上一首">
+          <span class="ico ico--prev" aria-hidden="true"></span>
+        </button>
+        <button class="w__tbtn w__tbtn--main" type="button" data-tape-toggle aria-pressed="false" aria-label="播放音乐">
+          <span class="ico ico--play" aria-hidden="true"></span>
+        </button>
+        <button class="w__tbtn" type="button" data-tape-next aria-label="下一首">
+          <span class="ico ico--next" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <audio data-tape-audio preload="none" src={first.src}></audio>
+      <script type="application/json" data-tape-list set:html={JSON.stringify(site.playlist)} />
     </div>
   )}
 
   {id === 'note' && (
     <div class="w__card w__note">
       <span class="w__tapebar" aria-hidden="true"></span>
-      <p class="w__notehead">今天要做的事</p>
-      <ul class="w__tasks">
-        {planTop.map((t) => (
-          <li class:list={[`is-${t.status}`]}>{t.title}</li>
-        ))}
-      </ul>
+      <p class="w__notehead">TODO LIST</p>
+      <div class="w__noteview" data-note-view>
+        <ul class="w__tasks" data-note-list>
+          {planList.map((t) => <li class:list={[`is-${t.status}`]}>{t.title}</li>)}
+        </ul>
+      </div>
       <div class="w__progress"><i data-bar={planStats.percent}></i></div>
       <p class="w__pct">{planStats.percent}%</p>
     </div>
   )}
 
   {id === 'polaroid' && (
-    <a class="w__card w__polaroid" href="/gallery/">
-      <span class="w__pin" aria-hidden="true"></span>
-      <Image src={lakeSm} alt="山与湖" widths={[220, 440]} sizes="220px" loading="lazy" />
-      <span class="w__cap">2026 · 山与湖</span>
+    <a class="w__cam" href="/gallery/" aria-label="打开图库">
+      <span class="cam">
+        <span class="cam__flash" aria-hidden="true"></span>
+        <span class="cam__finder" aria-hidden="true"></span>
+        <span class="cam__lens" aria-hidden="true"><i></i></span>
+        <span class="cam__brand" aria-hidden="true"></span>
+        <span class="cam__slot" aria-hidden="true"></span>
+        <span class="cam__print">
+          <span class="cam__pic">
+            <Image src={lakeSm} alt="山与湖" widths={[200, 400]} sizes="124px" loading="lazy" />
+          </span>
+        </span>
+      </span>
     </a>
   )}
 
@@ -107,7 +157,7 @@ const planTop = planGroups
       translate(-50%, -50%)
       translate(calc(var(--x) * var(--rs, 1)), calc(var(--y) * var(--rs, 1)))
       rotate(var(--rot))
-      scale(var(--scale))
+      scale(calc(var(--scale) * var(--rs, 1)))
       translate3d(var(--plx, 0px), var(--ply, 0px), 0);
     will-change: transform;
   }
@@ -138,108 +188,369 @@ const planTop = planGroups
     box-shadow: 0 2px 6px rgba(255, 187, 160, .7);
   }
 
-  /* ---- clock: digital text, never a clock face ---- */
-  .w__clock { width: 186px; text-align: center; }
-  .w__time {
-    margin: 0;
-    font-family: var(--font-mono);
-    font-size: 30px;
-    font-weight: 600;
-    letter-spacing: .02em;
-    line-height: 1.1;
-    font-variant-numeric: tabular-nums;
+  /* ================= LED clock ================= */
+  .w__clock {
+    position: relative;
+    width: 208px;
+    padding: 15px 13px 12px;
+    white-space: normal;
+    text-align: center;
+    border-radius: 18px;
+    /* 米白机身：顶部高光 + 底部内阴影，做出塑料外壳的厚度 */
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, .95), rgba(255, 255, 255, 0) 44%),
+      linear-gradient(180deg, #f7f2e7 0%, #ece4d5 58%, #ded3bf 100%);
+    border: 1px solid rgba(120, 105, 85, .38);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .95),
+      inset 0 -9px 16px rgba(120, 105, 85, .20),
+      0 22px 40px -24px rgba(20, 26, 32, .85);
   }
-  .w__sec { font-size: 14px; color: var(--mint-deep); margin-left: 4px; }
-  .w__date { margin: 4px 0 0; font-size: 11px; color: var(--ink-faint); }
-  .w__greet {
-    margin: 6px 0 0;
-    font-size: var(--fs-xs);
-    color: var(--mint-deep);
-    background: var(--mint-soft);
-    border-radius: var(--r-pill);
-    display: inline-block;
-    padding: 1px 10px;
+  /* 内凹的深色屏幕：不是纯色，带一层绿色环境光和上下渐深 */
+  .w__clock::before {
+    content: '';
+    position: absolute;
+    inset: 7px;
+    border-radius: 12px;
+    background:
+      radial-gradient(130% 96% at 50% 24%, rgba(127, 199, 169, .24), rgba(127, 199, 169, 0) 64%),
+      linear-gradient(180deg, #3d444e 0%, #272d35 56%, #1b2027 100%);
+    box-shadow:
+      inset 0 2px 7px rgba(0, 0, 0, .78),
+      inset 0 -12px 22px rgba(0, 0, 0, .55),
+      0 1px 0 rgba(255, 255, 255, .5);
+  }
+  /* 扫描线 + 极淡的刻度圈，屏幕像一块真的 LCD */
+  .w__clock::after {
+    content: '';
+    position: absolute;
+    inset: 7px;
+    border-radius: 12px;
+    pointer-events: none;
+    opacity: .55;
+    background-image:
+      repeating-linear-gradient(to bottom, rgba(0, 0, 0, .22) 0 1px, transparent 1px 3px),
+      repeating-conic-gradient(from 0deg at 50% 50%, rgba(211, 239, 223, .12) 0deg .7deg, transparent .7deg 15deg);
+    mask-image: radial-gradient(122% 94% at 50% 42%, #000 24%, transparent 94%);
+  }
+  .w__clock > * { position: relative; z-index: 1; }
+
+  .led { display: flex; align-items: center; justify-content: center; gap: 3px; }
+  .led__d { position: relative; flex: none; width: 20px; height: 34px; }
+  .led__d i {
+    position: absolute;
+    border-radius: 2px;
+    background: rgba(127, 199, 169, .10);
+    transition: background 90ms linear, box-shadow 90ms linear;
+  }
+  .led__d i.on {
+    background: var(--mint);
+    box-shadow: 0 0 5px rgba(127, 199, 169, .95), 0 0 13px rgba(127, 199, 169, .5);
+  }
+  .led__d i[data-sg='a'] { left: 2px; top: 0; width: 16px; height: 3px; }
+  .led__d i[data-sg='g'] { left: 2px; top: 15px; width: 16px; height: 3px; }
+  .led__d i[data-sg='d'] { left: 2px; top: 31px; width: 16px; height: 3px; }
+  .led__d i[data-sg='f'] { left: 0; top: 2px; width: 3px; height: 12px; }
+  .led__d i[data-sg='b'] { right: 0; top: 2px; width: 3px; height: 12px; }
+  .led__d i[data-sg='e'] { left: 0; top: 17px; width: 3px; height: 12px; }
+  .led__d i[data-sg='c'] { right: 0; top: 17px; width: 3px; height: 12px; }
+
+  .led__colon {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 7px;
+    flex: none;
+    width: 4px;
+    height: 34px;
+  }
+  .led__colon i {
+    display: block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(127, 199, 169, .16);
+    transition: background 160ms linear, box-shadow 160ms linear;
+  }
+  .led__colon.is-on i {
+    background: var(--mint);
+    box-shadow: 0 0 6px rgba(127, 199, 169, .9);
   }
 
-  /* ---- tape ---- */
-  .w__tape { width: 208px; }
-  .w__reels { display: flex; gap: 10px; margin-bottom: 10px; }
-  .w__reel {
-    width: 46px;
-    height: 46px;
-    border-radius: var(--r-pill);
-    border: 2px dashed var(--ink-faint);
-    opacity: .55;
+  .w__date {
+    margin: 9px 0 0;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .04em;
+    color: rgba(211, 239, 223, .66);
   }
-  .w__tape.is-playing .w__reel { animation: none; border-color: var(--mint-deep); opacity: .9; }
-  .w__song { margin: 0; font-weight: 600; font-size: var(--fs-sm); }
-  .w__artist { margin: 2px 0 0; font-size: var(--fs-xs); color: var(--ink-faint); }
-  .w__eq { display: flex; align-items: flex-end; gap: 3px; height: 16px; margin-top: 10px; }
-  .w__eq i {
-    width: 3px;
-    height: 5px;
+  .w__greet {
+    margin: 6px 0 0;
+    display: inline-block;
+    padding: 1px 10px;
     border-radius: var(--r-pill);
-    background: var(--mint);
-    transition: height 180ms var(--ease-out);
+    background: rgba(127, 199, 169, .18);
+    color: var(--mint-soft);
+    font-size: 11px;
+    letter-spacing: .06em;
   }
-  .w__tape.is-playing .w__eq i:nth-child(1) { height: 14px; }
-  .w__tape.is-playing .w__eq i:nth-child(2) { height: 9px; }
-  .w__tape.is-playing .w__eq i:nth-child(3) { height: 12px; }
-  .w__play {
+
+  /* ================= cassette ================= */
+  .w__tape { width: 218px; padding: 10px 10px 8px; white-space: normal; }
+
+  .cass {
+    position: relative;
+    padding: 9px 10px 7px;
+    border-radius: 9px;
+    background: linear-gradient(180deg, #f7f1e4 0%, #efe6d4 62%, #e3d7c0 100%);
+    border: 1px solid rgba(120, 105, 85, .35);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .9),
+      inset 0 -7px 14px rgba(120, 105, 85, .16),
+      0 12px 22px -16px rgba(52, 56, 63, .7);
+  }
+  .cass__screw {
     position: absolute;
-    right: var(--s-3);
-    bottom: var(--s-3);
-    width: 34px;
-    height: 34px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff, #b9ab92);
+    box-shadow: inset 0 0 0 1px rgba(120, 105, 85, .5);
+  }
+  .cass__screw.tl { top: 5px; left: 5px; }
+  .cass__screw.tr { top: 5px; right: 5px; }
+  .cass__screw.bl { bottom: 5px; left: 5px; }
+  .cass__screw.br { bottom: 5px; right: 5px; }
+
+  .cass__label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 7px;
+    border-radius: 4px;
+    background: linear-gradient(180deg, #fffdf7, #fbf6ea);
+    border: 1px solid rgba(120, 105, 85, .22);
+  }
+  .cass__side {
+    flex: none;
     display: grid;
     place-items: center;
+    width: 15px;
+    height: 15px;
+    border-radius: 3px;
+    background: #d9634f;
+    color: #fff8f0;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .cass__titles { display: grid; gap: 1px; min-width: 0; flex: 1; }
+  .cass__song {
+    font-size: 11px;
+    font-weight: 700;
+    color: #4a4238;
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .cass__artist {
+    font-size: 9px;
+    color: #8b7f6c;
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .cass__idx {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: #a2957f;
+  }
+
+  .cass__window {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin-top: 7px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    background: linear-gradient(180deg, #2b3038, #1d222a);
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, .6), inset 0 -1px 0 rgba(255, 255, 255, .08);
+  }
+  .cass__ribbon {
+    position: absolute;
+    left: 26px;
+    right: 26px;
+    top: 50%;
+    height: 9px;
+    margin-top: -4.5px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #4b3a2c, #2c211a);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12);
+  }
+  .reel {
+    position: relative;
+    z-index: 1;
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 50%, #fdfaf3 0 30%, #e8ddc8 31% 100%);
+    border: 2px solid #b6a68a;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .45);
+    transform: rotate(var(--spin, 0deg));
+    will-change: transform;
+  }
+  .reel i {
+    position: absolute;
+    left: calc(50% - 1px);
+    top: 50%;
+    width: 2px;
+    height: 15px;
+    border-radius: 1px;
+    background: #b6a68a;
+    transform-origin: 50% 0;
+  }
+  .reel b {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 11px;
+    height: 11px;
+    margin: -5.5px 0 0 -5.5px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #fff, #cbbb9d);
+    box-shadow: 0 0 0 1px rgba(120, 105, 85, .45);
+  }
+  .w__tape.is-playing .reel { border-color: #8e7f65; }
+
+  .cass__foot {
+    height: 8px;
+    margin-top: 6px;
+    border-radius: 0 0 6px 6px;
+    background:
+      linear-gradient(180deg, rgba(120, 105, 85, .16), rgba(120, 105, 85, .04));
+    clip-path: polygon(18% 0, 82% 0, 70% 100%, 30% 100%);
+  }
+
+  .w__deck {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .w__tbtn {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
     border-radius: var(--r-pill);
     border: 1px solid var(--line);
     background: var(--paper);
+    transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
   }
-  .w__ico {
-    width: 0;
-    height: 0;
-    border-left: 9px solid var(--mint-deep);
-    border-top: 6px solid transparent;
-    border-bottom: 6px solid transparent;
-    margin-left: 3px;
+  .w__tbtn:hover { border-color: var(--mint); background: #fff; }
+  .w__tbtn--main { width: 32px; height: 32px; border-color: var(--mint); background: var(--mint-soft); }
+  .ico { display: block; }
+  .ico--play {
+    width: 0; height: 0;
+    margin-left: 2px;
+    border-left: 8px solid var(--mint-deep);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
   }
-  .w__tape.is-playing .w__ico {
-    width: 10px;
-    height: 11px;
-    border: 0;
+  .w__tape.is-playing .ico--play {
+    width: 9px; height: 10px;
     margin-left: 0;
-    background: linear-gradient(to right, var(--mint-deep) 0 3px, transparent 3px 7px, var(--mint-deep) 7px 10px);
+    border: 0;
+    background: linear-gradient(to right, var(--mint-deep) 0 3px, transparent 3px 6px, var(--mint-deep) 6px 9px);
   }
+  .ico--prev, .ico--next {
+    width: 0; height: 0;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+  }
+  .ico--prev { border-right: 6px solid var(--ink-soft); }
+  .ico--next { border-left: 6px solid var(--ink-soft); }
 
-  /* ---- note ---- */
+  /* ================= sticky note ================= */
   .w__note {
-    width: 186px;
-    background: var(--sun);
-    border-color: rgba(255, 216, 138, .9);
+    width: 190px;
+    padding: 14px 13px 10px;
+    white-space: normal;
+    overflow: hidden;
+    background: linear-gradient(180deg, #ffe6a8, var(--sun));
+    border-color: rgba(255, 216, 138, .95);
+    box-shadow: 0 16px 30px -20px rgba(150, 112, 47, .8);
   }
   .w__tapebar {
     position: absolute;
-    top: -10px;
+    top: -9px;
     left: 50%;
-    width: 62px;
-    height: 18px;
-    margin-left: -31px;
-    background: rgba(255, 255, 255, .55);
-    border-radius: 2px;
+    width: 58px;
+    height: 17px;
+    margin-left: -29px;
+    background: rgba(255, 255, 255, .58);
+    box-shadow: 0 1px 2px rgba(150, 112, 47, .25);
+    border-radius: 1px;
   }
-  .w__notehead { margin: 0 0 6px; font-weight: 700; font-size: var(--fs-sm); }
-  .w__tasks { list-style: none; margin: 0; padding: 0; font-size: var(--fs-xs); line-height: 1.9; }
-  .w__tasks li::before { content: '□ '; color: var(--ink-faint); }
-  .w__tasks li.is-done { text-decoration: line-through; opacity: .55; }
-  .w__tasks li.is-done::before { content: '✓ '; color: var(--mint-deep); }
-  .w__tasks li.is-doing::before { content: '◐ '; color: var(--peach); }
+  .w__notehead {
+    margin: 0 0 6px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: .18em;
+    color: #96702f;
+    text-align: center;
+  }
+  .w__noteview {
+    position: relative;
+    height: 118px;
+    overflow: hidden;
+    mask-image: linear-gradient(to bottom, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+  }
+  .w__tasks {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 11px;
+    line-height: 1.7;
+    color: #5a4a2c;
+    transform: translate3d(0, var(--nt, 0px), 0);
+    will-change: transform;
+  }
+  /* 长条目换行显示，不再用省略号截断 */
+  .w__tasks li {
+    position: relative;
+    padding: 1px 0 1px 13px;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
+  }
+  .w__tasks li::before {
+    content: '□';
+    position: absolute;
+    left: 0;
+    top: 1px;
+    color: rgba(150, 112, 47, .6);
+  }
+  .w__tasks li.is-done { text-decoration: line-through; opacity: .5; }
+  .w__tasks li.is-done::before { content: '✓'; color: var(--mint-deep); }
+  .w__tasks li.is-doing::before { content: '◐'; color: #d1793f; }
+
   .w__progress {
     height: 5px;
-    margin-top: 10px;
+    margin-top: 9px;
     border-radius: var(--r-pill);
-    background: rgba(52, 56, 63, .12);
+    background: rgba(150, 112, 47, .22);
     overflow: hidden;
   }
   .w__progress i {
@@ -248,29 +559,107 @@ const planTop = planGroups
     width: 100%;
     transform-origin: left;
     border-radius: var(--r-pill);
-    background: var(--mint-deep);
+    background: #96702f;
   }
-  .w__pct { margin: 4px 0 0; font-size: 11px; color: var(--ink-soft); text-align: right; }
+  .w__pct { margin: 3px 0 0; font-size: 10px; color: #8a6a2e; text-align: right; }
 
-  /* ---- polaroid ---- */
-  .w__polaroid { width: 196px; padding: 10px 10px 0; background: #fff; }
-  .w__polaroid :global(img) {
-    width: 100%;
-    height: 132px;
-    object-fit: cover;
+  /* ================= instant camera ================= */
+  .w__cam { display: block; width: 208px; }
+
+  .cam {
+    position: relative;
+    display: block;
+    height: 122px;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #fffdf8 0%, #f6f0e4 58%, #e9e0cd 100%);
+    border: 1px solid rgba(120, 105, 85, .32);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .95),
+      inset 0 -10px 20px rgba(120, 105, 85, .14),
+      0 20px 36px -24px rgba(52, 56, 63, .8);
+  }
+  .cam__flash {
+    position: absolute;
+    top: 13px;
+    right: 14px;
+    width: 34px;
+    height: 19px;
     border-radius: 4px;
-    display: block;
+    background: linear-gradient(180deg, #f4f7fa, #dfe6ee);
+    box-shadow: inset 0 0 0 1px rgba(120, 130, 145, .35), inset 0 0 8px rgba(255, 255, 255, .9);
   }
-  .w__cap {
+  .cam__finder {
+    position: absolute;
+    top: 16px;
+    left: 96px;
+    width: 22px;
+    height: 14px;
+    border-radius: 3px;
+    background: #3a4048;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, .8), 0 0 0 1px rgba(255, 255, 255, .5);
+  }
+  .cam__lens {
+    position: absolute;
+    left: 16px;
+    top: 26px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 50%, #4a5666 0 32%, #2b323c 33% 62%, #d8d2c4 63% 72%, #b9b0a0 73% 100%);
+    box-shadow: 0 2px 6px rgba(52, 56, 63, .35), inset 0 0 0 1px rgba(255, 255, 255, .35);
+  }
+  .cam__lens i {
+    position: absolute;
+    left: 30%;
+    top: 22%;
+    width: 16px;
+    height: 11px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .5);
+    filter: blur(2px);
+    transform: rotate(-25deg);
+  }
+  .cam__brand {
+    position: absolute;
+    right: 16px;
+    bottom: 30px;
+    width: 44px;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(120, 105, 85, .35);
+  }
+  .cam__slot {
+    position: absolute;
+    left: 50%;
+    bottom: -3px;
+    width: 148px;
+    height: 8px;
+    margin-left: -74px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, #cfc5b1, #a89c86);
+    box-shadow: inset 0 2px 4px rgba(52, 56, 63, .45);
+  }
+  .cam__print {
+    position: absolute;
+    left: 50%;
+    top: 104px;
+    width: 132px;
+    margin-left: -66px;
+    padding: 7px 7px 16px;
+    border-radius: 3px;
+    background: #fff;
+    box-shadow: 0 12px 24px -16px rgba(52, 56, 63, .8), 0 1px 0 rgba(120, 105, 85, .18);
+  }
+  .cam__pic { display: block; overflow: hidden; border-radius: 1px; background: var(--paper-3); }
+  .cam__pic :global(img) {
     display: block;
-    padding: 8px 0 10px;
-    text-align: center;
-    font-size: var(--fs-xs);
-    color: var(--ink-soft);
-    font-family: var(--font-serif);
+    width: 100%;
+    height: 82px;
+    object-fit: cover;
   }
 
-  /* ---- tag ---- */
+  /* ================= tag ================= */
   .w__tag {
     display: inline-flex;
     align-items: center;
@@ -291,7 +680,7 @@ const planTop = planGroups
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, .18);
   }
 
-  /* ---- search ---- */
+  /* ================= search ================= */
   .w__search {
     display: inline-flex;
     align-items: center;
