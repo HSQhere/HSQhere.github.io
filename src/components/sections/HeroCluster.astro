@@ -75,6 +75,10 @@ const quotes = site.quotes.map((q) => `${q.text}##${q.from}`).join('|||');
   <p class="hero__hint" aria-hidden="true">
     <span class="hero__hintdot"></span>往下看看
   </p>
+
+  <button class="hero__gyro" type="button" data-gyro hidden>
+    <span class="hero__gyrodot" aria-hidden="true"></span>轻晃手机，画面会跟着动
+  </button>
 </section>
 
 <style>
@@ -360,6 +364,51 @@ const quotes = site.quotes.map((q) => `${q.text}##${q.from}`).join('|||');
     border-radius: var(--r-pill);
     background: var(--mint);
     box-shadow: 0 0 0 4px var(--mint-soft);
+  }
+
+  /* the gyro prompt only ever appears on a touch device that has not yet
+     handed over orientation readings — see initGyro() in effects/motion.ts.
+     It floats at the bottom of the viewport (not inside the hero) so the
+     widget ring can never cover it. */
+  .hero__gyro {
+    position: fixed;
+    left: 50%;
+    bottom: calc(var(--s-5) + env(safe-area-inset-bottom, 0px));
+    z-index: 60;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    padding: var(--s-2) var(--s-4);
+    border: 1px solid var(--line);
+    border-radius: var(--r-pill);
+    background: var(--paper);
+    box-shadow: var(--sh-2);
+    font: inherit;
+    font-size: var(--fs-xs);
+    letter-spacing: .04em;
+    color: var(--ink-soft);
+    cursor: pointer;
+    animation: gyro-nudge 3.2s ease-in-out infinite;
+  }
+  .hero__gyro[hidden] { display: none; }
+  .hero__gyro:hover {
+    border-color: var(--mint);
+    color: var(--ink);
+  }
+  .hero__gyrodot {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--r-pill);
+    background: var(--mint);
+    box-shadow: 0 0 0 3px var(--mint-soft);
+  }
+  @keyframes gyro-nudge {
+    0%, 100% { transform: translateX(-50%) rotate(-1.4deg); }
+    50% { transform: translateX(-50%) rotate(1.4deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero__gyro { animation: none; }
   }
 
   /* ---------- responsive ---------- */

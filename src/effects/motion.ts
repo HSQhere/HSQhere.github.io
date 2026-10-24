@@ -36,6 +36,43 @@ const clearTimers = () => {
 };
 
 /* ------------------------------------------------------------------ *
+ * 0. shared aim — one -1..1 vector, written by the pointer or by the
+ *    gyroscope. Everything that used to listen for `pointermove` now
+ *    reads this instead, so a phone can drive the same motion.
+ * ------------------------------------------------------------------ */
+
+type AimSource = 'pointer' | 'gyro';
+
+const aim = { x: 0, y: 0, source: 'pointer' as AimSource, gyro: false };
+const aimHooks = new Set<() => void>();
+
+const writeAim = (x: number, y: number, source: AimSource) => {
+  aim.x = x;
+  aim.y = y;
+  aim.source = source;
+  document.documentElement.style.setProperty('--pointer-x', x.toFixed(4));
+  document.documentElement.style.setProperty('--pointer-y', y.toFixed(4));
+  aimHooks.forEach((fn) => fn());
+};
+
+/** the desktop path: mouse position, normalised to -1..1 */
+function initPointerAim() {
+  window.addEventListener(
+    'pointermove',
+    (e) => {
+      /* once the gyro is running on a phone, a stray tap should not fight it */
+      if (aim.gyro) return;
+      writeAim(
+        (e.clientX / window.innerWidth) * 2 - 1,
+        (e.clientY / window.innerHeight) * 2 - 1,
+        'pointer'
+      );
+    },
+    { passive: true }
+  );
+}
+
+/* ------------------------------------------------------------------ *
  * 1. parallax — pointer + scroll driven, setInterval(16)
  * ------------------------------------------------------------------ */
 
@@ -108,17 +145,14 @@ function initParallax() {
     id = window.setInterval(apply, 16);
   };
 
-  window.addEventListener(
-    'pointermove',
-    (e) => {
-      tx = (e.clientX / window.innerWidth) * 2 - 1;
-      ty = (e.clientY / window.innerHeight) * 2 - 1;
-      document.documentElement.style.setProperty('--pointer-x', String(tx));
-      document.documentElement.style.setProperty('--pointer-y', String(ty));
-      kick();
-    },
-    { passive: true }
-  );
+  /* the parallax no longer listens for the pointer itself — it reads the shared
+     aim vector, which the mouse OR the gyroscope may be writing */
+  const sync = () => {
+    tx = aim.x;
+    ty = aim.y;
+    kick();
+  };
+  aimHooks.add(sync);
 
   window.addEventListener(
     'scroll',
@@ -175,9 +209,22 @@ function initTilt() {
     id = window.setInterval(apply, 16);
   };
 
+  /* a phone has no hover and no pointer trail, so the card leans with the
+     device instead: same numbers, fed from the shared aim vector */
+  const sync = () => {
+    if (aim.source !== 'gyro') return;
+    try_ = aim.x * 12;
+    trx = -aim.y * 12;
+    tsx = aim.x * 2;
+    tsy = aim.y * 1.8;
+    kick();
+  };
+  aimHooks.add(sync);
+
   host.addEventListener(
     'pointermove',
     (e) => {
+      if (aim.source === 'gyro') return;
       const r = host.getBoundingClientRect();
       const nx = ((e.clientX - r.left) / r.width) * 2 - 1;
       const ny = ((e.clientY - r.top) / r.height) * 2 - 1;
@@ -191,12 +238,101 @@ function initTilt() {
   );
 
   host.addEventListener('pointerleave', () => {
+    if (aim.source === 'gyro') return;
     trx = 0;
     try_ = 0;
     tsx = 0;
     tsy = 0;
     kick();
   });
+}
+
+/* ------------------------------------------------------------------ *
+ * 2b. gyroscope — the phone's answer to the pointer
+ *
+ * A phone never fires `pointermove` until you touch it, so on mobile the
+ * hero would sit perfectly still. Device orientation gives us the same
+ * -1..1 aim vector from the physical tilt of the handset: turn the phone
+ * left/right to swing the layers, tip it forward/back to raise them.
+ * ------------------------------------------------------------------ */
+
+/** how many degrees of tilt equals a full swing — smaller = more sensitive */
+const GYRO_RANGE = 34;
+
+function initGyro() {
+  if (prefersReduced()) return;
+  if (typeof window.DeviceOrientationEvent === 'undefined') return;
+  /* desktop browsers expose the constructor but never emit readings — only
+     bother on something with a touchscreen */
+  if (!window.matchMedia('(pointer: coarse)').matches) return;
+
+  const btn = document.querySelector<HTMLElement>('[data-gyro]');
+  const DOE = window.DeviceOrientationEvent as unknown as {
+    requestPermission?: () => Promise<'granted' | 'denied' | 'default'>;
+  };
+
+  let listening = false;
+  let idleTimer = 0;
+
+  const onOrient = (e: DeviceOrientationEvent) => {
+    /* gamma: left/right lean (-90..90). beta: front/back (-180..180) and it
+       reads ~90 when the phone is held upright, so measure from there. */
+    const g = e.gamma;
+    const b = e.beta;
+    if (g === null || b === null) return;
+
+    if (!aim.gyro) {
+      aim.gyro = true;
+      document.documentElement.dataset.aim = 'gyro';
+      if (btn) btn.hidden = true;
+    }
+
+    writeAim(
+      clamp(g / GYRO_RANGE, -1, 1),
+      clamp((b - 90) / GYRO_RANGE, -1, 1),
+      'gyro'
+    );
+  };
+
+  const listen = () => {
+    if (listening) return;
+    listening = true;
+    window.addEventListener('deviceorientation', onOrient, { passive: true });
+  };
+
+  const ask = () => {
+    if (!DOE.requestPermission) {
+      listen();
+      return;
+    }
+    DOE.requestPermission()
+      .then((res) => {
+        if (res === 'granted') listen();
+        else if (btn) btn.hidden = true;
+      })
+      .catch(() => {
+        if (btn) btn.hidden = true;
+      });
+  };
+
+  if (DOE.requestPermission) {
+    /* iOS 13+ hands out no readings until a real tap asks for them */
+    if (btn) {
+      btn.hidden = false;
+      btn.addEventListener('click', ask, { once: true });
+    }
+    return;
+  }
+
+  /* everywhere else the readings just arrive — but a few browsers stay silent
+     until the page has been touched, so surface the button as a fallback */
+  listen();
+  idleTimer = window.setTimeout(() => {
+    if (aim.gyro || !btn) return;
+    btn.hidden = false;
+    btn.addEventListener('click', ask, { once: true });
+  }, 1200);
+  window.addEventListener('pagehide', () => clearTimeout(idleTimer), { once: true });
 }
 
 /* ------------------------------------------------------------------ *
@@ -750,6 +886,8 @@ export function initMotion() {
   if (booted) return;
   booted = true;
 
+  initPointerAim();
+  initGyro();
   initParallax();
   initTilt();
   initScrollChrome();
