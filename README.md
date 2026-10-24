@@ -265,7 +265,6 @@ F:\myblognew
 │  │  ├─ index.astro                  # 首页
 │  │  ├─ [...slug].astro              # 文章页，生成 /2026/07/02/xxx/
 │  │  ├─ archive.astro  tags\  categories\  gallery\  plan.astro  friends.astro  about.astro  search.astro  404.astro
-│  │  ├─ rss.xml.ts                   # /rss.xml
 │  │  └─ search-index.json.ts         # 搜索用的 JSON 索引
 │  ├─ layouts
 │  │  ├─ Base.astro                   # <head>、header、footer、全局 CSS

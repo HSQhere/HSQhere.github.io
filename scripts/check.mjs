@@ -15,7 +15,6 @@ const targets = paths.length
       '/about/',
       '/search/',
       '/search-index.json',
-      '/rss.xml',
       '/404/',
       '/2026/07/02/有感FOC(SVPWM)/',
     ];

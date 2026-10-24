@@ -2,6 +2,9 @@
 /**
  * BentoGrid.astro — the "从这里进去" section under the hero.
  * Pure CSS grid, no fixed coordinates; every card is a plain link.
+ *
+ * 第一张卡是搜索（真的能搜，不是跳转按钮）；最后一张是成长轨迹，
+ * 用一条 S 形曲线把整条时间线上的文章累计起来画出来。
  */
 import { Image } from 'astro:assets';
 import lakeSm from '../../assets/lake-sm.webp';
@@ -31,6 +34,84 @@ const planGroups = parseTasks((await getEntry('posts', 'To-Do'))?.body ?? '');
 const stats = taskStats(planGroups);
 const pct = stats.percent;
 const planTop = planGroups.flatMap((g) => g.tasks).slice(0, 4);
+
+/* ---------------------------------------------------------------- *
+ * 成长轨迹 —— 直接从文章时间线里算，不写死任何数字。
+ *   曲线本身是一条逻辑斯蒂（S）形：起步慢 → 中段陡 → 后段趋平。
+ *   节点是真实阶段，位置按阶段顺序落在 S 上，标签里写真实月份和篇数。
+ * ---------------------------------------------------------------- */
+
+const ymOf = (d: Date) => `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+
+const perMonth = new Map<string, number>();
+for (const p of posts) {
+  const k = ymOf(p.data.date);
+  perMonth.set(k, (perMonth.get(k) ?? 0) + 1);
+}
+const monthKeys = [...perMonth.keys()].sort();
+
+const phases = site.growthPhases.map((ph) => {
+  const inside = posts.filter((p) => {
+    const k = ymOf(p.data.date);
+    return k >= ph.from && k <= ph.to;
+  });
+  const top = [...inside].sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())[0];
+  return { ...ph, count: inside.length, sample: top?.data.title ?? '' };
+});
+
+/* ---- S 曲线几何（viewBox 单位，preserveAspectRatio="none" 铺满卡片） ---- */
+const W = 1000;
+const H = 480;
+const padL = 72;
+const padR = 72;
+const padT = 120;
+const padB = 110;
+const iw = W - padL - padR;
+const ih = H - padT - padB;
+
+/** 逻辑斯蒂：t∈[0,1] → 0..1，k 越大中段越陡 */
+const K = 8.5;
+const sig = (t: number) => 1 / (1 + Math.exp(-K * (t - 0.5)));
+const sig0 = sig(0);
+const sig1 = sig(1);
+const norm = (t: number) => (sig(t) - sig0) / (sig1 - sig0);
+
+const xOf = (t: number) => padL + t * iw;
+const yOf = (v: number) => padT + (1 - v) * ih;
+
+/** 采样成折线 —— 逻辑斯蒂本身足够顺，采样比贝塞尔更好控 */
+const SAMPLES = 120;
+const curvePts = Array.from({ length: SAMPLES + 1 }, (_, i) => {
+  const t = i / SAMPLES;
+  return { x: xOf(t), y: yOf(norm(t)) };
+});
+const curvePath = curvePts
+  .map((p, i) => `${i ? 'L' : 'M'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`)
+  .join(' ');
+const areaPath = `${curvePath} L ${xOf(1).toFixed(1)} ${(H - padB).toFixed(1)} L ${xOf(0).toFixed(1)} ${(H - padB).toFixed(1)} Z`;
+
+/** 阶段落在 S 上的位置：按顺序均分，留出两端余量 */
+const marks = phases.map((p, i) => {
+  const t = phases.length === 1 ? 0.5 : 0.1 + (i / (phases.length - 1)) * 0.8;
+  return {
+    ...p,
+    xPct: (xOf(t) / W) * 100,
+    yPct: (yOf(norm(t)) / H) * 100,
+    side: i % 2 === 0 ? 'up' : 'down',
+    anchor: i === 0 ? 'start' : i === phases.length - 1 ? 'end' : 'mid',
+  };
+});
+
+/** 曲线上的等分刻度（只画短线，不写数字） */
+const ticks = [0, 0.25, 0.5, 0.75, 1].map((t) => ({
+  x: xOf(t),
+  y: yOf(norm(t)),
+  base: H - padB,
+}));
+
+const firstMonth = monthKeys[0] ?? '';
+const lastMonth = monthKeys[monthKeys.length - 1] ?? '';
+const spanLabel = `${firstMonth.slice(2).replace('-', '.')} – ${lastMonth.slice(2).replace('-', '.')}`;
 ---
 
 <section class="bento" aria-labelledby="bento-title">
@@ -41,8 +122,40 @@ const planTop = planGroups.flatMap((g) => g.tasks).slice(0, 4);
   </header>
 
   <div class="bento__grid">
+    <!-- 搜索 —— 第一张卡，真的能搜 -->
+    <article class="card card--search" data-reveal="1">
+      <div class="search__top">
+        <p class="card__badge">搜索</p>
+        <p class="search__hint">{total} 篇 · 标题、标签、正文都能搜</p>
+      </div>
+      <form class="search__form" action="/search/" method="get" role="search" data-search-form>
+        <span class="search__icon" aria-hidden="true">⌕</span>
+        <label class="u-visually-hidden" for="home-q">搜索文章</label>
+        <input
+          class="search__input"
+          id="home-q"
+          name="q"
+          type="search"
+          placeholder="想找什么？电控、SVPWM、路径规划…"
+          autocomplete="off"
+          spellcheck="false"
+          data-search-input
+        />
+        <kbd class="search__kbd" aria-hidden="true">⌘K</kbd>
+        <button class="search__go" type="submit">搜索</button>
+      </form>
+      <ul class="search__hits" data-search-hits hidden></ul>
+      <ul class="search__tags">
+        {tags.map(([name, list]) => (
+          <li>
+            <a href={`/search/?q=${encodeURIComponent(name)}`}>{name} <span>{list.length}</span></a>
+          </li>
+        ))}
+      </ul>
+    </article>
+
     <!-- 日志 -->
-    <article class="card card--log" data-reveal="1">
+    <article class="card card--log" data-reveal="2">
       <p class="card__badge">日志</p>
       <p class="card__big">{total} <em>篇</em></p>
       <p class="card__desc">电控、算法、机器人，还有一些不太好分类的东西。</p>
@@ -72,7 +185,7 @@ const planTop = planGroups.flatMap((g) => g.tasks).slice(0, 4);
     </article>
 
     <!-- 图库 -->
-    <article class="card card--gallery" data-reveal="2">
+    <article class="card card--gallery" data-reveal="3">
       <a class="card__shot" href="/gallery/">
         <Image src={lakeSm} alt="山与湖" widths={[320, 640]} sizes="(max-width: 620px) 100vw, 40vw" loading="lazy" />
       </a>
@@ -82,7 +195,7 @@ const planTop = planGroups.flatMap((g) => g.tasks).slice(0, 4);
     </article>
 
     <!-- 计划 -->
-    <article class="card card--plan" data-reveal="3">
+    <article class="card card--plan" data-reveal="4">
       <p class="card__badge">计划</p>
       <ul class="card__tasks">
         {planTop.map((t) => (
@@ -94,9 +207,8 @@ const planTop = planGroups.flatMap((g) => g.tasks).slice(0, 4);
       <a class="card__go" href="/plan/">看全部 →</a>
     </article>
 
-
     <!-- 关于 -->
-    <article class="card card--about" data-reveal="4">
+    <article class="card card--about" data-reveal="5">
       <p class="card__badge">关于</p>
       <p class="card__desc">{site.author.bio}</p>
       <ul class="card__meta">
@@ -107,31 +219,183 @@ const planTop = planGroups.flatMap((g) => g.tasks).slice(0, 4);
       <a class="card__go" href="/about/">认识一下 →</a>
     </article>
 
-    <!-- 搜索 -->
-    <article class="card card--search" data-reveal="5">
-      <p class="card__badge">搜索</p>
-      <p class="card__desc">标题、标签、摘要都能搜。</p>
-      <a class="card__searchbtn" href="/search/">打开搜索 ⌘K</a>
-    </article>
-
-    <!-- 成长路径 -->
+    <!-- 成长轨迹 —— S 形曲线 -->
     <article class="card card--path" data-reveal="6">
-      <p class="card__badge">成长路径</p>
-      <div class="card__track">
-        <i class="card__line" data-growth-line aria-hidden="true"></i>
-        <ol class="card__steps">
-          {site.growth.map((g, i) => (
-            <li class:list={{ 'is-now': i === site.growth.length - 2 }}>
-              <span class="step__dot" aria-hidden="true"></span>
-              <span class="step__label">{g.label}</span>
-              <span class="step__year">{g.year}</span>
+      <header class="path__head">
+        <p class="card__badge">成长轨迹</p>
+        <h3 class="path__title">从第一篇到第 {total} 篇</h3>
+        <p class="path__sub">{spanLabel} · 按月度累计，越陡的地方写得越密</p>
+      </header>
+
+      <!-- 桌面：真正的 S 曲线 -->
+      <div class="path__chart" aria-hidden="true">
+        <svg class="path__svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" focusable="false">
+          <defs>
+            <linearGradient id="growth-fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="var(--mint)" stop-opacity=".28" />
+              <stop offset="100%" stop-color="var(--mint)" stop-opacity="0" />
+            </linearGradient>
+            <linearGradient id="growth-stroke" x1="0" y1="1" x2="1" y2="0">
+              <stop offset="0%" stop-color="var(--mint)" />
+              <stop offset="55%" stop-color="var(--mint-deep)" />
+              <stop offset="100%" stop-color="var(--peach)" />
+            </linearGradient>
+          </defs>
+
+          {ticks.map((t) => (
+            <line class="path__tick" x1={t.x} y1={t.base} x2={t.x} y2={t.base + 10} />
+          ))}
+          <line class="path__base" x1={xOf(0)} y1={H - padB} x2={xOf(1)} y2={H - padB} />
+
+          <path class="path__area" d={areaPath} />
+          <path class="path__curve" d={curvePath} pathLength="1" />
+        </svg>
+
+        <!-- 轴标签用 HTML 叠上去，窄卡片上也不会被 SVG 缩放吃掉 -->
+        <div class="path__axis">
+          <span class="path__axis-from" style={`--l:${(xOf(0) / W) * 100}%`}>{firstMonth.slice(2).replace('-', '.')}</span>
+          <span class="path__axis-to" style={`--l:${(xOf(1) / W) * 100}%`}>{lastMonth.slice(2).replace('-', '.')}</span>
+          <span class="path__axis-y0" style={`--t:${((H - padB) / H) * 100}%`}>0</span>
+          <span class="path__axis-y1" style={`--t:${(padT / H) * 100}%`}>{total} 篇</span>
+        </div>
+
+        <ol class="path__marks">
+          {marks.map((m, i) => (
+            <li
+              class:list={['mark', `mark--${m.side}`, `mark--${m.anchor}`]}
+              style={`--x:${m.xPct}%;--y:${m.yPct}%;--i:${i}`}
+            >
+              <span class="mark__dot"></span>
+              <span class="mark__card">
+                <b class="mark__label">{m.label}</b>
+                <i class="mark__range">{m.range}</i>
+                <em class="mark__count">{m.count} 篇</em>
+              </span>
             </li>
           ))}
         </ol>
       </div>
+
+      <!-- 手机：竖排时间线，同一份数据 -->
+      <ol class="path__list">
+        {phases.map((p, i) => (
+          <li class="grow" style={`--i:${i}`}>
+            <span class="grow__dot" aria-hidden="true"></span>
+            <div class="grow__body">
+              <p class="grow__head"><b>{p.label}</b><i>{p.range}</i></p>
+              <p class="grow__note">{p.note}</p>
+            </div>
+            <span class="grow__count">{p.count} 篇</span>
+          </li>
+        ))}
+      </ol>
+
+      <p class="path__foot">数据来自归档里 {total} 篇文章的发布时间 · <a href="/archive/">看全部 →</a></p>
     </article>
   </div>
 </section>
+
+<script>
+  /* 首页内联搜索：第一次敲字才去拉索引，不拖慢首屏 */
+  type Hit = {
+    title: string;
+    url: string;
+    date: string;
+    tags: string[];
+    categories: string[];
+    excerpt: string;
+  };
+
+  const form = document.querySelector<HTMLFormElement>('[data-search-form]');
+  const input = document.querySelector<HTMLInputElement>('[data-search-input]');
+  const hitsBox = document.querySelector<HTMLUListElement>('[data-search-hits]');
+
+  if (form && input && hitsBox) {
+    let index: Hit[] | null = null;
+    let pending: Promise<Hit[]> | null = null;
+
+    const load = () => {
+      if (index) return Promise.resolve(index);
+      if (!pending) {
+        pending = fetch('/search-index.json')
+          .then((r) => r.json() as Promise<Hit[]>)
+          .then((data) => (index = data))
+          .catch(() => (index = [] as Hit[]));
+      }
+      return pending;
+    };
+
+    const esc = (s: string) =>
+      s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+
+    const mark = (text: string, term: string) => {
+      const safe = esc(text);
+      if (!term) return safe;
+      const re = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+      return safe.replace(re, (m) => `<mark>${m}</mark>`);
+    };
+
+    const render = (hits: Hit[], term: string) => {
+      if (!hits.length) {
+        hitsBox.hidden = false;
+        hitsBox.innerHTML = `<li class="sh__empty">没找到「${esc(term)}」，回车去搜索页试试。</li>`;
+        return;
+      }
+      hitsBox.hidden = false;
+      hitsBox.innerHTML = hits
+        .map(
+          (h) => `<li class="sh">
+            <a class="sh__link" href="${h.url}">
+              <span class="sh__title">${mark(h.title, term)}</span>
+              <span class="sh__meta">${h.date}${h.tags.length ? ' · ' + esc(h.tags.slice(0, 2).join(' / ')) : ''}</span>
+            </a>
+          </li>`
+        )
+        .join('');
+    };
+
+    const clear = () => {
+      hitsBox.hidden = true;
+      hitsBox.innerHTML = '';
+    };
+
+    let timer = 0;
+    input.addEventListener('input', () => {
+      const term = input.value.trim();
+      window.clearTimeout(timer);
+      if (!term) return clear();
+      timer = window.setTimeout(async () => {
+        const data = await load();
+        const lower = term.toLowerCase();
+        const hits = data.filter((h) =>
+          [h.title, h.tags.join(' '), h.categories.join(' '), h.excerpt].join(' ').toLowerCase().includes(lower)
+        );
+        render(hits.slice(0, 5), term);
+      }, 140);
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        input.value = '';
+        clear();
+        input.blur();
+      }
+    });
+
+    /* ⌘K / Ctrl+K 直接聚焦到这张卡 */
+    window.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        input.focus();
+        input.select();
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!form.contains(e.target as Node)) clear();
+    });
+  }
+</script>
 
 <style>
   .bento {
@@ -206,7 +470,6 @@ const planTop = planGroups.flatMap((g) => g.tasks).slice(0, 4);
   .card--gallery .card__badge { background: var(--peach-soft); color: #b46a4a; }
   .card--plan .card__badge { background: var(--lilac); color: #5b5680; }
   .card--about .card__badge { background: var(--sun); color: #96702f; }
-  .card--search .card__badge { background: var(--mint-soft); color: var(--mint-deep); }
   .card--path .card__badge { background: var(--paper-3); color: var(--ink-soft); }
 
   .card__big {
@@ -220,7 +483,7 @@ const planTop = planGroups.flatMap((g) => g.tasks).slice(0, 4);
   .card__big em { font-size: var(--fs-sm); font-style: normal; color: var(--ink-faint); }
   .card__desc { margin: 0; font-size: var(--fs-xs); color: var(--ink-soft); line-height: 1.7; }
 
-  .card__tags, .card__latest, .card__meta, .card__tasks, .card__steps {
+  .card__tags, .card__latest, .card__meta, .card__tasks {
     list-style: none; margin: 0; padding: 0;
   }
   .card__tags { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -299,49 +562,270 @@ const planTop = planGroups.flatMap((g) => g.tasks).slice(0, 4);
   .card__progress i { display: block; height: 100%; width: 100%; transform-origin: left; border-radius: var(--r-pill); background: var(--mint); }
   .card__pct { margin: 0; font-size: 11px; color: var(--ink-faint); }
 
-
   /* about */
   .card__meta { display: flex; flex-wrap: wrap; gap: 6px; }
   .card__meta li { font-size: 11px; color: var(--ink-faint); }
 
-  /* search */
-  .card__searchbtn {
-    margin-top: auto;
-    display: inline-flex;
+  /* ---------------------------------------------------------------- *
+   * 搜索卡 —— 首页第一张
+   * ---------------------------------------------------------------- */
+  .card--search { gap: var(--s-3); }
+  .search__top { display: flex; align-items: center; gap: var(--s-3); flex-wrap: wrap; }
+  .search__hint { margin: 0; font-family: var(--font-mono); font-size: 11px; color: var(--ink-faint); }
+
+  .search__form {
+    position: relative;
+    display: flex;
     align-items: center;
-    justify-content: center;
-    min-height: 38px;
+    gap: var(--s-2);
+    padding: 6px 6px 6px 42px;
     border-radius: var(--r-pill);
     background: var(--paper);
-    border: 1px dashed var(--line);
-    font-size: var(--fs-xs);
-    color: var(--ink-soft);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-card);
+    transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
   }
-  .card__searchbtn:hover { border-color: var(--mint); color: var(--mint-deep); }
+  .search__form:focus-within { border-color: var(--mint); box-shadow: 0 0 0 4px var(--mint-soft); }
 
-  /* path */
-  .card__track { position: relative; margin-top: var(--s-3); }
-  .card__line {
+  .search__icon {
     position: absolute;
-    left: 4px; right: 4px; top: 4px;
-    height: 2px;
-    transform-origin: left;
-    transform: scaleX(0);
-    background: linear-gradient(90deg, var(--mint), var(--peach), var(--lilac));
-    border-radius: var(--r-pill);
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    line-height: 1;
+    color: var(--ink-faint);
+    pointer-events: none;
   }
-  .card__steps { display: flex; flex-direction: column; gap: var(--s-3); }
-  .card__steps li { display: grid; grid-template-columns: 10px 1fr auto; align-items: center; gap: var(--s-3); padding-left: 0; }
-  .step__dot { width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--paper-3); border: 2px solid var(--mint); }
-  .card__steps li.is-now .step__dot { background: var(--mint); box-shadow: 0 0 0 4px var(--mint-soft); }
-  .step__label { font-size: var(--fs-xs); color: var(--ink); }
-  .step__year { font-family: var(--font-mono); font-size: 11px; color: var(--ink-faint); }
+
+  .search__input {
+    flex: 1;
+    min-width: 0;
+    height: 40px;
+    border: 0;
+    background: transparent;
+    font-family: var(--font-body);
+    font-size: var(--fs-sm);
+    color: var(--ink);
+    outline: none;
+  }
+  .search__input::placeholder { color: var(--ink-faint); }
+  .search__input::-webkit-search-cancel-button { display: none; }
+
+  .search__kbd {
+    flex: none;
+    padding: 2px 7px;
+    border-radius: var(--r-xs);
+    border: 1px solid var(--line);
+    background: var(--paper-3);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--ink-faint);
+  }
+
+  .search__go {
+    flex: none;
+    height: 40px;
+    padding: 0 20px;
+    border: 0;
+    border-radius: var(--r-pill);
+    background: var(--mint);
+    font-family: var(--font-ui);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: #234a3b;
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease-out);
+  }
+  .search__go:hover { background: var(--mint-deep); color: #fff; }
+
+  .search__hits {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+    border-radius: var(--r-md);
+    overflow: hidden;
+  }
+  .search__hits[hidden] { display: none; }
+  .sh__link {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--s-4);
+    padding: 9px var(--s-3);
+    border-radius: var(--r-sm);
+    color: inherit;
+  }
+  .sh__link:hover { background: var(--mint-soft); }
+  .sh__title { font-size: var(--fs-sm); color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sh__meta { flex: none; font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint); }
+  .sh__empty { padding: 10px var(--s-3); font-size: var(--fs-xs); color: var(--ink-faint); }
+  .search__hits :global(mark) { background: var(--sun); color: var(--ink); border-radius: 3px; padding: 0 1px; }
+
+  .search__tags {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .search__tags a {
+    display: inline-flex;
+    gap: 5px;
+    padding: 3px 11px;
+    border-radius: var(--r-pill);
+    background: rgba(255, 255, 255, .72);
+    border: 1px solid var(--line);
+    font-size: 11px;
+    color: var(--ink-soft);
+    transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+  }
+  .search__tags a:hover { border-color: var(--mint); color: var(--mint-deep); }
+  .search__tags span { color: var(--ink-faint); }
+
+  /* ---------------------------------------------------------------- *
+   * 成长轨迹 —— S 形曲线
+   * ---------------------------------------------------------------- */
+  .card--path { padding-bottom: var(--s-4); }
+
+  .path__head { display: grid; gap: 4px; }
+  .path__title { margin: 0; font-family: var(--font-ui); font-size: var(--fs-lg); color: var(--ink); }
+  .path__sub { margin: 0; font-size: 11px; color: var(--ink-faint); }
+
+  .path__chart { position: relative; width: 100%; aspect-ratio: 1000 / 480; margin-top: var(--s-2); }
+  .path__svg { display: block; width: 100%; height: 100%; overflow: visible; }
+
+  .path__tick { stroke: var(--line); stroke-width: 1; vector-effect: non-scaling-stroke; }
+  .path__base { stroke: var(--line); stroke-width: 1; vector-effect: non-scaling-stroke; }
+
+  .path__axis { position: absolute; inset: 0; pointer-events: none; }
+  .path__axis span {
+    position: absolute;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--ink-faint);
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .path__axis-from { left: var(--l); transform: translateX(-50%); bottom: 4%; }
+  .path__axis-to { left: var(--l); transform: translateX(-50%); bottom: 4%; }
+  .path__axis-y0 { left: 0; width: 6.2%; text-align: right; top: var(--t); transform: translateY(-50%); }
+  .path__axis-y1 { left: 0; width: 6.2%; text-align: right; top: var(--t); transform: translateY(-50%); }
+
+  .path__area { fill: url(#growth-fill); }
+
+  .path__curve {
+    fill: none;
+    stroke: var(--mint-deep);
+    stroke-width: 3;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 1.6s var(--ease-out) .25s;
+  }
+  .card--path.is-in .path__curve { stroke-dashoffset: 0; }
+
+  .path__marks { list-style: none; margin: 0; padding: 0; }
+  .mark { position: absolute; left: var(--x); top: var(--y); width: 0; height: 0; }
+
+  .mark__dot {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 11px;
+    height: 11px;
+    margin: -5.5px 0 0 -5.5px;
+    border-radius: var(--r-pill);
+    background: var(--mint);
+    border: 2px solid var(--paper);
+    box-shadow: 0 0 0 4px var(--mint-soft);
+    opacity: 0;
+    transform: scale(.4);
+    transition: opacity .45s var(--ease-out), transform .45s var(--ease-out);
+    transition-delay: calc(.5s + var(--i) * 110ms);
+  }
+  .card--path.is-in .mark__dot { opacity: 1; transform: scale(1); }
+
+  .mark__card {
+    position: absolute;
+    width: 146px;
+    left: 50%;
+    translate: -50% 0;
+    display: grid;
+    gap: 1px;
+    padding: 7px 10px;
+    border-radius: var(--r-sm);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-soft);
+    opacity: 0;
+    transition: opacity .5s var(--ease-out), transform .5s var(--ease-out);
+    transition-delay: calc(.6s + var(--i) * 110ms);
+  }
+  .card--path.is-in .mark__card { opacity: 1; }
+  .mark--up .mark__card { bottom: 26px; transform: translateY(6px); }
+  .mark--down .mark__card { top: 26px; transform: translateY(-6px); }
+  .card--path.is-in .mark--up .mark__card,
+  .card--path.is-in .mark--down .mark__card { transform: none; }
+
+  .mark--start .mark__card { left: 0; translate: 0 0; }
+  .mark--end .mark__card { left: auto; right: 0; translate: 0 0; }
+
+  .mark__label { font-family: var(--font-ui); font-size: var(--fs-sm); font-weight: 700; color: var(--ink); }
+  .mark__range { font-family: var(--font-mono); font-size: 10px; font-style: normal; color: var(--ink-faint); }
+  .mark__count { font-family: var(--font-mono); font-size: 10px; font-style: normal; color: var(--mint-deep); }
+
+  /* 手机：竖排时间线 */
+  .path__list { list-style: none; margin: var(--s-4) 0 0; padding: 0; display: none; }
+  .grow {
+    position: relative;
+    display: grid;
+    grid-template-columns: 18px 1fr auto;
+    align-items: start;
+    gap: var(--s-3);
+    padding: 10px 0 10px 0;
+  }
+  .grow::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, var(--mint-soft), var(--mint), var(--peach), var(--lilac));
+    opacity: .55;
+  }
+  .grow:first-child::before { top: 16px; }
+  .grow:last-child::before { bottom: calc(100% - 26px); }
+  .grow__dot {
+    position: relative;
+    z-index: 1;
+    width: 10px;
+    height: 10px;
+    margin-top: 4px;
+    border-radius: var(--r-pill);
+    background: var(--mint);
+    border: 2px solid var(--paper);
+    box-shadow: 0 0 0 3px var(--mint-soft);
+  }
+  .grow__head { display: flex; align-items: baseline; gap: 8px; margin: 0; }
+  .grow__head b { font-family: var(--font-ui); font-size: var(--fs-sm); color: var(--ink); }
+  .grow__head i { font-family: var(--font-mono); font-size: 10px; font-style: normal; color: var(--ink-faint); }
+  .grow__note { margin: 2px 0 0; font-size: 11px; color: var(--ink-soft); line-height: 1.6; }
+  .grow__count { font-family: var(--font-mono); font-size: 11px; color: var(--mint-deep); }
+
+  .path__foot { margin: var(--s-3) 0 0; font-size: 11px; color: var(--ink-faint); }
+  .path__foot a { color: var(--mint-deep); }
 
   /* spans */
+  .card--search { grid-column: span 4; }
   .card--log { grid-column: span 2; grid-row: span 2; }
   .card--gallery { grid-column: span 2; }
-  .card--search { grid-column: span 2; }
-  .card--path { grid-column: span 2; }
+  .card--path { grid-column: span 4; }
 
   @media (max-width: 1024px) {
     .bento__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -350,8 +834,16 @@ const planTop = planGroups.flatMap((g) => g.tasks).slice(0, 4);
     .card--search { grid-column: span 2; }
     .card--path { grid-column: span 2; }
   }
+
+  @media (max-width: 760px) {
+    .path__chart { display: none; }
+    .path__list { display: grid; }
+  }
+
   @media (max-width: 620px) {
     .bento__grid { grid-template-columns: minmax(0, 1fr); }
     .card--log, .card--gallery, .card--search, .card--path { grid-column: span 1; }
+    .search__kbd { display: none; }
+    .search__go { padding: 0 16px; }
   }
 </style>

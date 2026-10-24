@@ -1,5 +1,7 @@
 ---
+import { Image } from 'astro:assets';
 import { site } from '../../lib/site';
+import avatar from '../../assets/real-avatar.webp';
 
 const path = Astro.url.pathname;
 const isActive = (href: string) =>
@@ -9,7 +11,9 @@ const isActive = (href: string) =>
 <header class="header" data-header>
   <div class="header__inner u-page">
     <a class="header__brand" href="/">
-      <span class="header__dot" aria-hidden="true"></span>
+      <span class="header__avatar">
+        <Image src={avatar} alt="" widths={[96, 192]} sizes="96px" loading="eager" />
+      </span>
       <span class="header__name">{site.name}</span>
     </a>
 
@@ -60,12 +64,30 @@ const isActive = (href: string) =>
     letter-spacing: .01em;
   }
 
-  .header__dot {
-    width: 10px;
-    height: 10px;
+  .header__avatar {
+    width: 32px;
+    height: 32px;
+    flex: none;
+    display: block;
     border-radius: var(--r-pill);
-    background: var(--mint);
-    box-shadow: 0 0 0 4px var(--mint-soft);
+    overflow: hidden;
+    background: var(--mint-soft);
+    box-shadow: 0 0 0 2px var(--paper), 0 0 0 3px var(--line);
+    transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+  }
+
+  .header__avatar :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 56% 50%;
+    transform: scale(1.18);
+    display: block;
+  }
+
+  .header__brand:hover .header__avatar {
+    transform: rotate(-6deg) scale(1.06);
+    box-shadow: 0 0 0 2px var(--paper), 0 0 0 3px var(--mint);
   }
 
   .header__nav {

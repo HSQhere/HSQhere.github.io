@@ -20,9 +20,8 @@ export const site = {
     greeting: '晚安',
     welcome: '欢迎回来',
   },
-  /** hero one-liner + fact chips */
+  /** hero headline + fact chips */
   hero: {
-    kicker: 'GOOD EVENING',
     hello: '你好呀，',
     iam: '我是',
     lead: '一个把电机、代码和落日都当作收藏品的工科生。',
@@ -43,12 +42,17 @@ export const site = {
     { id: 'about', href: '/about/', label: '关于', desc: '我是谁，在做什么。', accent: 'sun' },
     { id: 'search', href: '/search/', label: '搜索', desc: '快速找到一篇文章。', accent: 'mint' },
   ],
-  /** 成长路径 —— 便当格最后一张卡 */
-  growth: [
-    { label: '刚入学', year: '2024' },
-    { label: '电控入门', year: '2025' },
-    { label: '往机器人走', year: '2026' },
-    { label: '还在路上', year: 'NEXT' },
+  /**
+   * 成长轨迹 —— 便当格最后一张卡，用 S 形曲线画出来。
+   * from/to 是 YYYY-MM（含端点），篇数由构建时按真实文章时间线统计，
+   * 所以这里只写阶段名和一句人话，不写数字。
+   */
+  growthPhases: [
+    { label: '起步', from: '2026-03', to: '2026-03', range: '2026.03', note: '装系统、点灯、第一次画板' },
+    { label: '电控', from: '2026-04', to: '2026-05', range: '2026.04 – 05', note: 'FOC、姿态解算、CATIA' },
+    { label: '系统与控制', from: '2026-06', to: '2026-07', range: '2026.06 – 07', note: 'Jetson、ROS2、平衡车、LQR' },
+    { label: '深度学习', from: '2026-08', to: '2026-08', range: '2026.08', note: 'Transformer、CLIP、ViT、PPO、RT-2' },
+    { label: '往机器人走', from: '2026-09', to: '2026-12', range: '2026.09 –', note: '路径规划，还在路上' },
   ],
   /** 本地音乐（public/music） */
   music: {

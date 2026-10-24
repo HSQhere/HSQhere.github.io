@@ -33,12 +33,6 @@ const quotes = site.quotes.map((q) => `${q.text}##${q.from}`).join('|||');
 
   <div class="hero__stage">
     <div class="hero__copy" data-hero-copy data-pl="copy">
-      <p class="hero__kicker">
-        <span>{site.hero.kicker}</span>
-        <span class="hero__star" aria-hidden="true">✦</span>
-        <span data-clock-time>--:--</span>
-      </p>
-
       <h1 class="hero__title" id="hero-title">
         {site.hero.hello}<br />
         {site.hero.iam} <span class="hero__name">{site.name}</span>
@@ -185,34 +179,18 @@ const quotes = site.quotes.map((q) => `${q.text}##${q.from}`).join('|||');
   .hero__copy {
     position: relative;
     z-index: 1;
-    width: min(30rem, 100% - var(--s-6));
+    width: min(34rem, 100% - var(--s-6));
     text-align: center;
     transform: translate3d(var(--plx, 0px), var(--ply, 0px), 0);
   }
 
-  .hero__kicker {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--s-2);
-    margin: 0 0 var(--s-4);
-    padding: 4px 14px;
-    border-radius: var(--r-pill);
-    background: var(--glass);
-    border: 1px solid var(--glass-line);
-    backdrop-filter: var(--glass-blur);
-    font-family: var(--font-mono);
-    font-size: var(--fs-xs);
-    letter-spacing: .16em;
-    color: var(--ink-soft);
-  }
-  .hero__star { color: var(--peach); }
-
   .hero__title {
     margin: 0;
     font-family: var(--font-ui);
-    font-size: clamp(2.1rem, 4.4vw, 3.4rem);
-    line-height: 1.2;
-    letter-spacing: -.01em;
+    font-size: clamp(2.6rem, 6.4vw, 5rem);
+    line-height: 1.16;
+    letter-spacing: -.02em;
+    text-wrap: balance;
   }
   .hero__name {
     position: relative;
@@ -400,15 +378,17 @@ const quotes = site.quotes.map((q) => `${q.text}##${q.from}`).join('|||');
     .hero__pet {
       position: static;
       width: min(320px, 100%);
-      transform: none;
+      /* keep the card's own angle on narrow screens — the tilt is part of the
+         "pinned to a corkboard" look, not a desktop-only flourish */
+      transform: rotate(var(--rot));
       margin-top: var(--s-7);
       justify-self: center;
     }
 
     /* The scatter cannot survive a narrow screen. Instead of an overlapping
        strip (which let the polaroid slide under the note) the desk becomes a
-       plain two-column grid: no negative margins, no collision, the angles are
-       kept only as a slight tilt. */
+       plain two-column grid: no negative margins, no collision — but every
+       widget keeps its own free tilt angle. */
     .hero__ring {
       position: static;
       width: min(36rem, 100% - var(--s-6));
@@ -426,7 +406,7 @@ const quotes = site.quotes.map((q) => `${q.text}##${q.from}`).join('|||');
       display: flex;
       justify-content: center;
       width: 100%;
-      transform: rotate(calc(var(--rot) * .5));
+      transform: rotate(var(--rot)) scale(var(--scale));
     }
     .hero__ring :global(.w--tag),
     .hero__ring :global(.w--search) { display: none; }
@@ -440,10 +420,11 @@ const quotes = site.quotes.map((q) => `${q.text}##${q.from}`).join('|||');
          so .hero { overflow: clip } never cuts it off on phones */
       padding-bottom: 96px;
     }
-    .hero__ring :global(.w) { transform: none; }
+    /* one widget per row: there is room for the full angle again */
+    .hero__ring :global(.w) { transform: rotate(var(--rot)) scale(var(--scale)); }
   }
   @media (max-width: 620px) {
-    .hero__title { font-size: clamp(1.8rem, 8vw, 2.4rem); }
+    .hero__title { font-size: clamp(2rem, 9.5vw, 2.9rem); }
     .hero__lead { font-size: var(--fs-sm); }
   }
 </style>

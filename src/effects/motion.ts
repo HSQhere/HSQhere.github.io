@@ -297,22 +297,6 @@ function initReveal() {
   later(() => items.forEach((el) => el.classList.add('is-in')), 1600);
 }
 
-function initGrowthLine() {
-  const line = document.querySelector<HTMLElement>('[data-growth-line]');
-  if (!line) return;
-
-  if (prefersReduced()) {
-    line.style.transform = 'scaleX(1)';
-    return;
-  }
-
-  line.style.transform = 'scaleX(0)';
-  later(() => {
-    line.style.transition = 'transform 1000ms cubic-bezier(.22,1,.36,1)';
-    line.style.transform = 'scaleX(1)';
-  }, 420);
-}
-
 /* ------------------------------------------------------------------ *
  * 5. LED clock — seven-segment digits, never a clock face
  * ------------------------------------------------------------------ */
@@ -771,7 +755,6 @@ export function initMotion() {
   initScrollChrome();
   initHeroIn();
   initReveal();
-  initGrowthLine();
   initClock();
   initQuote();
   initIntro();
