@@ -1,0 +1,131 @@
+---
+/**
+ * IntroOverlay.astro — the 晚安 ✦ 欢迎回来 curtain.
+ * Shown once per session (sessionStorage), skipped entirely when the visitor
+ * asks for reduced motion. The animation itself lives in effects/motion.ts.
+ */
+import { Image } from 'astro:assets';
+import realAvatar from '../../assets/real-avatar.webp';
+import { site } from '../../lib/site';
+
+const greeting = [...site.intro.greeting];
+const welcome = [...site.intro.welcome];
+---
+
+<div class="intro" data-intro aria-hidden="false">
+  <span class="intro__veil left" data-veil="left"></span>
+  <span class="intro__veil right" data-veil="right"></span>
+  <span class="intro__glow" aria-hidden="true"></span>
+
+  <div class="intro__inner">
+    <span class="intro__head" data-intro-head>
+      <Image src={realAvatar} alt="" width={44} height={44} loading="eager" />
+    </span>
+
+    <p class="intro__title">
+      {greeting.map((ch) => <span class="intro__letter" data-intro-letter>{ch}</span>)}
+      <span class="intro__gap" aria-hidden="true">✦</span>
+      {welcome.map((ch) => <span class="intro__letter" data-intro-letter>{ch}</span>)}
+    </p>
+
+    <span class="intro__tail">HSQ · 小站</span>
+
+    <button class="intro__skip" type="button" data-intro-skip>跳过</button>
+  </div>
+</div>
+
+<style>
+  .intro {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-intro);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  .intro.is-off { display: none; }
+
+  .intro__veil {
+    position: absolute;
+    top: 0;
+    width: 51%;
+    height: 100%;
+    background: var(--paper);
+  }
+  .intro__veil.left { left: 0; }
+  .intro__veil.right { right: 0; }
+
+  .intro__glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 52%, rgba(127, 199, 169, .18), transparent 58%);
+  }
+
+  .intro__inner {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: var(--s-3);
+  }
+
+  .intro__head {
+    display: block;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--r-pill);
+    overflow: hidden;
+    box-shadow: 0 0 0 3px var(--mint-soft);
+    opacity: 0;
+  }
+  .intro__head :global(img) { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+  .intro__title {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: clamp(1.6rem, 5vw, 2.6rem);
+    font-weight: 700;
+    letter-spacing: .04em;
+  }
+  .intro__letter {
+    display: inline-block;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+  .intro__gap {
+    margin-inline: var(--s-3);
+    color: var(--peach);
+    font-size: .8em;
+  }
+
+  .intro__tail {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: .3em;
+    color: var(--ink-faint);
+  }
+
+  .intro__skip {
+    margin-top: var(--s-4);
+    padding: 4px 16px;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--line);
+    background: var(--glass);
+    font-size: var(--fs-xs);
+    color: var(--ink-faint);
+  }
+  .intro__skip:hover { color: var(--ink); border-color: var(--mint); }
+
+  body.is-locked { overflow: hidden; }
+</style>
+
+<script>
+  /* the overlay only exists for the very first paint of a session */
+  if (sessionStorage.getItem('hsq-intro') === 'done') {
+    document.querySelector('[data-intro]')?.classList.add('is-off');
+  } else {
+    sessionStorage.setItem('hsq-intro', 'done');
+  }
+</script>

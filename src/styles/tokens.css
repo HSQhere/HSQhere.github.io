@@ -1,0 +1,104 @@
+/* ============================================================
+   tokens.css — the ONLY place colours, radii, spacing live.
+   Components must never hard-code a literal colour value.
+   ============================================================ */
+
+:root {
+  /* ---- paper / ink ------------------------------------------------ */
+  --paper:        #fffdf9;
+  --paper-2:      #fdfaf5;
+  --paper-3:      #f7f2e9;
+  --ink:          #34383f;
+  --ink-soft:     #5c636e;
+  --ink-faint:    #8b929c;
+  --line:         rgba(52, 56, 63, .10);
+
+  /* ---- watercolour accents ---------------------------------------- */
+  --mint:         #7fc7a9;
+  --mint-deep:    #4c8a70;
+  --mint-soft:    #d3efdf;
+  --peach:        #ffbba0;
+  --peach-soft:   #ffe3c9;
+  --lilac:        #dedbf6;
+  --sky:          #d3e7ff;
+  --sun:          #ffd88a;
+
+  /* ---- glass ------------------------------------------------------ */
+  --glass:        rgba(255, 255, 255, .50);
+  --glass-strong: rgba(255, 255, 255, .72);
+  --glass-line:   rgba(255, 255, 255, .82);
+  --glass-blur:   blur(14px) saturate(1.15);
+  --shadow-card:  0 40px 50px -32px rgba(0, 0, 0, .05),
+                  inset 0 0 20px rgba(255, 255, 255, .25);
+  --shadow-soft:  0 18px 40px -26px rgba(52, 56, 63, .35);
+  --shadow-float: 0 24px 60px -30px rgba(52, 56, 63, .40);
+
+  /* ---- radii ------------------------------------------------------ */
+  --r-xs:   8px;
+  --r-sm:  12px;
+  --r-md:  20px;
+  --r-lg:  32px;
+  --r-xl:  48px;
+  --r-2xl: 64px;
+  --r-pill: 999px;
+
+  /* ---- spacing scale (4px base) ----------------------------------- */
+  --s-1:  4px;
+  --s-2:  8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+  --s-9: 96px;
+
+  /* ---- type ------------------------------------------------------- */
+  --font-ui: "Quicksand", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+  --font-body: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  --font-serif: "Songti SC", "STSong", "SimSun", Georgia, serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  --fs-xs:   .78rem;
+  --fs-sm:   .875rem;
+  --fs-base: 1rem;
+  --fs-md:   1.0625rem;
+  --fs-lg:   1.25rem;
+  --fs-xl:   1.5rem;
+  --fs-2xl:  2rem;
+  --fs-3xl:  2.75rem;
+  --fs-4xl:  clamp(2.6rem, 6vw, 4.2rem);
+
+  /* ---- layout ----------------------------------------------------- */
+  --w-page:  1180px;
+  --w-prose:  760px;
+  --header-h: 68px;
+
+  /* ---- motion ----------------------------------------------------- */
+  --ease-out:  cubic-bezier(.22, .61, .36, 1);
+  --ease-soft: cubic-bezier(.4, 0, .2, 1);
+  --dur-fast: 160ms;
+  --dur-base: 280ms;
+  --dur-slow: 520ms;
+
+  /* ---- layers ----------------------------------------------------- */
+  --z-base: 1;
+  --z-sticky: 50;
+  --z-overlay: 80;
+  --z-intro: 120;
+
+  /* ---- runtime-mutated (written by effects/motion.ts) ------------- */
+  --pointer-x: 0;
+  --pointer-y: 0;
+  --scroll-shift: 0;
+}
+
+/* Reduced motion: collapse every duration to zero so effects that read
+   these variables land instantly on their final state. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-base: 0ms;
+    --dur-slow: 0ms;
+  }
+}

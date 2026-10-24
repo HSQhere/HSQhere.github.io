@@ -1,0 +1,258 @@
+---
+/**
+ * /search/ — 两种搜索模式：
+ *   标题  — 标题 / 标签 / 分类 / 摘要，结果轻、命中准
+ *   全文  — 再加上正文纯文本，命中多但慢一点
+ * 索引在构建时生成（/search-index.json），客户端只负责过滤。
+ */
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="搜索" description="在 HSQ 的小站里搜索文章：标题模式或全文模式。" noindex>
+  <section class="se">
+    <header class="se__head">
+      <p class="se__crumb"><a href="/">首页</a><span aria-hidden="true">/</span>搜索</p>
+      <h1 class="se__title">搜索</h1>
+      <p class="se__lead">先按标题找，找不到再切全文。</p>
+    </header>
+
+    <div class="se__bar">
+      <label class="se__field">
+        <span class="u-visually-hidden">搜索关键词</span>
+        <input class="se__input" type="search" data-q placeholder="输入关键词，比如 电控、SVPWM、路径规划" autocomplete="off" spellcheck="false" />
+        <button class="se__clear" type="button" data-clear aria-label="清空">✕</button>
+      </label>
+      <div class="se__modes" role="group" aria-label="搜索范围">
+        <button class="mode is-on" type="button" data-mode="title" aria-pressed="true">标题</button>
+        <button class="mode" type="button" data-mode="full" aria-pressed="false">全文</button>
+      </div>
+    </div>
+
+    <p class="se__stat" data-stat aria-live="polite"></p>
+
+    <ul class="se__list" data-list></ul>
+
+    <p class="se__empty" data-empty hidden>
+      没有找到。换个词试试，或者去 <a href="/archive/">归档</a> 里翻翻。
+    </p>
+
+    <noscript>
+      <p class="se__stat">搜索需要 JavaScript。可以直接去 <a href="/archive/">归档</a> 浏览全部文章。</p>
+    </noscript>
+  </section>
+</Base>
+
+<script>
+  type Item = {
+    title: string;
+    url: string;
+    date: string;
+    tags: string[];
+    categories: string[];
+    excerpt: string;
+    text: string;
+  };
+
+  const input = document.querySelector<HTMLInputElement>('[data-q]');
+  const list = document.querySelector<HTMLUListElement>('[data-list]');
+  const stat = document.querySelector<HTMLElement>('[data-stat]');
+  const empty = document.querySelector<HTMLElement>('[data-empty]');
+  const clear = document.querySelector<HTMLButtonElement>('[data-clear]');
+  const modes = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-mode]'));
+
+  let items: Item[] = [];
+  let mode: 'title' | 'full' = 'title';
+  let ready = false;
+
+  const escapeHtml = (s: string) =>
+    s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+
+  const highlight = (text: string, terms: string[]) => {
+    let out = escapeHtml(text);
+    for (const t of terms) {
+      if (!t) continue;
+      const safe = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      out = out.replace(new RegExp(safe, 'gi'), (m) => `<mark>${m}</mark>`);
+    }
+    return out;
+  };
+
+  const haystack = (it: Item) => {
+    const base = [it.title, it.tags.join(' '), it.categories.join(' '), it.excerpt].join(' ');
+    return mode === 'full' ? `${base} ${it.text}` : base;
+  };
+
+  const render = (hits: Item[], terms: string[]) => {
+    if (!list || !stat || !empty) return;
+
+    list.innerHTML = hits
+      .map((it) => {
+        const tagBits = [...it.categories, ...it.tags]
+          .slice(0, 5)
+          .map((t) => `<span class="tag">${escapeHtml(t)}</span>`)
+          .join('');
+        const where = mode === 'full' && terms.length ? snippet(it.text, terms) : it.excerpt;
+        return `<li class="hit">
+          <a class="hit__link" href="${it.url}">
+            <span class="hit__date">${it.date}</span>
+            <span class="hit__title">${highlight(it.title, terms)}</span>
+            <span class="hit__desc">${highlight(where, terms)}</span>
+            <span class="hit__tags">${tagBits}</span>
+          </a>
+        </li>`;
+      })
+      .join('');
+
+    stat.textContent = hits.length ? `${hits.length} 篇 · ${mode === 'title' ? '标题模式' : '全文模式'}` : '';
+    empty.hidden = hits.length > 0 || !terms.length;
+    list.hidden = hits.length === 0;
+  };
+
+  /** 全文模式下取命中词附近的一段文字 */
+  const snippet = (text: string, terms: string[]) => {
+    const lower = text.toLowerCase();
+    let at = -1;
+    for (const t of terms) {
+      const i = lower.indexOf(t.toLowerCase());
+      if (i !== -1 && (at === -1 || i < at)) at = i;
+    }
+    if (at === -1) return text.slice(0, 120);
+    const from = Math.max(0, at - 40);
+    return (from > 0 ? '…' : '') + text.slice(from, from + 130) + '…';
+  };
+
+  const search = () => {
+    const raw = (input?.value ?? '').trim();
+    const terms = raw.split(/\s+/).filter(Boolean);
+    if (!terms.length) {
+      render([], []);
+      return;
+    }
+    const hits = items.filter((it) => {
+      const hay = haystack(it).toLowerCase();
+      return terms.every((t) => hay.includes(t.toLowerCase()));
+    });
+    render(hits.slice(0, 60), terms);
+  };
+
+  const setMode = (next: 'title' | 'full') => {
+    mode = next;
+    modes.forEach((b) => {
+      const on = b.dataset.mode === next;
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-pressed', String(on));
+    });
+    if (input?.value.trim()) search();
+  };
+
+  modes.forEach((b) => b.addEventListener('click', () => setMode((b.dataset.mode as 'title' | 'full') ?? 'title')));
+  clear?.addEventListener('click', () => {
+    if (!input) return;
+    input.value = '';
+    input.focus();
+    search();
+  });
+
+  let timer = 0;
+  input?.addEventListener('input', () => {
+    if (!ready) return;
+    clearTimeout(timer);
+    timer = window.setTimeout(search, 120);
+  });
+
+  // 支持 /search/?q=xxx 直接带词进来
+  const preset = new URLSearchParams(location.search).get('q');
+  if (preset && input) input.value = preset;
+
+  fetch('/search-index.json')
+    .then((r) => r.json() as Promise<Item[]>)
+    .then((data) => {
+      items = data;
+      ready = true;
+      if (input?.value.trim()) search();
+      else if (stat) stat.textContent = `共 ${items.length} 篇文章可搜`;
+    })
+    .catch(() => {
+      if (stat) stat.textContent = '索引加载失败，刷新试试。';
+    });
+</script>
+
+<style>
+  .se { width: min(var(--w-prose), 100% - var(--s-6)); margin-inline: auto; padding-block: var(--s-8) var(--s-9); }
+  .se__crumb { margin: 0 0 var(--s-3); display: flex; gap: 8px; font-size: var(--fs-xs); color: var(--ink-faint); }
+  .se__crumb a { color: var(--ink-faint); }
+  .se__crumb a:hover { color: var(--mint-deep); }
+  .se__title { margin: 0; font-size: var(--fs-2xl); }
+  .se__lead { margin: var(--s-3) 0 0; color: var(--ink-soft); }
+
+  .se__bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3); margin-top: var(--s-6); }
+  .se__field { position: relative; flex: 1 1 260px; display: block; }
+  .se__input {
+    width: 100%;
+    padding: 12px 40px 12px 16px;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--line);
+    background: var(--paper);
+    font-family: var(--font-body);
+    font-size: var(--fs-sm);
+    color: var(--ink);
+    box-shadow: var(--shadow-card);
+    outline: none;
+  }
+  .se__input:focus { border-color: var(--mint); box-shadow: 0 0 0 4px var(--mint-soft); }
+  .se__clear {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    border: 0;
+    border-radius: var(--r-pill);
+    background: var(--paper-3);
+    color: var(--ink-faint);
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .se__clear:hover { background: var(--mint-soft); color: var(--mint-deep); }
+
+  .se__modes { display: flex; padding: 3px; border-radius: var(--r-pill); background: var(--paper-3); border: 1px solid var(--line); }
+  .mode {
+    padding: 6px 16px;
+    border: 0;
+    border-radius: var(--r-pill);
+    background: transparent;
+    font-family: var(--font-ui);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--ink-faint);
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+  }
+  .mode.is-on { background: var(--paper); color: var(--mint-deep); box-shadow: 0 1px 4px rgba(52,56,63,.08); }
+
+  .se__stat { margin: var(--s-4) 0 0; font-family: var(--font-mono); font-size: 11px; color: var(--ink-faint); }
+
+  .se__list { margin: var(--s-5) 0 0; padding: 0; list-style: none; display: grid; gap: var(--s-2); }
+  .hit__link {
+    display: grid;
+    gap: 3px;
+    padding: var(--s-4);
+    border-radius: var(--r-md);
+    background: var(--paper-2);
+    border: 1px solid transparent;
+    color: inherit;
+    text-decoration: none;
+    transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+  }
+  .hit__link:hover { background: var(--paper); border-color: var(--line); transform: translateX(2px); }
+  .hit__date { font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint); }
+  .hit__title { font-family: var(--font-ui); font-weight: 700; font-size: var(--fs-md); }
+  .hit__desc { font-size: var(--fs-sm); color: var(--ink-soft); line-height: 1.7; }
+  .hit__tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 3px; }
+  .hit__tags .tag { padding: 1px 8px; border-radius: var(--r-pill); background: var(--mint-soft); color: var(--mint-deep); font-size: 10px; }
+  :global(mark) { background: var(--sun); color: var(--ink); border-radius: 3px; padding: 0 1px; }
+
+  .se__empty { margin-top: var(--s-6); font-size: var(--fs-sm); color: var(--ink-faint); }
+  .se__empty a { color: var(--mint-deep); }
+</style>

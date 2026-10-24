@@ -1,0 +1,57 @@
+---
+import { site } from '../../lib/site';
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="footer__inner u-page">
+    <p class="footer__line">
+      © {year} {site.author.name} · 用 Astro 搭的
+    </p>
+    <p class="footer__meta">
+      <a href="/rss.xml">RSS</a>
+      <span aria-hidden="true">·</span>
+      <a href={site.social.github} rel="noopener noreferrer" target="_blank">GitHub</a>
+      <span aria-hidden="true">·</span>
+      <a href="/categories/">分类</a>
+      <span aria-hidden="true">·</span>
+      <a href="/about/">关于</a>
+    </p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    margin-top: var(--s-9);
+    padding-block: var(--s-7);
+    border-top: 1px solid var(--line);
+  }
+
+  .footer__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-3);
+    font-size: var(--fs-sm);
+    color: var(--ink-faint);
+  }
+
+  .footer__line { margin: 0; }
+
+  .footer__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    margin: 0;
+  }
+
+  .footer__meta a {
+    color: var(--ink-soft);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 3px;
+    transition: color var(--dur-fast) var(--ease-out), text-decoration-color var(--dur-fast) var(--ease-out);
+  }
+  .footer__meta a:hover { color: var(--mint-deep); text-decoration-color: var(--mint-soft); }
+</style>

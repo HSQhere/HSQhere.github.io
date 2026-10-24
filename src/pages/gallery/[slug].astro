@@ -1,0 +1,225 @@
+---
+/**
+ * /gallery/[slug]/ — one album.
+ * Photos are grouped exactly as the old site grouped them; every image is
+ * resolved through src/lib/gallery.ts, so a missing file simply disappears.
+ */
+import Base from '../../layouts/Base.astro';
+import { Image } from 'astro:assets';
+import { albums } from '../../lib/gallery';
+
+export function getStaticPaths() {
+  return albums.map((album) => ({ params: { slug: album.slug }, props: { album } }));
+}
+
+const { album } = Astro.props;
+const others = albums.filter((a) => a.slug !== album.slug);
+---
+
+<Base title={album.title} description={album.tagline} image={album.cover.src}>
+  <article class="alb">
+    <header class="alb__head">
+      <p class="alb__crumb">
+        <a href="/">首页</a><span aria-hidden="true">/</span><a href="/gallery/">图库</a><span aria-hidden="true">/</span>{album.title}
+      </p>
+      <h1 class="alb__title"><span aria-hidden="true">{album.emoji}</span> {album.title}</h1>
+      <p class="alb__lead">{album.tagline}</p>
+      <p class="alb__meta">{album.count} 张 · {album.groups.length} 组</p>
+    </header>
+
+    {album.groups.map((group, gi) => (
+      <section class="grp" aria-labelledby={`grp-${gi}`}>
+        <h2 class="grp__title" id={`grp-${gi}`}>
+          <span class="grp__dot" aria-hidden="true"></span>{group.title}
+          <span class="grp__n">{group.photos.length}</span>
+        </h2>
+        <div class="grid">
+          {group.photos.map((photo, i) => (
+            <figure class="ph" data-reveal={Math.min(i, 6)}>
+              <button class="ph__btn" type="button" data-photo data-src={photo.src.src} data-w={photo.src.width} data-h={photo.src.height} data-cap={photo.caption} aria-label={`放大查看 ${photo.caption}`}>
+                <Image src={photo.src} alt={photo.caption} widths={[320, 640, 1080]} sizes="(max-width: 640px) 46vw, (max-width: 1100px) 30vw, 340px" loading={gi === 0 && i < 3 ? 'eager' : 'lazy'} />
+              </button>
+              <figcaption class="ph__cap">{photo.caption}</figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+    ))}
+
+    <nav class="alb__nav" aria-label="相册导航">
+      {others.map((a) => (
+        <a class="alb__next" href={`/gallery/${a.slug}/`}>
+          <span class="alb__nextlab">下一个相册</span>
+          <span class="alb__nextname">{a.emoji} {a.title} →</span>
+        </a>
+      ))}
+      <a class="alb__back" href="/gallery/">← 回到图库</a>
+    </nav>
+  </article>
+
+  <dialog class="lb" data-lb aria-label="图片预览">
+    <button class="lb__x" type="button" data-lb-close aria-label="关闭">✕</button>
+    <img class="lb__img" data-lb-img alt="" />
+    <p class="lb__cap" data-lb-cap></p>
+  </dialog>
+</Base>
+
+<script>
+  import '../../effects/motion';
+
+  const dlg = document.querySelector<HTMLDialogElement>('[data-lb]');
+  const img = document.querySelector<HTMLImageElement>('[data-lb-img]');
+  const cap = document.querySelector<HTMLElement>('[data-lb-cap]');
+
+  if (dlg && img && cap) {
+    document.querySelectorAll<HTMLButtonElement>('[data-photo]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        img.src = btn.dataset.src || '';
+        img.width = Number(btn.dataset.w || 0);
+        img.height = Number(btn.dataset.h || 0);
+        img.alt = btn.dataset.cap || '';
+        cap.textContent = btn.dataset.cap || '';
+        dlg.showModal();
+      });
+    });
+
+    dlg.addEventListener('click', (event) => {
+      if (event.target === dlg) dlg.close();
+    });
+    document.querySelector('[data-lb-close]')?.addEventListener('click', () => dlg.close());
+  }
+</script>
+
+<style>
+  .alb {
+    width: min(var(--w-page), 100% - var(--s-6));
+    margin-inline: auto;
+    padding-block: var(--s-8) var(--s-9);
+  }
+
+  .alb__crumb {
+    margin: 0 0 var(--s-3);
+    display: flex;
+    gap: 8px;
+    font-size: var(--fs-xs);
+    color: var(--ink-faint);
+  }
+  .alb__crumb a { color: var(--ink-faint); }
+  .alb__crumb a:hover { color: var(--mint-deep); }
+
+  .alb__title { margin: 0; font-size: var(--fs-2xl); }
+  .alb__lead { margin: var(--s-3) 0 0; color: var(--ink-soft); }
+  .alb__meta { margin: var(--s-2) 0 0; font-family: var(--font-mono); font-size: 11px; color: var(--ink-faint); }
+
+  .grp { margin-top: var(--s-8); }
+  .grp__title {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    margin: 0 0 var(--s-4);
+    font-size: var(--fs-lg);
+  }
+  .grp__dot {
+    width: 8px; height: 8px;
+    border-radius: var(--r-pill);
+    background: var(--mint);
+    box-shadow: 0 0 0 4px var(--mint-soft);
+  }
+  .grp__n {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+    font-weight: 400;
+  }
+
+  /* Masonry via CSS columns: photos keep their own aspect ratio and the
+     column boxes pack them tightly, so a mixed-height album has no dead rows. */
+  .grid {
+    columns: 240px;
+    column-gap: var(--s-3);
+  }
+
+  .ph {
+    margin: 0 0 var(--s-3);
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+  }
+  .ph__btn {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: var(--r-md);
+    overflow: hidden;
+    background: var(--paper-3);
+    cursor: zoom-in;
+    box-shadow: var(--shadow-card);
+  }
+  .ph__btn :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: transform .7s var(--ease-out);
+  }
+  .ph__btn:hover :global(img) { transform: scale(1.05); }
+  .ph__cap {
+    margin: 6px 2px 0;
+    font-family: var(--font-serif);
+    font-size: 11px;
+    color: var(--ink-faint);
+  }
+
+  .alb__nav {
+    margin-top: var(--s-9);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4);
+    padding-top: var(--s-6);
+    border-top: 1px solid var(--line);
+  }
+  .alb__next { display: grid; gap: 2px; }
+  .alb__nextlab { font-size: 11px; color: var(--ink-faint); }
+  .alb__nextname { font-family: var(--font-ui); font-weight: 600; color: var(--mint-deep); }
+  .alb__back { font-size: var(--fs-xs); color: var(--ink-soft); }
+
+  /* lightbox */
+  .lb {
+    padding: 0;
+    border: 0;
+    border-radius: var(--r-lg);
+    background: var(--paper);
+    box-shadow: var(--shadow-float);
+    max-width: min(92vw, 1200px);
+    max-height: 90vh;
+  }
+  .lb::backdrop { background: rgba(52, 56, 63, .55); backdrop-filter: blur(4px); }
+  .lb__img {
+    display: block;
+    max-width: min(92vw, 1200px);
+    max-height: 80vh;
+    width: auto;
+    height: auto;
+  }
+  .lb__cap {
+    margin: 0;
+    padding: 10px 16px 14px;
+    font-family: var(--font-serif);
+    font-size: var(--fs-xs);
+    color: var(--ink-soft);
+    text-align: center;
+  }
+  .lb__x {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 34px;
+    height: 34px;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+</style>

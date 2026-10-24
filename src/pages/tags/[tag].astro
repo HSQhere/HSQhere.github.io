@@ -1,0 +1,63 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import PostCard from '../../components/post/PostCard.astro';
+import { getPosts, collectTags, type Post } from '../../lib/posts';
+
+export const getStaticPaths = (async () => {
+  const posts = await getPosts();
+  const tags = collectTags(posts);
+  return [...tags.entries()].map(([tag, list]) => ({
+    params: { tag },
+    props: { tag, posts: list },
+  }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  tag: string;
+  posts: Post[];
+}
+
+const { tag, posts } = Astro.props;
+---
+
+<Base title={`标签：${tag}`} description={`标签 ${tag} 下的全部文章`}>
+  <div class="u-page tagpage">
+    <header class="tagpage__head">
+      <p class="tagpage__label">标签</p>
+      <h1 class="tagpage__title">{tag}</h1>
+      <p class="tagpage__sub">{posts.length} 篇文章</p>
+    </header>
+
+    <div class="tagpage__grid">
+      {posts.map((p) => <PostCard post={p} />)}
+    </div>
+
+    <p class="tagpage__back"><a href="/tags/">← 全部标签</a></p>
+  </div>
+</Base>
+
+<style>
+  .tagpage { padding-block: var(--s-8); }
+
+  .tagpage__label {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .tagpage__title { margin-top: var(--s-2); font-size: var(--fs-3xl); }
+  .tagpage__sub { margin-top: var(--s-3); color: var(--ink-soft); }
+
+  .tagpage__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--s-5);
+    margin-top: var(--s-6);
+  }
+
+  .tagpage__back { margin-top: var(--s-7); }
+  .tagpage__back a { color: var(--mint-deep); }
+</style>

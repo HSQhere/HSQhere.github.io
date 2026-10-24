@@ -1,0 +1,63 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getPosts, collectTags } from '../../lib/posts';
+
+const posts = await getPosts();
+const tags = collectTags(posts);
+---
+
+<Base title="标签" description="全部标签">
+  <div class="u-page cloud">
+    <header class="cloud__head">
+      <h1 class="cloud__title">标签</h1>
+      <p class="cloud__sub">{tags.size} 个标签</p>
+    </header>
+
+    <ul class="cloud__list">
+      {[...tags.entries()].map(([tag, list]) => (
+        <li>
+          <a class="cloud__tag" href={`/tags/${encodeURIComponent(tag)}/`} style={`--weight:${Math.min(list.length, 12)}`}>
+            <span class="cloud__name">{tag}</span>
+            <span class="cloud__num">{list.length}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</Base>
+
+<style>
+  .cloud { padding-block: var(--s-8); }
+
+  .cloud__title { font-size: var(--fs-3xl); }
+  .cloud__sub { margin-top: var(--s-3); color: var(--ink-soft); }
+
+  .cloud__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3);
+    list-style: none;
+    padding: 0;
+    margin-top: var(--s-6);
+  }
+
+  .cloud__tag {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--s-2);
+    padding: calc(var(--s-2) + var(--weight) * .35px) calc(var(--s-4) + var(--weight) * .5px);
+    border-radius: var(--r-pill);
+    background: var(--glass);
+    border: 1px solid var(--line);
+    font-size: calc(var(--fs-sm) + var(--weight) * .022rem);
+    transition: transform var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+  }
+
+  .cloud__tag:hover { transform: translateY(-2px); background: var(--mint-soft); }
+
+  .cloud__num {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--ink-faint);
+  }
+</style>

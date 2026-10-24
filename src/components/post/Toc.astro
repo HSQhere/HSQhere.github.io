@@ -1,0 +1,112 @@
+---
+export interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+}
+
+const { headings } = Astro.props;
+
+// Some posts skip h2 entirely and start at h3/h4. Rather than showing an empty
+// panel, derive the two shallowest depths actually present in the document.
+const present = headings.filter((h) => h.depth >= 2 && h.depth <= 6);
+const shallowest = present.length > 0 ? Math.min(...present.map((h) => h.depth)) : 2;
+const items = present.filter((h) => h.depth <= shallowest + 1);
+const base = items.length > 0 ? Math.min(...items.map((h) => h.depth)) : 2;
+const show = items.length > 1;
+---
+
+{show && (
+  <nav class="toc" aria-label="文章目录">
+    <p class="toc__title">目录</p>
+    <ul class="toc__list">
+      {items.map((h) => (
+        <li class:list={['toc__item', h.depth > base && 'toc__item--nested']}>
+          <a class="toc__link" href={`#${h.slug}`} data-toc-link={h.slug}>{h.text}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}
+
+<style>
+  .toc {
+    padding: var(--s-4) var(--s-5);
+    border-radius: var(--r-md);
+    background: var(--glass);
+    border: 1px solid var(--line);
+  }
+
+  .toc__title {
+    margin: 0 0 var(--s-3);
+    font-family: var(--font-ui);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .toc__list { list-style: none; padding: 0; margin: 0; }
+
+  .toc__item + .toc__item { margin-top: 2px; }
+
+  .toc__item--nested { padding-left: var(--s-4); }
+
+  .toc__link {
+    display: block;
+    padding: 3px var(--s-3);
+    border-left: 2px solid transparent;
+    border-radius: 0 var(--r-xs) var(--r-xs) 0;
+    font-size: var(--fs-sm);
+    line-height: 1.55;
+    color: var(--ink-soft);
+    transition: color var(--dur-fast) var(--ease-out),
+                border-color var(--dur-fast) var(--ease-out),
+                background var(--dur-fast) var(--ease-out);
+  }
+
+  .toc__link:hover { color: var(--ink); background: rgba(255, 255, 255, .55); }
+
+  .toc__link.is-active {
+    color: var(--mint-deep);
+    border-left-color: var(--mint);
+    background: rgba(211, 239, 223, .45);
+    font-weight: 600;
+  }
+</style>
+
+<script>
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'));
+  const map = new Map<string, HTMLAnchorElement>();
+  for (const a of links) map.set(a.dataset.tocLink!, a);
+
+  const targets = links
+    .map((a) => document.getElementById(a.dataset.tocLink!))
+    .filter((el): el is HTMLElement => Boolean(el));
+
+  let active: HTMLAnchorElement | null = null;
+
+  const setActive = () => {
+    const line = window.innerHeight * 0.28;
+    let current: HTMLElement | null = null;
+    for (const el of targets) {
+      if (el.getBoundingClientRect().top <= line) current = el;
+      else break;
+    }
+    const next = current ? map.get(current.id) ?? null : null;
+    if (next === active) return;
+    active?.classList.remove('is-active');
+    next?.classList.add('is-active');
+    active = next;
+  };
+
+  // Scroll listeners plus a setInterval tick — never requestAnimationFrame.
+  window.addEventListener('scroll', setActive, { passive: true });
+  window.addEventListener('resize', setActive, { passive: true });
+  setActive();
+</script>

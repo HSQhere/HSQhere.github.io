@@ -1,0 +1,333 @@
+---
+/**
+ * WidgetHost.astro — maps a DeskWidget id to its markup.
+ * The data (position, rotation, scale) lives in src/lib/widgets.ts; this file
+ * only knows how to draw each kind.
+ */
+import { Image } from 'astro:assets';
+import lakeSm from '../../assets/lake-sm.webp';
+import { site } from '../../lib/site';
+import type { DeskWidget } from '../../lib/widgets';
+import { getEntry } from 'astro:content';
+import { parseTasks, taskStats } from '../../lib/plan';
+
+interface Props {
+  widget: DeskWidget;
+}
+
+const { widget } = Astro.props;
+const { id, x, y, rotate, size, z, label } = widget;
+
+const style = `--x:${x}px; --y:${y}px; --rot:${rotate}deg; --scale:${size}; --z:${z}`;
+const task = site.music;
+
+// The sticky note mirrors the live /plan/ data instead of a hard-coded list.
+const planGroups = parseTasks((await getEntry('posts', 'To-Do'))?.body ?? '');
+const planStats = taskStats(planGroups);
+const planTop = planGroups
+  .flatMap((g) => g.tasks)
+  .filter((t) => t.status !== 'canceled')
+  .slice(0, 3);
+---
+
+<div class:list={['w', `w--${id}`]} style={style} data-widget={id} aria-label={label}>
+  {id === 'clock' && (
+    <div class="w__card w__clock">
+      <span class="w__pin" aria-hidden="true"></span>
+      <p class="w__time">
+        <span data-clock-time>--:--</span><span class="w__sec" data-clock-sec>--</span>
+      </p>
+      <p class="w__date" data-clock-date>正在校准…</p>
+      <p class="w__greet" data-clock-greet>你好</p>
+    </div>
+  )}
+
+  {id === 'tape' && (
+    <div class="w__card w__tape" data-tape>
+      <span class="w__pin" aria-hidden="true"></span>
+      <div class="w__reels" aria-hidden="true">
+        <span class="w__reel"></span>
+        <span class="w__reel"></span>
+      </div>
+      <p class="w__song">{task.title}</p>
+      <p class="w__artist">{task.artist}</p>
+      <div class="w__eq" aria-hidden="true"><i></i><i></i><i></i></div>
+      <audio data-tape-audio preload="none" loop src={task.src}></audio>
+      <button class="w__play" type="button" data-tape-toggle aria-pressed="false" aria-label="播放音乐">
+        <span class="w__ico" aria-hidden="true"></span>
+      </button>
+    </div>
+  )}
+
+  {id === 'note' && (
+    <div class="w__card w__note">
+      <span class="w__tapebar" aria-hidden="true"></span>
+      <p class="w__notehead">今天要做的事</p>
+      <ul class="w__tasks">
+        {planTop.map((t) => (
+          <li class:list={[`is-${t.status}`]}>{t.title}</li>
+        ))}
+      </ul>
+      <div class="w__progress"><i data-bar={planStats.percent}></i></div>
+      <p class="w__pct">{planStats.percent}%</p>
+    </div>
+  )}
+
+  {id === 'polaroid' && (
+    <a class="w__card w__polaroid" href="/gallery/">
+      <span class="w__pin" aria-hidden="true"></span>
+      <Image src={lakeSm} alt="山与湖" widths={[220, 440]} sizes="220px" loading="lazy" />
+      <span class="w__cap">2026 · 山与湖</span>
+    </a>
+  )}
+
+  {id === 'tag' && (
+    <a class="w__card w__tag" href="/plan/">
+      <span class="w__hole" aria-hidden="true"></span>
+      <span class="w__tagtext">只读 · OBSIDIAN</span>
+    </a>
+  )}
+
+  {id === 'search' && (
+    <a class="w__card w__search" href="/search/">
+      <span class="w__loupe" aria-hidden="true"></span>
+      <span class="w__searchtext">搜点什么</span>
+      <kbd class="w__kbd">⌘K</kbd>
+    </a>
+  )}
+</div>
+
+<style>
+  .w {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: var(--z, 2);
+    transform:
+      translate(-50%, -50%)
+      translate(calc(var(--x) * var(--rs, 1)), calc(var(--y) * var(--rs, 1)))
+      rotate(var(--rot))
+      scale(var(--scale))
+      translate3d(var(--plx, 0px), var(--ply, 0px), 0);
+    will-change: transform;
+  }
+
+  .w__card {
+    position: relative;
+    display: block;
+    padding: var(--s-4);
+    border-radius: var(--r-md);
+    background: var(--glass-strong);
+    border: 1px solid var(--glass-line);
+    box-shadow: var(--shadow-float);
+    backdrop-filter: var(--glass-blur);
+    color: var(--ink);
+    font-size: var(--fs-sm);
+    white-space: nowrap;
+  }
+
+  .w__pin {
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    width: 9px;
+    height: 9px;
+    margin-left: -4.5px;
+    border-radius: var(--r-pill);
+    background: var(--peach);
+    box-shadow: 0 2px 6px rgba(255, 187, 160, .7);
+  }
+
+  /* ---- clock: digital text, never a clock face ---- */
+  .w__clock { width: 186px; text-align: center; }
+  .w__time {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+  .w__sec { font-size: 14px; color: var(--mint-deep); margin-left: 4px; }
+  .w__date { margin: 4px 0 0; font-size: 11px; color: var(--ink-faint); }
+  .w__greet {
+    margin: 6px 0 0;
+    font-size: var(--fs-xs);
+    color: var(--mint-deep);
+    background: var(--mint-soft);
+    border-radius: var(--r-pill);
+    display: inline-block;
+    padding: 1px 10px;
+  }
+
+  /* ---- tape ---- */
+  .w__tape { width: 208px; }
+  .w__reels { display: flex; gap: 10px; margin-bottom: 10px; }
+  .w__reel {
+    width: 46px;
+    height: 46px;
+    border-radius: var(--r-pill);
+    border: 2px dashed var(--ink-faint);
+    opacity: .55;
+  }
+  .w__tape.is-playing .w__reel { animation: none; border-color: var(--mint-deep); opacity: .9; }
+  .w__song { margin: 0; font-weight: 600; font-size: var(--fs-sm); }
+  .w__artist { margin: 2px 0 0; font-size: var(--fs-xs); color: var(--ink-faint); }
+  .w__eq { display: flex; align-items: flex-end; gap: 3px; height: 16px; margin-top: 10px; }
+  .w__eq i {
+    width: 3px;
+    height: 5px;
+    border-radius: var(--r-pill);
+    background: var(--mint);
+    transition: height 180ms var(--ease-out);
+  }
+  .w__tape.is-playing .w__eq i:nth-child(1) { height: 14px; }
+  .w__tape.is-playing .w__eq i:nth-child(2) { height: 9px; }
+  .w__tape.is-playing .w__eq i:nth-child(3) { height: 12px; }
+  .w__play {
+    position: absolute;
+    right: var(--s-3);
+    bottom: var(--s-3);
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--line);
+    background: var(--paper);
+  }
+  .w__ico {
+    width: 0;
+    height: 0;
+    border-left: 9px solid var(--mint-deep);
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    margin-left: 3px;
+  }
+  .w__tape.is-playing .w__ico {
+    width: 10px;
+    height: 11px;
+    border: 0;
+    margin-left: 0;
+    background: linear-gradient(to right, var(--mint-deep) 0 3px, transparent 3px 7px, var(--mint-deep) 7px 10px);
+  }
+
+  /* ---- note ---- */
+  .w__note {
+    width: 186px;
+    background: var(--sun);
+    border-color: rgba(255, 216, 138, .9);
+  }
+  .w__tapebar {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    width: 62px;
+    height: 18px;
+    margin-left: -31px;
+    background: rgba(255, 255, 255, .55);
+    border-radius: 2px;
+  }
+  .w__notehead { margin: 0 0 6px; font-weight: 700; font-size: var(--fs-sm); }
+  .w__tasks { list-style: none; margin: 0; padding: 0; font-size: var(--fs-xs); line-height: 1.9; }
+  .w__tasks li::before { content: '□ '; color: var(--ink-faint); }
+  .w__tasks li.is-done { text-decoration: line-through; opacity: .55; }
+  .w__tasks li.is-done::before { content: '✓ '; color: var(--mint-deep); }
+  .w__tasks li.is-doing::before { content: '◐ '; color: var(--peach); }
+  .w__progress {
+    height: 5px;
+    margin-top: 10px;
+    border-radius: var(--r-pill);
+    background: rgba(52, 56, 63, .12);
+    overflow: hidden;
+  }
+  .w__progress i {
+    display: block;
+    height: 100%;
+    width: 100%;
+    transform-origin: left;
+    border-radius: var(--r-pill);
+    background: var(--mint-deep);
+  }
+  .w__pct { margin: 4px 0 0; font-size: 11px; color: var(--ink-soft); text-align: right; }
+
+  /* ---- polaroid ---- */
+  .w__polaroid { width: 196px; padding: 10px 10px 0; background: #fff; }
+  .w__polaroid :global(img) {
+    width: 100%;
+    height: 132px;
+    object-fit: cover;
+    border-radius: 4px;
+    display: block;
+  }
+  .w__cap {
+    display: block;
+    padding: 8px 0 10px;
+    text-align: center;
+    font-size: var(--fs-xs);
+    color: var(--ink-soft);
+    font-family: var(--font-serif);
+  }
+
+  /* ---- tag ---- */
+  .w__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px 8px 10px;
+    border-radius: var(--r-pill);
+    background: var(--lilac);
+    border-color: rgba(222, 219, 246, .95);
+    font-size: var(--fs-xs);
+    letter-spacing: .08em;
+    color: #5b5680;
+  }
+  .w__hole {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--r-pill);
+    background: var(--paper);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .18);
+  }
+
+  /* ---- search ---- */
+  .w__search {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px 8px 14px;
+    border-radius: var(--r-pill);
+    background: var(--paper);
+    border-color: var(--line);
+  }
+  .w__loupe {
+    position: relative;
+    width: 12px;
+    height: 12px;
+    border: 1.6px solid var(--mint-deep);
+    border-radius: var(--r-pill);
+  }
+  .w__loupe::after {
+    content: '';
+    position: absolute;
+    right: -4px;
+    bottom: -3px;
+    width: 5px;
+    height: 1.6px;
+    background: var(--mint-deep);
+    transform: rotate(45deg);
+  }
+  .w__searchtext { font-size: var(--fs-xs); color: var(--ink-soft); white-space: nowrap; }
+  .w__kbd {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 5px;
+    background: var(--paper-3);
+    color: var(--ink-faint);
+  }
+
+  .w__card { transition: box-shadow var(--dur-base) var(--ease-out); }
+  .w__card:hover { box-shadow: 0 30px 60px -28px rgba(52, 56, 63, .5); }
+</style>

@@ -1,0 +1,166 @@
+---
+/**
+ * /friends/ — 友链。头像来自 GitHub，加载失败时退化成首字母方块，不留破图。
+ */
+import Base from '../layouts/Base.astro';
+import { friends } from '../lib/friends';
+import { site } from '../lib/site';
+---
+
+<Base title="朋友们" description="HSQ 的朋友们，以及友链申请方式。">
+  <section class="fr">
+    <header class="fr__head">
+      <p class="fr__crumb"><a href="/">首页</a><span aria-hidden="true">/</span>朋友</p>
+      <h1 class="fr__title">朋友们</h1>
+      <p class="fr__lead">在互联网上遇见的人，是这个世界给我的意外惊喜。</p>
+    </header>
+
+    <ul class="fr__grid">
+      {friends.map((f) => (
+        <li class={`card card--${f.accent}`}>
+          <a class="card__link" href={f.url} target="_blank" rel="noopener noreferrer">
+            <span class="card__avatar" data-avatar>
+              <img src={f.avatar} alt={`${f.name} 的头像`} width="56" height="56" loading="lazy" referrerpolicy="no-referrer" />
+              <span class="card__initial" aria-hidden="true">{f.name.slice(0, 1).toUpperCase()}</span>
+            </span>
+            <span class="card__body">
+              <span class="card__name">{f.name}<span class="card__arrow" aria-hidden="true">↗</span></span>
+              <span class="card__desc">{f.desc}</span>
+              <span class="card__domain">{f.domain}</span>
+            </span>
+          </a>
+        </li>
+      ))}
+
+      <li class="card card--apply">
+        <div class="card__inner">
+          <span class="card__plus" aria-hidden="true">＋</span>
+          <span class="card__body">
+            <span class="card__name">申请友链</span>
+            <span class="card__desc">发邮件告诉我你的站点，我会去看看。</span>
+            <a class="card__mail" href={`mailto:${site.social.email}`}>{site.social.email}</a>
+          </span>
+        </div>
+      </li>
+    </ul>
+
+    <section class="how" aria-labelledby="how-title">
+      <h2 class="how__title" id="how-title">怎么交换友链</h2>
+      <ol class="how__list">
+        <li>先把我的站点加到你那边：<code>{site.title}</code> · <code>{site.url}</code></li>
+        <li>然后发一封邮件，带上站点名称、地址、一句简介和头像链接。</li>
+        <li>我看到之后会手动加进来——所以可能会慢一点，请见谅。</li>
+      </ol>
+    </section>
+  </section>
+</Base>
+
+<script>
+  // 头像加载失败 → 隐藏 img，露出首字母兜底
+  document.querySelectorAll<HTMLElement>('[data-avatar]').forEach((wrap) => {
+    const img = wrap.querySelector('img');
+    if (!img) return;
+    const fail = () => wrap.classList.add('is-fallback');
+    img.addEventListener('error', fail);
+    if (img.complete && img.naturalWidth === 0) fail();
+  });
+</script>
+
+<style>
+  .fr { width: min(var(--w-page), 100% - var(--s-6)); margin-inline: auto; padding-block: var(--s-8) var(--s-9); }
+  .fr__crumb { margin: 0 0 var(--s-3); display: flex; gap: 8px; font-size: var(--fs-xs); color: var(--ink-faint); }
+  .fr__crumb a { color: var(--ink-faint); }
+  .fr__crumb a:hover { color: var(--mint-deep); }
+  .fr__title { margin: 0; font-size: var(--fs-2xl); }
+  .fr__lead { margin: var(--s-3) 0 0; color: var(--ink-soft); }
+
+  .fr__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: var(--s-4);
+    margin: var(--s-7) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .card {
+    --accent: var(--mint);
+    --accent-soft: var(--mint-soft);
+    border-radius: var(--r-lg);
+    background: var(--glass);
+    border: 1px solid var(--glass-line);
+    backdrop-filter: var(--glass-blur);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-soft); }
+  .card--peach { --accent: var(--peach); --accent-soft: var(--peach-soft); }
+  .card--lilac { --accent: var(--lilac); --accent-soft: #eeecfb; }
+  .card--sky { --accent: var(--sky); --accent-soft: #e6f0ff; }
+  .card--sun { --accent: var(--sun); --accent-soft: #fff1cf; }
+
+  .card__link, .card__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--s-4);
+    padding: var(--s-5);
+    color: inherit;
+    text-decoration: none;
+  }
+  .card__link::after { content: ''; position: absolute; inset: 0; }
+  .card__link { position: relative; }
+
+  .card__avatar {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    flex: 0 0 auto;
+    border-radius: var(--r-pill);
+    background: var(--accent-soft);
+    box-shadow: 0 0 0 1px var(--glass-line) inset;
+    overflow: hidden;
+  }
+  .card__avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .card__initial {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    color: var(--ink-soft);
+    opacity: 0;
+    transition: opacity var(--dur-fast) var(--ease-out);
+  }
+  .card__avatar.is-fallback img { opacity: 0; }
+  .card__avatar.is-fallback .card__initial { opacity: 1; }
+
+  .card__body { display: grid; gap: 2px; min-width: 0; }
+  .card__name { display: flex; align-items: center; gap: 6px; font-family: var(--font-ui); font-weight: 700; font-size: var(--fs-md); }
+  .card__arrow { font-size: 12px; color: var(--ink-faint); transition: transform var(--dur-fast) var(--ease-out); }
+  .card:hover .card__arrow { transform: translate(2px, -2px); color: var(--mint-deep); }
+  .card__desc { font-size: var(--fs-sm); color: var(--ink-soft); }
+  .card__domain { font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint); }
+
+  .card--apply { border-style: dashed; background: var(--paper-2); }
+  .card__plus {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    flex: 0 0 auto;
+    border-radius: var(--r-pill);
+    background: var(--paper-3);
+    color: var(--ink-faint);
+    font-size: 22px;
+  }
+  .card__mail { font-family: var(--font-mono); font-size: 11px; color: var(--mint-deep); }
+
+  .how { margin-top: var(--s-9); padding-top: var(--s-6); border-top: 1px solid var(--line); }
+  .how__title { margin: 0 0 var(--s-4); font-size: var(--fs-lg); }
+  .how__list { margin: 0; padding-left: 1.2em; display: grid; gap: var(--s-2); font-size: var(--fs-sm); color: var(--ink-soft); }
+  .how__list code { font-family: var(--font-mono); font-size: 11px; padding: 1px 6px; border-radius: 5px; background: var(--paper-3); color: var(--ink); }
+</style>

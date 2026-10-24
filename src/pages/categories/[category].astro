@@ -1,0 +1,63 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import PostCard from '../../components/post/PostCard.astro';
+import { getPosts, collectCategories, type Post } from '../../lib/posts';
+
+export const getStaticPaths = (async () => {
+  const posts = await getPosts();
+  const cats = collectCategories(posts);
+  return [...cats.entries()].map(([category, list]) => ({
+    params: { category },
+    props: { category, posts: list },
+  }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  category: string;
+  posts: Post[];
+}
+
+const { category, posts } = Astro.props;
+---
+
+<Base title={`分类：${category}`} description={`分类 ${category} 下的全部文章`}>
+  <div class="u-page catpage">
+    <header class="catpage__head">
+      <p class="catpage__label">分类</p>
+      <h1 class="catpage__title">{category}</h1>
+      <p class="catpage__sub">{posts.length} 篇文章</p>
+    </header>
+
+    <div class="catpage__grid">
+      {posts.map((p) => <PostCard post={p} />)}
+    </div>
+
+    <p class="catpage__back"><a href="/archive/">← 全部日志</a></p>
+  </div>
+</Base>
+
+<style>
+  .catpage { padding-block: var(--s-8); }
+
+  .catpage__label {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .catpage__title { margin-top: var(--s-2); font-size: var(--fs-3xl); }
+  .catpage__sub { margin-top: var(--s-3); color: var(--ink-soft); }
+
+  .catpage__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--s-5);
+    margin-top: var(--s-6);
+  }
+
+  .catpage__back { margin-top: var(--s-7); }
+  .catpage__back a { color: var(--mint-deep); }
+</style>

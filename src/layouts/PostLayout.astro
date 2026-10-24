@@ -1,0 +1,296 @@
+---
+import { Image } from 'astro:assets';
+import Base from './Base.astro';
+import Toc, { type Heading } from '../components/post/Toc.astro';
+import { site } from '../lib/site';
+import { postPath, formatDateCN, readingTime, type Post } from '../lib/posts';
+
+interface Props {
+  post: Post;
+  headings: Heading[];
+  prev?: Post;
+  next?: Post;
+}
+
+const { post, headings, prev, next } = Astro.props;
+const { title, date, tags, categories, cover, coverAlt } = post.data;
+const minutes = readingTime(post.body);
+const coverUrl = cover?.src;
+
+// Mirror Toc.astro: the aside only exists when there is a real outline to show.
+const present = headings.filter((h) => h.depth >= 2 && h.depth <= 6);
+const shallowest = present.length > 0 ? Math.min(...present.map((h) => h.depth)) : 2;
+const tocItems = present.filter((h) => h.depth <= shallowest + 1);
+const hasToc = tocItems.length > 1;
+---
+
+<Base title={title} description={post.data.excerpt ?? `${title} · ${site.title}`} image={coverUrl}>
+  <article class="post">
+    <header class="post__head">
+      <div class="post__head-inner u-page">
+        <nav class="post__crumbs" aria-label="面包屑">
+          <a href="/">首页</a>
+          <span aria-hidden="true">/</span>
+          <a href="/archive/">日志</a>
+          {categories.length > 0 && (
+            <>
+              <span aria-hidden="true">/</span>
+              <a href={`/categories/${categories[0]}/`}>{categories[0]}</a>
+            </>
+          )}
+        </nav>
+
+        <h1 class="post__title">{title}</h1>
+
+        <p class="post__meta">
+          <time datetime={date.toISOString()}>{formatDateCN(date)}</time>
+          <span aria-hidden="true">·</span>
+          <span>{minutes} 分钟阅读</span>
+        </p>
+
+        {tags.length > 0 && (
+          <ul class="post__tags">
+            {tags.map((t) => (
+              <li><a class="post__tag" href={`/tags/${encodeURIComponent(t)}/`}>{t}</a></li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </header>
+
+    {cover && (
+      <div class="post__cover u-page">
+        <Image src={cover} alt={coverAlt ?? title} widths={[640, 960, 1280]} sizes="(max-width: 900px) 92vw, 860px" loading="eager" />
+      </div>
+    )}
+
+    <div class:list={['post__grid', 'u-page', !hasToc && 'post__grid--plain']}>
+      {hasToc && (
+        <aside class="post__aside">
+          <details class="tocwrap" data-tocwrap open>
+            <summary class="tocwrap__sum">
+              <span class="tocwrap__label">目录</span>
+              <span class="tocwrap__chev" aria-hidden="true"></span>
+            </summary>
+            <Toc headings={headings} />
+          </details>
+          <script is:inline>
+            (function () {
+              var box = document.querySelector('[data-tocwrap]');
+              if (box && window.matchMedia('(max-width: 1000px)').matches) box.removeAttribute('open');
+            })();
+          </script>
+        </aside>
+      )}
+
+      <div class="post__main">
+        <div class="prose">
+          <slot />
+        </div>
+
+        <nav class="post__nav" aria-label="上一篇与下一篇">
+          {prev ? (
+            <a class="post__nav-item post__nav-item--prev" href={postPath(prev)}>
+              <span class="post__nav-label">← 上一篇</span>
+              <span class="post__nav-title">{prev.data.title}</span>
+            </a>
+          ) : <span />}
+          {next ? (
+            <a class="post__nav-item post__nav-item--next" href={postPath(next)}>
+              <span class="post__nav-label">下一篇 →</span>
+              <span class="post__nav-title">{next.data.title}</span>
+            </a>
+          ) : <span />}
+        </nav>
+      </div>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .post__head { padding-block: var(--s-8) var(--s-6); }
+
+  .post__crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-2);
+    margin-bottom: var(--s-4);
+    font-size: var(--fs-sm);
+    color: var(--ink-faint);
+  }
+  .post__crumbs a:hover { color: var(--mint-deep); }
+
+  .post__title {
+    max-width: 22ch;
+    font-size: clamp(1.9rem, 4.2vw, 3rem);
+    line-height: 1.25;
+    letter-spacing: -.015em;
+  }
+
+  .post__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-2);
+    margin-top: var(--s-4);
+    font-family: var(--font-mono);
+    font-size: var(--fs-sm);
+    color: var(--ink-faint);
+  }
+
+  .post__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2);
+    list-style: none;
+    padding: 0;
+    margin: var(--s-4) 0 0;
+  }
+
+  .post__tag {
+    display: inline-block;
+    padding: 3px var(--s-3);
+    border-radius: var(--r-pill);
+    background: var(--glass);
+    border: 1px solid var(--line);
+    font-size: var(--fs-xs);
+    color: var(--ink-soft);
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+  }
+  .post__tag:hover { background: var(--mint-soft); color: var(--mint-deep); }
+
+  .post__cover {
+    margin-bottom: var(--s-7);
+  }
+  .post__cover :global(img) {
+    width: 100%;
+    max-height: 460px;
+    object-fit: cover;
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .post__grid {
+    display: grid;
+    grid-template-columns: minmax(0, var(--w-prose)) 220px;
+    grid-template-areas: "main aside";
+    justify-content: center;
+    gap: var(--s-8);
+    align-items: start;
+  }
+
+  .post__grid--plain {
+    grid-template-columns: minmax(0, var(--w-prose));
+    grid-template-areas: "main";
+  }
+
+  .post__main { grid-area: main; min-width: 0; }
+
+  .post__aside {
+    grid-area: aside;
+    position: sticky;
+    top: calc(var(--header-h) + var(--s-5));
+    max-height: calc(100dvh - var(--header-h) - var(--s-7));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .post__aside::-webkit-scrollbar { width: 6px; }
+  .post__aside::-webkit-scrollbar-thumb { background: var(--line); border-radius: var(--r-pill); }
+
+  .post__nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s-4);
+    margin-top: var(--s-8);
+    padding-top: var(--s-6);
+    border-top: 1px solid var(--line);
+  }
+
+  .post__nav-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-1);
+    padding: var(--s-4) var(--s-5);
+    border-radius: var(--r-md);
+    background: var(--glass);
+    border: 1px solid var(--line);
+    transition: transform var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+  }
+  .post__nav-item:hover { transform: translateY(-2px); background: rgba(255, 255, 255, .72); }
+  .post__nav-item--next { text-align: right; }
+
+  .post__nav-label {
+    font-size: var(--fs-xs);
+    font-family: var(--font-mono);
+    color: var(--ink-faint);
+  }
+
+  .post__nav-title {
+    font-size: var(--fs-sm);
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  /* The outline is a sticky sidebar on desktop and a collapsible strip on
+     narrow screens, where a full list would push the article below the fold. */
+  .tocwrap { display: block; }
+  .tocwrap > summary { list-style: none; }
+  .tocwrap > summary::-webkit-details-marker { display: none; }
+  .tocwrap__sum { display: none; }
+
+  @media (max-width: 1000px) {
+    .post__grid {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas: "aside" "main";
+      gap: var(--s-6);
+    }
+    .post__aside {
+      position: static;
+      max-height: none;
+      overflow: visible;
+    }
+
+    .tocwrap {
+      border-radius: var(--r-md);
+      background: var(--glass);
+      border: 1px solid var(--line);
+    }
+    .tocwrap__sum {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--s-3);
+      padding: var(--s-3) var(--s-5);
+      cursor: pointer;
+      font-family: var(--font-ui);
+      font-size: var(--fs-sm);
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: var(--ink-soft);
+    }
+    .tocwrap__chev {
+      width: 8px;
+      height: 8px;
+      border-right: 2px solid var(--ink-faint);
+      border-bottom: 2px solid var(--ink-faint);
+      transform: rotate(45deg) translateY(-2px);
+      transition: transform var(--dur-fast) var(--ease-out);
+    }
+    .tocwrap[open] .tocwrap__chev { transform: rotate(-135deg) translateY(-2px); }
+    .tocwrap :global(.toc) {
+      padding: 0 var(--s-3) var(--s-3);
+      background: none;
+      border: 0;
+      border-radius: 0;
+    }
+    .tocwrap :global(.toc__title) { display: none; }
+  }
+
+  @media (max-width: 620px) {
+    .post__head { padding-block: var(--s-6) var(--s-5); }
+    .post__nav { grid-template-columns: 1fr; }
+    .post__nav-item--next { text-align: left; }
+  }
+</style>

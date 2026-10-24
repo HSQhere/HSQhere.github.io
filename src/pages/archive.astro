@@ -1,0 +1,92 @@
+---
+import Base from '../layouts/Base.astro';
+import { getPosts, groupByYear, postPath, formatDate } from '../lib/posts';
+
+const posts = await getPosts();
+const years = groupByYear(posts);
+---
+
+<Base title="日志" description="按年份归档的全部文章">
+  <div class="u-page archive">
+    <header class="archive__head">
+      <h1 class="archive__title">日志</h1>
+      <p class="archive__sub">共 {posts.length} 篇，跨越 {years.length} 个年份。</p>
+    </header>
+
+    {years.map(({ year, posts: list }) => (
+      <section class="year">
+        <h2 class="year__label" id={`y${year}`}>
+          <span>{year}</span>
+          <span class="year__count">{list.length} 篇</span>
+        </h2>
+        <ul class="year__list">
+          {list.map((p) => (
+            <li class="year__item">
+              <a class="year__link" href={postPath(p)}>
+                <time class="year__date" datetime={p.data.date.toISOString()}>{formatDate(p.data.date)}</time>
+                <span class="year__title">{p.data.title}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+</Base>
+
+<style>
+  .archive { padding-block: var(--s-8); max-width: 900px; }
+
+  .archive__title { font-size: var(--fs-3xl); }
+  .archive__sub { margin-top: var(--s-3); color: var(--ink-soft); }
+
+  .year { margin-top: var(--s-7); }
+
+  .year__label {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-3);
+    margin-bottom: var(--s-4);
+    font-size: var(--fs-xl);
+    font-family: var(--font-mono);
+    letter-spacing: -.01em;
+  }
+
+  .year__count {
+    font-size: var(--fs-xs);
+    font-family: var(--font-body);
+    color: var(--ink-faint);
+  }
+
+  .year__list { list-style: none; padding: 0; }
+
+  .year__item + .year__item { margin-top: 2px; }
+
+  .year__link {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-4);
+    padding: var(--s-3) var(--s-4);
+    border-radius: var(--r-sm);
+    border: 1px solid transparent;
+    transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+  }
+
+  .year__link:hover {
+    background: var(--glass);
+    border-color: var(--line);
+  }
+
+  .year__date {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--ink-faint);
+  }
+
+  .year__title { color: var(--ink); line-height: 1.6; }
+
+  @media (max-width: 620px) {
+    .year__link { flex-direction: column; gap: 2px; }
+  }
+</style>

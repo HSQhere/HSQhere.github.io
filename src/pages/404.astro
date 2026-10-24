@@ -1,0 +1,54 @@
+---
+/**
+ * 404 — GitHub Pages serves this for any unknown path.
+ */
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="找不到页面" description="这个地址上没有东西。" noindex>
+  <section class="nf">
+    <p class="nf__code" aria-hidden="true">404</p>
+    <h1 class="nf__title">这里什么都没有</h1>
+    <p class="nf__lead">可能是链接拼错了，也可能是这篇文章还没有被写出来。</p>
+    <div class="nf__acts">
+      <a class="btn btn--primary" href="/">回首页</a>
+      <a class="btn" href="/archive/">看归档</a>
+      <a class="btn" href="/search/">搜一下</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nf {
+    width: min(var(--w-prose), 100% - var(--s-6));
+    margin-inline: auto;
+    padding-block: clamp(var(--s-8), 12vh, 160px) var(--s-9);
+    text-align: center;
+  }
+  .nf__code {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: clamp(4rem, 16vw, 9rem);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--mint-soft);
+    letter-spacing: -0.04em;
+  }
+  .nf__title { margin: calc(var(--s-4) * -1) 0 0; font-size: var(--fs-xl); }
+  .nf__lead { margin: var(--s-3) 0 0; color: var(--ink-soft); font-size: var(--fs-sm); }
+  .nf__acts { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--s-3); margin-top: var(--s-6); }
+  .btn {
+    padding: 9px 20px;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink-soft);
+    font-family: var(--font-ui);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn--primary { background: var(--mint-deep); border-color: var(--mint-deep); color: #fff; }
+</style>

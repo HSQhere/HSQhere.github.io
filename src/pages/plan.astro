@@ -1,0 +1,180 @@
+---
+/**
+ * /plan/ — the 规划 page. Content comes from the To-Do post so there is exactly
+ * one source of truth for the task list.
+ */
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import { parseTasks, taskStats, STATUS_LABEL } from '../lib/plan';
+
+const posts = await getCollection('posts');
+const todo = posts.find((p) => p.data.slug === 'To-Do');
+const groups = todo ? parseTasks(todo.body ?? '') : [];
+const stats = taskStats(groups);
+
+---
+
+<Base title="规划" description="HSQ 的学习与项目规划，按学期分组，实时统计完成度。">
+  <section class="plan">
+    <header class="plan__head">
+      <p class="plan__crumb"><a href="/">首页</a><span aria-hidden="true">/</span>规划</p>
+      <h1 class="plan__title">规划</h1>
+      <p class="plan__lead">想做的事很多，先把它们写下来。勾掉一条，就少一条。</p>
+    </header>
+
+    <div class="stats" aria-label="任务统计">
+      <div class="stats__ring" style={`--p:${stats.percent}`}>
+        <span class="stats__num">{stats.percent}<em>%</em></span>
+        <span class="stats__lab">已完成</span>
+      </div>
+      <ul class="stats__list">
+        <li><span class="dot dot--done" aria-hidden="true"></span><b>{stats.done}</b> 完成</li>
+        <li><span class="dot dot--doing" aria-hidden="true"></span><b>{stats.doing}</b> 进行中</li>
+        <li><span class="dot dot--todo" aria-hidden="true"></span><b>{stats.todo}</b> 待开始</li>
+        <li><span class="dot dot--canceled" aria-hidden="true"></span><b>{stats.canceled}</b> 搁置</li>
+        <li class="stats__total">共 <b>{stats.total}</b> 条</li>
+      </ul>
+    </div>
+
+    {groups.map((group, gi) => (
+      <section class="term" aria-labelledby={`term-${gi}`}>
+        <h2 class="term__title" id={`term-${gi}`}>
+          <span class="term__dot" aria-hidden="true"></span>{group.title}
+          {group.date && <time class="term__date" datetime={group.date}>{group.date}</time>}
+          <span class="term__n">{group.tasks.length}</span>
+        </h2>
+        <ul class="tasks">
+          {group.tasks.map((task) => (
+            <li class={`task task--${task.status}`} data-priority={task.priority ?? undefined}>
+              <span class="task__box" aria-hidden="true"></span>
+              <span class="task__title">{task.title}</span>
+              <span class="task__meta">
+                <span class="task__status">{STATUS_LABEL[task.status]}</span>
+                {task.priority && <span class="task__pri">{task.priority === 'high' ? '高优先' : task.priority === 'medium' ? '中优先' : '低优先'}</span>}
+                {task.start && <span class="task__date">起 {task.start}</span>}
+                {task.done && <span class="task__date task__date--done">完 {task.done}</span>}
+                {task.canceled && <span class="task__date task__date--off">停 {task.canceled}</span>}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+
+    <p class="plan__note">
+      这个页面和 <a href={todo ? `/2026/03/17/To-Do/` : '/archive/'}>To-Do 日志</a> 是同一份数据，改一边就够了。
+    </p>
+  </section>
+</Base>
+
+<style>
+  .plan {
+    width: min(var(--w-page), 100% - var(--s-6));
+    margin-inline: auto;
+    padding-block: var(--s-8) var(--s-9);
+  }
+
+  .plan__crumb { margin: 0 0 var(--s-3); display: flex; gap: 8px; font-size: var(--fs-xs); color: var(--ink-faint); }
+  .plan__crumb a { color: var(--ink-faint); }
+  .plan__crumb a:hover { color: var(--mint-deep); }
+  .plan__title { margin: 0; font-size: var(--fs-2xl); }
+  .plan__lead { margin: var(--s-3) 0 0; color: var(--ink-soft); }
+
+  .stats {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-7);
+    margin-top: var(--s-7);
+    padding: var(--s-6);
+    border-radius: var(--r-lg);
+    background: var(--glass);
+    border: 1px solid var(--glass-line);
+    backdrop-filter: var(--glass-blur);
+    box-shadow: var(--shadow-card);
+  }
+  .stats__ring {
+    --p: 0;
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 116px;
+    height: 116px;
+    flex: 0 0 auto;
+    border-radius: var(--r-pill);
+    background: conic-gradient(var(--mint-deep) calc(var(--p) * 1%), var(--mint-soft) 0);
+  }
+  .stats__ring::before {
+    content: '';
+    position: absolute;
+    inset: 9px;
+    border-radius: var(--r-pill);
+    background: var(--paper);
+  }
+  .stats__num { position: relative; font-family: var(--font-ui); font-size: 30px; font-weight: 700; line-height: 1; }
+  .stats__num em { font-size: 14px; font-style: normal; color: var(--ink-faint); }
+  .stats__lab { position: relative; margin-top: 2px; font-size: 11px; color: var(--ink-faint); }
+  .stats__list { display: flex; flex-wrap: wrap; gap: var(--s-3) var(--s-5); margin: 0; padding: 0; list-style: none; font-size: var(--fs-sm); color: var(--ink-soft); }
+  .stats__list li { display: flex; align-items: center; gap: 7px; }
+  .stats__list b { font-family: var(--font-mono); color: var(--ink); }
+  .stats__total { color: var(--ink-faint); }
+  .dot { width: 8px; height: 8px; border-radius: var(--r-pill); }
+  .dot--done { background: var(--mint-deep); }
+  .dot--doing { background: var(--sky); }
+  .dot--todo { background: var(--paper-3); box-shadow: inset 0 0 0 1px var(--line); }
+  .dot--canceled { background: var(--lilac); }
+
+  .term { margin-top: var(--s-8); }
+  .term__title { display: flex; align-items: center; gap: var(--s-3); margin: 0 0 var(--s-4); font-size: var(--fs-lg); }
+  .term__dot { width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--mint); box-shadow: 0 0 0 4px var(--mint-soft); }
+  .term__date { font-family: var(--font-mono); font-size: 11px; font-weight: 400; color: var(--ink-faint); }
+  .term__n { font-family: var(--font-mono); font-size: 11px; font-weight: 400; color: var(--ink-faint); }
+
+  .tasks { display: grid; gap: var(--s-2); margin: 0; padding: 0; list-style: none; }
+  .task {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    padding: 12px var(--s-4);
+    border-radius: var(--r-sm);
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    transition: background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+  }
+  .task:hover { background: var(--paper); transform: translateX(2px); }
+  .task[data-priority='high'] { border-left: 3px solid var(--peach); }
+  .task[data-priority='medium'] { border-left: 3px solid var(--sun); }
+
+  .task__box { width: 15px; height: 15px; flex: 0 0 auto; border-radius: 5px; border: 1.5px solid var(--line); background: var(--paper); }
+  .task--done .task__box { background: var(--mint-deep); border-color: var(--mint-deep); }
+  .task--doing .task__box { border-color: var(--sky); box-shadow: inset 0 0 0 3px var(--sky); }
+  .task--canceled .task__box { background: var(--lilac); border-color: var(--lilac); }
+
+  .task__title { flex: 1 1 auto; min-width: 0; font-size: var(--fs-sm); }
+  .task--done .task__title { color: var(--ink-faint); text-decoration: line-through; text-decoration-color: var(--mint); }
+  .task--canceled .task__title { color: var(--ink-faint); }
+
+  .task__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; flex: 0 0 auto; }
+  .task__status, .task__pri, .task__date {
+    padding: 1px 7px;
+    border-radius: var(--r-pill);
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--ink-faint);
+    background: var(--paper-3);
+  }
+  .task__status { display: none; }
+  .task__date--done { color: var(--mint-deep); background: var(--mint-soft); }
+  .task__date--off { color: #8a7bb0; background: var(--lilac); }
+  .task__pri { color: #a8674a; background: var(--peach-soft); }
+
+  .plan__note { margin-top: var(--s-8); font-size: var(--fs-xs); color: var(--ink-faint); }
+  .plan__note a { color: var(--mint-deep); }
+
+  @media (max-width: 620px) {
+    .stats { gap: var(--s-5); padding: var(--s-5); }
+    .stats__ring { width: 96px; height: 96px; }
+    .task { flex-wrap: wrap; }
+    .task__meta { flex: 1 1 100%; padding-left: 27px; }
+  }
+</style>

@@ -1,0 +1,109 @@
+---
+/**
+ * /gallery/ — the album index.
+ * Only albums whose photos really exist are listed (see src/lib/gallery.ts).
+ */
+import Base from '../../layouts/Base.astro';
+import { Image } from 'astro:assets';
+import { albums } from '../../lib/gallery';
+---
+
+<Base title="图库" description="用色彩和明暗记录的一瞬间。">
+  <section class="gal">
+    <header class="gal__head">
+      <p class="gal__kicker">GALLERY · 图库</p>
+      <h1 class="gal__title">📷 摄影图库</h1>
+      <p class="gal__lead">用色彩和明暗记录的一瞬间。</p>
+    </header>
+
+    <div class="gal__grid">
+      {albums.map((album, i) => (
+        <a class="album" href={`/gallery/${album.slug}/`} data-reveal={i}>
+          <span class="album__shot">
+            <Image src={album.cover} alt={album.title} widths={[320, 640, 960]} sizes="(max-width: 720px) 100vw, 46vw" loading={i === 0 ? 'eager' : 'lazy'} />
+          </span>
+          <span class="album__body">
+            <span class="album__emoji" aria-hidden="true">{album.emoji}</span>
+            <span class="album__name">{album.title}</span>
+            <span class="album__desc">{album.tagline}</span>
+            <span class="album__meta">{album.count} 张 · {album.groups.length} 组</span>
+          </span>
+        </a>
+      ))}
+    </div>
+
+    <p class="gal__foot">持续更新中，记录生活的每一个精彩瞬间…</p>
+  </section>
+</Base>
+
+<script>
+  import '../../effects/motion';
+</script>
+
+<style>
+  .gal {
+    width: min(var(--w-page), 100% - var(--s-6));
+    margin-inline: auto;
+    padding-block: var(--s-8) var(--s-9);
+  }
+  .gal__head { max-width: 40rem; margin-bottom: var(--s-6); }
+  .gal__kicker {
+    margin: 0 0 var(--s-2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: .18em;
+    color: var(--ink-faint);
+  }
+  .gal__title { margin: 0; font-size: var(--fs-2xl); }
+  .gal__lead { margin: var(--s-3) 0 0; color: var(--ink-soft); font-size: var(--fs-sm); }
+
+  .gal__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+    gap: var(--s-5);
+  }
+
+  .album {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: var(--r-lg);
+    background: var(--glass-strong);
+    border: 1px solid var(--glass-line);
+    box-shadow: var(--shadow-card);
+    backdrop-filter: var(--glass-blur);
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity .7s var(--ease-out), transform .7s var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+  }
+  .album.is-in { opacity: 1; transform: none; }
+  .album:hover { box-shadow: var(--shadow-float); }
+  .album:hover .album__shot :global(img) { transform: scale(1.04); }
+
+  .album__shot { display: block; aspect-ratio: 16 / 10; overflow: hidden; background: var(--paper-3); }
+  .album__shot :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .8s var(--ease-out);
+  }
+
+  .album__body {
+    display: grid;
+    gap: 4px;
+    padding: var(--s-5);
+  }
+  .album__emoji { font-size: var(--fs-lg); line-height: 1; }
+  .album__name { font-family: var(--font-ui); font-size: var(--fs-lg); font-weight: 700; }
+  .album__desc { font-size: var(--fs-xs); color: var(--ink-soft); }
+  .album__meta { font-family: var(--font-mono); font-size: 11px; color: var(--ink-faint); }
+
+  .gal__foot {
+    margin: var(--s-7) 0 0;
+    text-align: center;
+    font-size: var(--fs-xs);
+    color: var(--ink-faint);
+    font-style: italic;
+  }
+</style>

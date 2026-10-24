@@ -1,0 +1,124 @@
+---
+import type { Post } from '../../lib/posts';
+import { postPath, formatDate, plainExcerpt, readingTime } from '../../lib/posts';
+import { Image } from 'astro:assets';
+
+interface Props {
+  post: Post;
+  compact?: boolean;
+}
+
+const { post, compact = false } = Astro.props;
+const { title, date, tags, cover } = post.data;
+const href = postPath(post);
+const excerpt = post.data.excerpt ?? plainExcerpt(post.body, compact ? 70 : 120);
+const minutes = readingTime(post.body);
+---
+
+<article class:list={['card', { 'card--compact': compact }]}>
+  <a class="card__link" href={href}>
+    {cover && (
+      <div class="card__media">
+        <Image src={cover} alt="" widths={[320, 640, 960]} sizes="(max-width: 620px) 92vw, 320px" loading="lazy" />
+      </div>
+    )}
+
+    <div class="card__body">
+      <p class="card__date">
+        <time datetime={date.toISOString()}>{formatDate(date)}</time>
+        <span aria-hidden="true">·</span>
+        <span>{minutes} 分钟</span>
+      </p>
+      <h3 class="card__title">{title}</h3>
+      {excerpt && <p class="card__excerpt">{excerpt}</p>}
+      {tags.length > 0 && (
+        <ul class="card__tags">
+          {tags.slice(0, 4).map((t) => (
+            <li class="card__tag">{t}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </a>
+</article>
+
+<style>
+  .card {
+    border-radius: var(--r-lg);
+    background: var(--glass);
+    border: 1px solid var(--glass-line);
+    box-shadow: var(--shadow-card);
+    backdrop-filter: var(--glass-blur);
+    overflow: hidden;
+    transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-float);
+  }
+
+  .card__link { display: block; height: 100%; }
+
+  .card__media {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--paper-3);
+  }
+
+  .card__media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--dur-slow) var(--ease-out);
+  }
+
+  .card:hover .card__media :global(img) { transform: scale(1.04); }
+
+  .card__body { padding: var(--s-5); }
+
+  .card__date {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    margin: 0 0 var(--s-2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--ink-faint);
+  }
+
+  .card__title {
+    margin: 0;
+    font-size: var(--fs-lg);
+    line-height: 1.45;
+    color: var(--ink);
+  }
+
+  .card__excerpt {
+    margin: var(--s-2) 0 0;
+    font-size: var(--fs-sm);
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+
+  .card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-1);
+    list-style: none;
+    padding: 0;
+    margin: var(--s-4) 0 0;
+  }
+
+  .card__tag {
+    padding: 2px var(--s-3);
+    border-radius: var(--r-pill);
+    background: var(--mint-soft);
+    color: var(--mint-deep);
+    font-size: var(--fs-xs);
+    line-height: 1.7;
+  }
+
+  .card--compact .card__body { padding: var(--s-4); }
+  .card--compact .card__title { font-size: var(--fs-base); }
+</style>

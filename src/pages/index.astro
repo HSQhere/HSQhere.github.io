@@ -1,0 +1,16 @@
+---
+import Base from '../layouts/Base.astro';
+import HeroCluster from '../components/sections/HeroCluster.astro';
+import BentoGrid from '../components/sections/BentoGrid.astro';
+import IntroOverlay from '../components/sections/IntroOverlay.astro';
+---
+
+<Base title="首页">
+  <IntroOverlay />
+  <HeroCluster />
+  <BentoGrid />
+</Base>
+
+<script>
+  import '../effects/motion';
+</script>

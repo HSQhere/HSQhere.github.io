@@ -1,0 +1,291 @@
+/* ============================================================
+   prose.css — article typography. Scoped to .prose.
+   ============================================================ */
+
+.prose {
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--fs-md);
+  line-height: 1.9;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.prose > * + * { margin-top: 1.05em; }
+
+/* ---- headings ---------------------------------------------------- */
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  margin-top: 2.1em;
+  margin-bottom: .7em;
+  color: var(--ink);
+  scroll-margin-top: calc(var(--header-h) + var(--s-5));
+}
+/* Posts start at h2 (h1 is reserved for the page title), so the visual
+   scale is shifted one level up to keep the hierarchy readable. */
+.prose h1 { font-size: var(--fs-3xl); }
+.prose h2 {
+  font-size: var(--fs-2xl);
+  padding-bottom: .35em;
+  border-bottom: 2px solid var(--mint-soft);
+}
+.prose h3 {
+  font-size: var(--fs-xl);
+  padding-bottom: .3em;
+  border-bottom: 1px solid var(--mint-soft);
+}
+.prose h4 { font-size: var(--fs-lg); }
+.prose h5 { font-size: var(--fs-md); color: var(--ink-soft); }
+.prose h6 {
+  font-size: var(--fs-base);
+  color: var(--ink-soft);
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+
+/* anchor link that appears on hover */
+.prose .heading-anchor {
+  margin-left: .4em;
+  color: var(--mint-deep);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+  font-weight: 400;
+}
+.prose h2:hover .heading-anchor,
+.prose h3:hover .heading-anchor,
+.prose h4:hover .heading-anchor { opacity: .55; }
+
+/* ---- text -------------------------------------------------------- */
+.prose p { margin-block: 0; }
+.prose strong { color: var(--ink); font-weight: 700; }
+.prose em { font-style: italic; }
+.prose del { color: var(--ink-faint); }
+.prose mark {
+  background: var(--peach-soft);
+  color: var(--ink);
+  padding: .05em .3em;
+  border-radius: var(--r-xs);
+}
+.prose a {
+  color: var(--mint-deep);
+  text-decoration: underline;
+  text-decoration-color: var(--mint-soft);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.prose a:hover { text-decoration-color: var(--mint-deep); }
+
+.prose hr {
+  margin-block: 2.4em;
+  border: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--line) 20%, var(--line) 80%, transparent);
+}
+
+/* ---- lists ------------------------------------------------------- */
+.prose ul, .prose ol { padding-left: 1.45em; }
+.prose li + li { margin-top: .4em; }
+.prose li > ul, .prose li > ol { margin-top: .4em; }
+.prose ul { list-style: disc; }
+.prose ol { list-style: decimal; }
+.prose li::marker { color: var(--mint-deep); }
+
+/* ---- Obsidian task items ----------------------------------------- */
+.prose .task-item {
+  list-style: none;
+  position: relative;
+  padding: .38em .85em .38em 2.1em;
+  margin-left: -1.45em;
+  border-radius: var(--r-sm);
+  background: var(--glass);
+  border: 1px solid var(--line);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.prose .task-item + .task-item { margin-top: .45em; }
+/* the native checkbox is replaced by the ::before chip */
+.prose .task-item > input[type="checkbox"] {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+.prose .task-item::before {
+  content: "";
+  position: absolute;
+  left: .75em;
+  top: .82em;
+  width: 1em;
+  height: 1em;
+  border-radius: 5px;
+  border: 2px solid var(--ink-faint);
+  background: var(--paper);
+}
+.prose .task-done { background: rgba(127, 199, 169, .10); }
+.prose .task-done::before {
+  border-color: var(--mint-deep);
+  background: var(--mint);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2 4.8 8.5 9.5 3.8' fill='none' stroke='%23fff' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-size: 100% 100%;
+}
+.prose .task-done > *:first-child { color: var(--ink-faint); text-decoration: line-through; text-decoration-color: rgba(139, 146, 156, .6); }
+
+.prose .task-doing { background: rgba(255, 216, 138, .14); }
+.prose .task-doing::before {
+  border-color: #d9a53a;
+  background: var(--sun);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M4 2.6 9 6 4 9.4z' fill='%23fff'/%3E%3C/svg%3E");
+  background-size: 100% 100%;
+}
+
+.prose .task-canceled { background: rgba(139, 146, 156, .08); }
+.prose .task-canceled::before {
+  border-color: var(--ink-faint);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3.2 3.2 8.8 8.8M8.8 3.2 3.2 8.8' fill='none' stroke='%238b929c' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-size: 100% 100%;
+}
+.prose .task-canceled > *:first-child { color: var(--ink-faint); text-decoration: line-through; }
+
+.prose .task-todo::before { border-color: var(--ink-faint); }
+
+.prose .task-item[data-priority="high"] { border-color: rgba(255, 187, 160, .55); }
+.prose .task-item[data-priority="high"]::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block: .5em;
+  width: 3px;
+  border-radius: var(--r-pill);
+  background: var(--peach);
+}
+
+.prose .task-date {
+  display: inline-block;
+  margin-left: .35em;
+  padding: .05em .5em;
+  font-size: var(--fs-xs);
+  font-family: var(--font-mono);
+  color: var(--ink-soft);
+  background: var(--paper-3);
+  border-radius: var(--r-pill);
+  vertical-align: .08em;
+}
+.prose .task-date-done { background: var(--mint-soft); color: var(--mint-deep); }
+.prose .task-date-canceled { background: rgba(139, 146, 156, .14); color: var(--ink-faint); }
+.prose .task-date-start { background: var(--sky); color: #3a6ea5; }
+
+/* ---- blockquote -------------------------------------------------- */
+.prose blockquote {
+  margin-inline: 0;
+  padding: .85em 1.15em;
+  border-left: 3px solid var(--mint);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  background: var(--glass);
+  color: var(--ink-soft);
+}
+.prose blockquote > * + * { margin-top: .6em; }
+.prose blockquote p:first-child { margin-top: 0; }
+
+/* ---- code -------------------------------------------------------- */
+.prose code {
+  font-family: var(--font-mono);
+  font-size: .875em;
+  padding: .16em .42em;
+  border-radius: 6px;
+  background: var(--paper-3);
+  color: #b3543a;
+  word-break: break-word;
+}
+
+.prose pre {
+  margin-block: 1.5em;
+  padding: var(--s-5);
+  border-radius: var(--r-md);
+  overflow-x: auto;
+  font-size: var(--fs-sm);
+  line-height: 1.72;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-soft);
+  tab-size: 2;
+}
+.prose pre code {
+  padding: 0;
+  background: none;
+  color: inherit;
+  font-size: 1em;
+  border-radius: 0;
+  word-break: normal;
+}
+.prose pre.astro-code { background: #fbfaf7 !important; }
+.prose pre::-webkit-scrollbar { height: 8px; }
+.prose pre::-webkit-scrollbar-thumb { background: rgba(52, 56, 63, .2); border-radius: var(--r-pill); }
+
+/* ---- tables ------------------------------------------------------ */
+.prose table {
+  width: 100%;
+  margin-block: 1.6em;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+  display: block;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.prose thead { background: var(--mint-soft); }
+.prose th, .prose td {
+  padding: .6em .9em;
+  border: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+.prose th { font-weight: 700; color: var(--ink); }
+.prose tbody tr:nth-child(even) { background: rgba(247, 242, 233, .55); }
+
+/* ---- images ------------------------------------------------------ */
+.prose img {
+  margin-block: 1.6em;
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-soft);
+  background: var(--paper-2);
+}
+.prose p > img:only-child { margin-inline: auto; }
+.prose figure { margin-block: 1.6em; }
+.prose figcaption {
+  margin-top: .55em;
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: var(--ink-faint);
+}
+
+/* ---- KaTeX ------------------------------------------------------- */
+.prose .katex { font-size: 1.06em; }
+.prose .katex-display {
+  margin-block: 1.5em;
+  padding: .35em .2em;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.prose .katex-error { color: #c0392b; }
+/* ---- footnotes --------------------------------------------------- */
+.prose .footnotes {
+  margin-top: 3em;
+  padding-top: 1.4em;
+  border-top: 2px solid var(--line);
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+}
+
+/* ---- small screens ----------------------------------------------- */
+@media (max-width: 620px) {
+  .prose { font-size: var(--fs-base); line-height: 1.85; }
+  .prose pre { padding: var(--s-4); border-radius: var(--r-sm); }
+  .prose h2 { font-size: var(--fs-lg); }
+  .prose h3 { font-size: var(--fs-md); }
+  /* shrink display math on phones so 3x3 matrices / arrow charts fit */
+  .prose .katex-display {
+    font-size: .82em;
+    margin-block: 1.2em;
+    padding-inline: 0;
+    /* fade the right edge so a wide matrix / arrow chart reads as swipeable */
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 20px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 20px), transparent);
+  }
+}

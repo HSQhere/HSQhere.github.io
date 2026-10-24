@@ -1,0 +1,381 @@
+---
+/**
+ * BentoGrid.astro — the "从这里进去" section under the hero.
+ * Pure CSS grid, no fixed coordinates; every card is a plain link.
+ */
+import { Image } from 'astro:assets';
+import lakeSm from '../../assets/lake-sm.webp';
+import catAvatar from '../../assets/cat-avatar.webp';
+import { site } from '../../lib/site';
+import { getEntry } from 'astro:content';
+import { getPosts, postPath, collectTags, readingTime } from '../../lib/posts';
+import { parseTasks, taskStats } from '../../lib/plan';
+
+const posts = await getPosts();
+const tags = [...collectTags(posts).entries()].sort((a, b) => b[1].length - a[1].length).slice(0, 4);
+const latest = posts.slice(0, 3);
+const total = posts.length;
+
+// Writing rhythm: posts per month, used to fill the tall log card.
+const months = new Map<string, number>();
+for (const p of posts) {
+  const d = p.data.date;
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const key = y + '-' + m;
+  months.set(key, (months.get(key) ?? 0) + 1);
+}
+const rhythm = [...months.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+const rhythmMax = Math.max(1, ...rhythm.map(([, n]) => n));
+
+const planGroups = parseTasks((await getEntry('posts', 'To-Do'))?.body ?? '');
+const stats = taskStats(planGroups);
+const pct = stats.percent;
+const planTop = planGroups.flatMap((g) => g.tasks).slice(0, 4);
+---
+
+<section class="bento" aria-labelledby="bento-title">
+  <header class="bento__head" data-reveal="0">
+    <p class="bento__kicker">BENTO · 板块</p>
+    <h2 class="bento__title" id="bento-title">从这里进去</h2>
+    <p class="bento__now" data-clock-time>--:--</p>
+  </header>
+
+  <div class="bento__grid">
+    <!-- 日志 -->
+    <article class="card card--log" data-reveal="1">
+      <p class="card__badge">日志</p>
+      <p class="card__big">{total} <em>篇</em></p>
+      <p class="card__desc">电控、算法、机器人，还有一些不太好分类的东西。</p>
+      <ul class="card__tags">
+        {tags.map(([name, list]) => (
+          <li><a href={`/tags/${encodeURIComponent(name)}/`}>{name} <span>{list.length}</span></a></li>
+        ))}
+      </ul>
+      <div class="card__rhythm" aria-hidden="true">
+        {rhythm.map(([key, n]) => (
+          <span class="rhythm" style={`--h:${Math.round((n / rhythmMax) * 100)}%`}>
+            <i></i>
+            <em>{key.slice(5)}</em>
+          </span>
+        ))}
+      </div>
+      <p class="card__rhythmlabel">{rhythm.length} 个月的写作节奏</p>
+      <ul class="card__latest">
+        {latest.map((p) => (
+          <li>
+            <a href={postPath(p)}>{p.data.title}</a>
+            <span>{readingTime(p.body ?? '')} 分钟</span>
+          </li>
+        ))}
+      </ul>
+      <a class="card__go" href="/archive/">进入归档 →</a>
+    </article>
+
+    <!-- 图库 -->
+    <article class="card card--gallery" data-reveal="2">
+      <div class="card__shots">
+        <a class="shot shot--wide" href="/gallery/">
+          <Image src={lakeSm} alt="山与湖" widths={[240, 480]} sizes="240px" loading="lazy" />
+        </a>
+        <a class="shot shot--tall" href="/gallery/">
+          <Image src={catAvatar} alt="猫" widths={[160, 320]} sizes="160px" loading="lazy" />
+        </a>
+      </div>
+      <p class="card__badge">图库</p>
+      <p class="card__desc">用色彩和明暗记录的一瞬间。</p>
+      <a class="card__go" href="/gallery/">去看看 →</a>
+    </article>
+
+    <!-- 计划 -->
+    <article class="card card--plan" data-reveal="3">
+      <p class="card__badge">计划</p>
+      <ul class="card__tasks">
+        {planTop.map((t) => (
+          <li class:list={[`is-${t.status}`]}>{t.title}</li>
+        ))}
+      </ul>
+      <div class="card__progress"><i data-bar={pct}></i></div>
+      <p class="card__pct">{pct}% · {stats.done + stats.doing + stats.canceled}/{stats.total}</p>
+      <a class="card__go" href="/plan/">看全部 →</a>
+    </article>
+
+    <!-- 朋友 -->
+    <article class="card card--friends" data-reveal="4">
+      <p class="card__badge">朋友</p>
+      <ul class="card__faces" aria-hidden="true">
+        <li>🐱</li><li>🐻</li><li>🐹</li><li>🦊</li><li>+</li>
+      </ul>
+      <p class="card__desc">每一个朋友都是我与世界的羁绊。</p>
+      <a class="card__go" href="/friends/">串门 →</a>
+    </article>
+
+    <!-- 关于 -->
+    <article class="card card--about" data-reveal="5">
+      <p class="card__badge">关于</p>
+      <p class="card__desc">{site.author.bio}</p>
+      <ul class="card__meta">
+        <li>📍 广州</li>
+        <li>🎓 华南理工</li>
+        <li>🛠 机器人</li>
+      </ul>
+      <a class="card__go" href="/about/">认识一下 →</a>
+    </article>
+
+    <!-- 搜索 -->
+    <article class="card card--search" data-reveal="6">
+      <p class="card__badge">搜索</p>
+      <p class="card__desc">标题、标签、摘要都能搜。</p>
+      <a class="card__searchbtn" href="/search/">打开搜索 ⌘K</a>
+    </article>
+
+    <!-- 成长路径 -->
+    <article class="card card--path" data-reveal="7">
+      <p class="card__badge">成长路径</p>
+      <div class="card__track">
+        <i class="card__line" data-growth-line aria-hidden="true"></i>
+        <ol class="card__steps">
+          {site.growth.map((g, i) => (
+            <li class:list={{ 'is-now': i === site.growth.length - 2 }}>
+              <span class="step__dot" aria-hidden="true"></span>
+              <span class="step__label">{g.label}</span>
+              <span class="step__year">{g.year}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </article>
+  </div>
+</section>
+
+<style>
+  .bento {
+    position: relative;
+    width: min(var(--w-page), 100% - var(--s-6));
+    margin-inline: auto;
+    padding-block: var(--s-8) var(--s-9);
+  }
+
+  .bento__head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: var(--s-2) var(--s-5);
+    margin-bottom: var(--s-6);
+  }
+  .bento__kicker {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: .18em;
+    color: var(--ink-faint);
+  }
+  .bento__title {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--fs-2xl);
+  }
+  .bento__now {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--fs-sm);
+    color: var(--mint-deep);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bento__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--s-4);
+  }
+
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-2);
+    padding: var(--s-5);
+    border-radius: var(--r-lg);
+    background: var(--glass-strong);
+    border: 1px solid var(--glass-line);
+    box-shadow: var(--shadow-card);
+    backdrop-filter: var(--glass-blur);
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity .7s var(--ease-out), transform .7s var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+  }
+  .card.is-in { opacity: 1; transform: none; }
+  .card:hover { box-shadow: var(--shadow-float); }
+
+  .card__badge {
+    margin: 0;
+    align-self: flex-start;
+    padding: 1px 10px;
+    border-radius: var(--r-pill);
+    background: var(--mint-soft);
+    color: var(--mint-deep);
+    font-size: 11px;
+    letter-spacing: .12em;
+  }
+  .card--gallery .card__badge { background: var(--peach-soft); color: #b46a4a; }
+  .card--plan .card__badge { background: var(--lilac); color: #5b5680; }
+  .card--friends .card__badge { background: var(--sky); color: #46698f; }
+  .card--about .card__badge { background: var(--sun); color: #96702f; }
+  .card--search .card__badge { background: var(--mint-soft); color: var(--mint-deep); }
+  .card--path .card__badge { background: var(--paper-3); color: var(--ink-soft); }
+
+  .card__big {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--fs-3xl);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--mint-deep);
+  }
+  .card__big em { font-size: var(--fs-sm); font-style: normal; color: var(--ink-faint); }
+  .card__desc { margin: 0; font-size: var(--fs-xs); color: var(--ink-soft); line-height: 1.7; }
+
+  .card__tags, .card__latest, .card__faces, .card__meta, .card__tasks, .card__steps {
+    list-style: none; margin: 0; padding: 0;
+  }
+  .card__tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .card__tags a {
+    display: inline-flex; gap: 4px;
+    padding: 1px 9px;
+    border-radius: var(--r-pill);
+    background: rgba(255, 255, 255, .7);
+    border: 1px solid var(--line);
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+  .card__tags span { color: var(--ink-faint); }
+
+  .card__rhythm {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 92px;
+    margin-top: var(--s-3);
+    padding-bottom: 18px;
+  }
+  .rhythm { position: relative; flex: 1; height: 100%; display: flex; align-items: flex-end; }
+  .rhythm i {
+    display: block;
+    width: 100%;
+    height: max(6%, var(--h));
+    border-radius: 6px 6px 3px 3px;
+    background: linear-gradient(180deg, var(--mint), var(--mint-soft));
+    opacity: .85;
+  }
+  .rhythm em {
+    position: absolute;
+    bottom: -18px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-style: normal;
+    color: var(--ink-faint);
+  }
+  .card__rhythmlabel { margin: 0; font-size: 11px; color: var(--ink-faint); }
+
+  .card__latest { display: flex; flex-direction: column; gap: 4px; margin-top: auto; padding-top: var(--s-3); border-top: 1px dashed var(--line); }
+  .card__latest li { display: flex; justify-content: space-between; gap: var(--s-3); font-size: 11px; }
+  .card__latest a { color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .card__latest span { flex: none; color: var(--ink-faint); }
+
+  .card__go {
+    margin-top: auto;
+    align-self: flex-start;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--mint-deep);
+  }
+  .card__go:hover { text-decoration: underline; }
+
+  /* gallery shots */
+  .card__shots { display: flex; gap: var(--s-2); margin-bottom: var(--s-2); }
+  .shot { display: block; border-radius: var(--r-sm); overflow: hidden; }
+  .shot :global(img) { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .shot--wide { flex: 1; height: 84px; }
+  .shot--tall { width: 66px; height: 84px; }
+
+  /* plan */
+  .card__tasks { font-size: var(--fs-xs); line-height: 1.95; color: var(--ink-soft); }
+  .card__tasks li::before { content: '□ '; }
+  .card__tasks li.is-done { text-decoration: line-through; opacity: .5; }
+  .card__tasks li.is-done::before { content: '✓ '; color: var(--mint-deep); }
+  .card__tasks li.is-doing::before { content: '◐ '; color: var(--peach); }
+  .card__progress { height: 5px; border-radius: var(--r-pill); background: rgba(52, 56, 63, .1); overflow: hidden; margin-top: var(--s-2); }
+  .card__progress i { display: block; height: 100%; width: 100%; transform-origin: left; border-radius: var(--r-pill); background: var(--mint); }
+  .card__pct { margin: 0; font-size: 11px; color: var(--ink-faint); }
+
+  /* friends */
+  .card__faces { display: flex; }
+  .card__faces li {
+    width: 32px; height: 32px;
+    display: grid; place-items: center;
+    margin-left: -8px;
+    border-radius: var(--r-pill);
+    background: var(--paper);
+    border: 2px solid var(--paper);
+    box-shadow: 0 2px 8px rgba(52, 56, 63, .1);
+    font-size: var(--fs-sm);
+  }
+  .card__faces li:first-child { margin-left: 0; }
+
+  /* about */
+  .card__meta { display: flex; flex-wrap: wrap; gap: 6px; }
+  .card__meta li { font-size: 11px; color: var(--ink-faint); }
+
+  /* search */
+  .card__searchbtn {
+    margin-top: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    border-radius: var(--r-pill);
+    background: var(--paper);
+    border: 1px dashed var(--line);
+    font-size: var(--fs-xs);
+    color: var(--ink-soft);
+  }
+  .card__searchbtn:hover { border-color: var(--mint); color: var(--mint-deep); }
+
+  /* path */
+  .card__track { position: relative; margin-top: var(--s-3); }
+  .card__line {
+    position: absolute;
+    left: 4px; right: 4px; top: 4px;
+    height: 2px;
+    transform-origin: left;
+    transform: scaleX(0);
+    background: linear-gradient(90deg, var(--mint), var(--peach), var(--lilac));
+    border-radius: var(--r-pill);
+  }
+  .card__steps { display: flex; flex-direction: column; gap: var(--s-3); }
+  .card__steps li { display: grid; grid-template-columns: 10px 1fr auto; align-items: center; gap: var(--s-3); padding-left: 0; }
+  .step__dot { width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--paper-3); border: 2px solid var(--mint); }
+  .card__steps li.is-now .step__dot { background: var(--mint); box-shadow: 0 0 0 4px var(--mint-soft); }
+  .step__label { font-size: var(--fs-xs); color: var(--ink); }
+  .step__year { font-family: var(--font-mono); font-size: 11px; color: var(--ink-faint); }
+
+  /* spans */
+  .card--log { grid-column: span 2; grid-row: span 2; }
+  .card--gallery { grid-column: span 2; }
+  .card--path { grid-column: span 2; }
+
+  @media (max-width: 1024px) {
+    .bento__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .card--log { grid-column: span 2; grid-row: auto; }
+    .card--gallery { grid-column: span 1; }
+    .card--path { grid-column: span 2; }
+  }
+  @media (max-width: 620px) {
+    .bento__grid { grid-template-columns: minmax(0, 1fr); }
+    .card--log, .card--gallery, .card--path { grid-column: span 1; }
+  }
+</style>

@@ -1,0 +1,64 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getPosts, collectCategories } from '../../lib/posts';
+
+const posts = await getPosts();
+const cats = [...collectCategories(posts).entries()].sort((a, b) => b[1].length - a[1].length);
+---
+
+<Base title="分类" description="全部文章分类">
+  <div class="u-page catindex">
+    <header class="catindex__head">
+      <h1 class="catindex__title">分类</h1>
+      <p class="catindex__sub">{cats.length} 个分类</p>
+    </header>
+
+    <ul class="catindex__list">
+      {cats.map(([name, list]) => (
+        <li>
+          <a class="catindex__item" href={`/categories/${encodeURIComponent(name)}/`}>
+            <span class="catindex__name">{name}</span>
+            <span class="catindex__num">{list.length}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <p class="catindex__back"><a href="/archive/">← 全部日志</a></p>
+  </div>
+</Base>
+
+<style>
+  .catindex { padding-block: var(--s-8); }
+
+  .catindex__title { font-size: var(--fs-3xl); }
+  .catindex__sub { margin-top: var(--s-3); color: var(--ink-soft); }
+
+  .catindex__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+    gap: var(--s-3);
+    list-style: none;
+    padding: 0;
+    margin-top: var(--s-6);
+  }
+
+  .catindex__item {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s-3);
+    padding: var(--s-3) var(--s-4);
+    border-radius: var(--r-md);
+    background: var(--glass);
+    border: 1px solid var(--line);
+    transition: transform var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+  }
+  .catindex__item:hover { transform: translateY(-2px); background: var(--mint-soft); }
+
+  .catindex__name { font-family: var(--font-ui); font-weight: 600; }
+  .catindex__num { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--ink-faint); }
+
+  .catindex__back { margin-top: var(--s-7); }
+  .catindex__back a { color: var(--mint-deep); }
+</style>

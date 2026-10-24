@@ -1,0 +1,199 @@
+---
+/**
+ * /about/ — 关于我。内容来自旧站 about/index.md，但把 shields.io / vercel 的
+ * 外链图片换成了本地渲染的卡片，避免离线时整块空白。
+ */
+import Base from '../layouts/Base.astro';
+import { Image } from 'astro:assets';
+import avatar from '../assets/real-avatar.webp';
+import { site } from '../lib/site';
+
+const skills = [
+  { k: '机械', v: 'Solidworks · Blender' },
+  { k: '程序', v: 'Python · C · C++ · Vue' },
+  { k: '电控', v: 'STM32 · 嘉立创 EDA' },
+  { k: '自媒体', v: 'Au · Pr · Ae' },
+  { k: '机器学习', v: '深度强化学习 · GAN' },
+];
+
+const games = ['守望先锋', '消逝的光芒 1', '消逝的光芒 2', '战神 4', '战神 5', '塞尔达传说 · 王国之泪'];
+
+const reasons = [
+  '想有个属于自己的、炫酷的地方，能有点小小的成就感。',
+  '锻炼前端和云端编写能力，把课堂外的东西真的做出来。',
+  '激励自己努力——写下来的东西不好意思敷衍。',
+  '记录生命中精彩的瞬间，哪怕只是今天的光很好看。',
+];
+
+const meta = [
+  { k: '建站时间', v: '2026 年 3 月' },
+  { k: '当前框架', v: 'Astro 7' },
+  { k: '上一版', v: 'Hexo · Nexmoe' },
+  { k: '部署', v: 'GitHub Pages' },
+];
+---
+
+<Base title="关于我" description="HSQ 的自我介绍、技能、以及这个站为什么存在。">
+  <section class="ab">
+    <header class="ab__hero">
+      <div class="ab__id">
+        <span class="ab__avatar">
+          <Image src={avatar} alt="HSQ 的头像" widths={[96, 192]} sizes="96px" />
+        </span>
+        <div>
+          <h1 class="ab__title">关于我</h1>
+          <p class="ab__sub">HSQ · 华南理工大学 · 广州</p>
+        </div>
+      </div>
+      <p class="ab__lead">
+        你好！我是 HSQ，欢迎来到我的个人博客。当 emo 的时候，会是树洞；当认真的时候，是知识的总结。
+      </p>
+    </header>
+
+    <section class="ab__sec" aria-labelledby="intro">
+      <h2 class="ab__h" id="intro"><span class="ab__dot" aria-hidden="true"></span>简单介绍</h2>
+      <p class="ab__p">
+        本人目前就读于华南理工大学，目前大一。居住于广州、重庆、浙江。折纸爱好者，音乐（未完成）爱好者，机器人爱好者。
+        喜欢在深夜里折腾一块板子，也喜欢在傍晚出去拍一张照片。
+      </p>
+    </section>
+
+    <section class="ab__sec" aria-labelledby="skills">
+      <h2 class="ab__h" id="skills"><span class="ab__dot" aria-hidden="true"></span>我在学的东西</h2>
+      <ul class="skills">
+        {skills.map((s) => (
+          <li class="skills__item">
+            <span class="skills__k">{s.k}</span>
+            <span class="skills__v">{s.v}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="ab__sec" aria-labelledby="games">
+      <h2 class="ab__h" id="games"><span class="ab__dot" aria-hidden="true"></span>游戏</h2>
+      <ul class="chips">
+        {games.map((g) => <li class="chip">{g}</li>)}
+      </ul>
+    </section>
+
+    <section class="ab__sec" aria-labelledby="why">
+      <h2 class="ab__h" id="why"><span class="ab__dot" aria-hidden="true"></span>关于我建立这个站的初衷</h2>
+      <ol class="why">
+        {reasons.map((r) => <li class="why__item">{r}</li>)}
+      </ol>
+    </section>
+
+    <section class="ab__sec" aria-labelledby="blog">
+      <h2 class="ab__h" id="blog"><span class="ab__dot" aria-hidden="true"></span>博客信息</h2>
+      <dl class="meta">
+        {meta.map((m) => (
+          <div class="meta__row">
+            <dt>{m.k}</dt>
+            <dd>{m.v}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+
+    <section class="ab__sec" aria-labelledby="contact">
+      <h2 class="ab__h" id="contact"><span class="ab__dot" aria-hidden="true"></span>联系方式</h2>
+      <ul class="contact">
+        <li>
+          <span class="contact__k">GitHub</span>
+          <a class="contact__v" href={site.social.github} target="_blank" rel="noopener noreferrer">{site.social.github.replace('https://', '')}</a>
+        </li>
+        <li>
+          <span class="contact__k">Email</span>
+          <a class="contact__v" href={`mailto:${site.social.email}`}>{site.social.email}</a>
+        </li>
+        <li>
+          <span class="contact__k">RSS</span>
+          <a class="contact__v" href="/rss.xml">订阅更新</a>
+        </li>
+      </ul>
+    </section>
+
+    <p class="ab__thanks">
+      感谢你读到这里。也感谢 Astro、KaTeX、以及所有把工具做成开源的人。
+    </p>
+  </section>
+</Base>
+
+<style>
+  .ab { width: min(var(--w-prose), 100% - var(--s-6)); margin-inline: auto; padding-block: var(--s-8) var(--s-9); }
+
+  .ab__hero { padding-bottom: var(--s-6); border-bottom: 1px solid var(--line); }
+  .ab__id { display: flex; align-items: center; gap: var(--s-4); }
+  .ab__avatar {
+    display: block;
+    width: 72px;
+    height: 72px;
+    flex: 0 0 auto;
+    border-radius: var(--r-pill);
+    overflow: hidden;
+    background: var(--mint-soft);
+    box-shadow: 0 0 0 4px var(--paper), 0 0 0 5px var(--line);
+  }
+  .ab__avatar :global(img) { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ab__title { margin: 0; font-size: var(--fs-2xl); }
+  .ab__sub { margin: 2px 0 0; font-family: var(--font-mono); font-size: 11px; color: var(--ink-faint); }
+  .ab__lead { margin: var(--s-5) 0 0; color: var(--ink-soft); }
+
+  .ab__sec { margin-top: var(--s-8); }
+  .ab__h { display: flex; align-items: center; gap: var(--s-3); margin: 0 0 var(--s-4); font-size: var(--fs-lg); }
+  .ab__dot { width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--mint); box-shadow: 0 0 0 4px var(--mint-soft); }
+  .ab__p { margin: 0; color: var(--ink-soft); }
+
+  .skills { display: grid; gap: var(--s-2); margin: 0; padding: 0; list-style: none; }
+  .skills__item {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-4);
+    padding: 10px var(--s-4);
+    border-radius: var(--r-sm);
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+  }
+  .skills__k { flex: 0 0 84px; font-family: var(--font-ui); font-weight: 700; font-size: var(--fs-sm); }
+  .skills__v { font-size: var(--fs-sm); color: var(--ink-soft); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: var(--s-2); margin: 0; padding: 0; list-style: none; }
+  .chip { padding: 5px 12px; border-radius: var(--r-pill); background: var(--lilac); color: #5a5378; font-size: var(--fs-xs); }
+
+  .why { margin: 0; padding: 0; list-style: none; counter-reset: why; display: grid; gap: var(--s-3); }
+  .why__item {
+    counter-increment: why;
+    position: relative;
+    padding-left: 34px;
+    font-size: var(--fs-sm);
+    color: var(--ink-soft);
+  }
+  .why__item::before {
+    content: counter(why);
+    position: absolute;
+    left: 0;
+    top: 1px;
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: var(--r-pill);
+    background: var(--mint-soft);
+    color: var(--mint-deep);
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+
+  .meta { margin: 0; display: grid; gap: 1px; background: var(--line); border-radius: var(--r-md); overflow: hidden; }
+  .meta__row { display: flex; gap: var(--s-4); padding: 10px var(--s-4); background: var(--paper-2); font-size: var(--fs-sm); }
+  .meta__row dt { flex: 0 0 84px; color: var(--ink-faint); }
+  .meta__row dd { margin: 0; color: var(--ink); }
+
+  .contact { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--s-2); }
+  .contact li { display: flex; align-items: baseline; gap: var(--s-4); font-size: var(--fs-sm); }
+  .contact__k { flex: 0 0 84px; font-family: var(--font-mono); font-size: 11px; color: var(--ink-faint); }
+  .contact__v { color: var(--mint-deep); word-break: break-all; }
+
+  .ab__thanks { margin-top: var(--s-8); padding-top: var(--s-5); border-top: 1px solid var(--line); font-family: var(--font-serif); font-size: var(--fs-sm); color: var(--ink-faint); }
+</style>

@@ -1,0 +1,162 @@
+---
+import { site } from '../../lib/site';
+
+const path = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === '/' ? path === '/' : path === href || path.startsWith(href);
+---
+
+<header class="header" data-header>
+  <div class="header__inner u-page">
+    <a class="header__brand" href="/">
+      <span class="header__dot" aria-hidden="true"></span>
+      <span class="header__name">{site.name}</span>
+    </a>
+
+    <nav class="header__nav" aria-label="主导航">
+      {site.nav.map((item) => (
+        <a
+          class:list={['header__link', { 'is-active': isActive(item.href) }]}
+          href={item.href}
+          aria-current={isActive(item.href) ? 'page' : undefined}
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
+
+    <button class="header__menu" type="button" aria-label="打开导航" aria-expanded="false" data-menu-toggle>
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    height: var(--header-h);
+    background: rgba(255, 253, 249, .72);
+    backdrop-filter: var(--glass-blur);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .header__inner {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-5);
+  }
+
+  .header__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: var(--fs-lg);
+    letter-spacing: .01em;
+  }
+
+  .header__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: var(--r-pill);
+    background: var(--mint);
+    box-shadow: 0 0 0 4px var(--mint-soft);
+  }
+
+  .header__nav {
+    display: flex;
+    align-items: center;
+    gap: var(--s-1);
+  }
+
+  .header__link {
+    padding: var(--s-2) var(--s-4);
+    border-radius: var(--r-pill);
+    font-size: var(--fs-sm);
+    color: var(--ink-soft);
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+  }
+
+  .header__link:hover { background: var(--glass); color: var(--ink); }
+
+  .header__link.is-active {
+    background: var(--mint-soft);
+    color: var(--mint-deep);
+    font-weight: 600;
+  }
+
+  .header__menu { display: none; }
+
+  @media (max-width: 860px) {
+    .header__nav {
+      position: fixed;
+      inset: var(--header-h) 0 auto 0;
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--s-1);
+      padding: var(--s-4) var(--s-5) var(--s-5);
+      background: rgba(255, 253, 249, .97);
+      backdrop-filter: var(--glass-blur);
+      border-bottom: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      transform: translateY(-8px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+    }
+
+    .header__nav.is-open {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .header__link { padding: var(--s-3) var(--s-4); font-size: var(--fs-base); }
+
+    .header__menu {
+      display: inline-flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      width: 40px;
+      height: 40px;
+      padding: 0 9px;
+      border-radius: var(--r-sm);
+      border: 1px solid var(--line);
+      background: var(--glass);
+    }
+    .header__menu span {
+      display: block;
+      height: 2px;
+      border-radius: var(--r-pill);
+      background: var(--ink-soft);
+      transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
+    }
+    .header__menu[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .header__menu[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+    .header__menu[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  }
+</style>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const nav = document.querySelector<HTMLElement>('.header__nav');
+  if (toggle && nav) {
+    toggle.addEventListener('click', () => {
+      const open = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!open));
+      nav.classList.toggle('is-open', !open);
+    });
+    nav.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a')) {
+        toggle.setAttribute('aria-expanded', 'false');
+        nav.classList.remove('is-open');
+      }
+    });
+  }
+</script>
