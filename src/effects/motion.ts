@@ -256,83 +256,219 @@ function initTilt() {
  * left/right to swing the layers, tip it forward/back to raise them.
  * ------------------------------------------------------------------ */
 
-/** how many degrees of tilt equals a full swing — smaller = more sensitive */
-const GYRO_RANGE = 34;
+/** degrees of tilt that equal a full swing — parallax.js calls this MAGIC_NUMBER */
+const GYRO_RANGE = 30;
+/** a jump this large means the handset was re-gripped, so take a new baseline */
+const GYRO_DRIFT = 45;
+
+type PermResult = 'granted' | 'denied' | 'default';
 
 function initGyro() {
   if (prefersReduced()) return;
   if (typeof window.DeviceOrientationEvent === 'undefined') return;
-  /* desktop browsers expose the constructor but never emit readings — only
-     bother on something with a touchscreen */
-  if (!window.matchMedia('(pointer: coarse)').matches) return;
+  /* desktop browsers expose the constructor but never emit readings */
+  if (!(navigator.maxTouchPoints > 0 || 'ontouchstart' in window)) return;
 
   const btn = document.querySelector<HTMLElement>('[data-gyro]');
+  const label = document.querySelector<HTMLElement>('[data-gyro-label]');
+
   const DOE = window.DeviceOrientationEvent as unknown as {
-    requestPermission?: () => Promise<'granted' | 'denied' | 'default'>;
+    requestPermission?: (absolute?: boolean) => Promise<PermResult>;
   };
+  const DME = (window as unknown as {
+    DeviceMotionEvent?: { requestPermission?: () => Promise<PermResult> };
+  }).DeviceMotionEvent;
 
   let listening = false;
-  let idleTimer = 0;
+  let reading = false;
+  let asked = false;
+  let source: 'orient' | 'motion' | null = null;
+  let base: { x: number; y: number } | null = null;
+  let watchdog = 0;
+  let dbg: ((s: string) => void) | null = null;
 
-  const onOrient = (e: DeviceOrientationEvent) => {
-    /* gamma: left/right lean (-90..90). beta: front/back (-180..180) and it
-       reads ~90 when the phone is held upright, so measure from there. */
-    const g = e.gamma;
-    const b = e.beta;
-    if (g === null || b === null) return;
+  const say = (msg: string) => {
+    if (label) label.textContent = msg;
+    if (btn) btn.hidden = false;
+  };
 
-    if (!aim.gyro) {
-      aim.gyro = true;
-      document.documentElement.dataset.aim = 'gyro';
-      if (btn) btn.hidden = true;
+  /* both axes arrive in degrees; the aim vector wants a calibrated -1..1.
+     Callers hand over device-frame roll (x) and pitch (y), so the portrait /
+     landscape swap happens at the source and this stays a pure calibrator. */
+  const push = (x: number, y: number) => {
+    if (!base) base = { x, y };
+
+    let dx = x - base.x;
+    let dy = y - base.y;
+
+    /* a re-grip reads as a huge jump — rebase instead of slamming the aim
+       to an extreme and leaving it stuck there */
+    if (Math.abs(dx) > GYRO_DRIFT || Math.abs(dy) > GYRO_DRIFT) {
+      base = { x, y };
+      dx = 0;
+      dy = 0;
     }
 
-    writeAim(
-      clamp(g / GYRO_RANGE, -1, 1),
-      clamp((b - 90) / GYRO_RANGE, -1, 1),
-      'gyro'
-    );
+    writeAim(clamp(dx / GYRO_RANGE, -1, 1), clamp(dy / GYRO_RANGE, -1, 1), 'gyro');
+  };
+
+  const markOn = () => {
+    if (reading) return;
+    reading = true;
+    aim.gyro = true;
+    document.documentElement.dataset.aim = 'gyro';
+    clearTimeout(watchdog);
+    if (btn) btn.hidden = true;
+  };
+
+  const onOrient = (e: DeviceOrientationEvent) => {
+    if (e.beta === null || e.gamma === null) {
+      dbg?.('deviceorientation · readings are null');
+      return;
+    }
+    if (source !== 'orient') {
+      source = 'orient';
+      base = null;
+    }
+    markOn();
+    dbg?.(`deviceorientation\nbeta  ${e.beta.toFixed(1)}\ngamma ${e.gamma.toFixed(1)}`);
+
+    /* beta is the front/back tip measured from lying flat, so a handset held
+       upright reads ~90 — subtract it to get a pitch around the grip. gamma
+       is already the left/right roll. Swapped when held sideways. */
+    const pitch = e.beta - 90;
+    const roll = e.gamma;
+    const upright = window.innerHeight >= window.innerWidth;
+    push(upright ? roll : pitch, upright ? pitch : roll);
+  };
+
+  /* fallback for handsets that hand over motion but not orientation: the
+     gravity vector still describes the tilt, so decompose it into the same
+     roll/pitch pair the orientation path produces. A portrait handset held
+     upright reads (0, +9.8, 0) — the accelerometer reports the normal force,
+     which points up the screen — so +g.y is "up" and the two off-axis
+     components give the lean.
+     Signs are matched to the orientation path so the same physical tilt
+     moves the scene the same way on either device: gamma and beta-90 are
+     both positive for a right lean / a tip away from you. */
+  const onMotion = (e: DeviceMotionEvent) => {
+    if (source === 'orient') return;
+    const g = e.accelerationIncludingGravity;
+    if (!g || g.x === null || g.y === null || g.z === null) return;
+    /* lying flat on a table: no meaningful roll/pitch to read */
+    if (Math.abs(g.y) < 1.5) return;
+    const rad = 180 / Math.PI;
+    const roll = Math.atan2(g.x, g.y) * rad;
+    const pitch = Math.atan2(-g.z, g.y) * rad;
+    if (source !== 'motion') {
+      source = 'motion';
+      base = null;
+    }
+    markOn();
+    dbg?.(`devicemotion · gravity\npitch ${pitch.toFixed(1)}\nroll  ${roll.toFixed(1)}`);
+    const upright = window.innerHeight >= window.innerWidth;
+    push(upright ? roll : pitch, upright ? pitch : roll);
+  };
+
+  const armWatchdog = (delay = 1500) => {
+    clearTimeout(watchdog);
+    watchdog = window.setTimeout(() => {
+      if (reading) return;
+      /* granted but silent — on iOS this is the per-site denial or the
+         Settings switch, and it otherwise fails without a word */
+      say(
+        asked
+          ? '没读到手机姿态 · 设置 → Safari → 动作与方向访问'
+          : '轻晃手机，画面会跟着动'
+      );
+    }, delay);
+  };
+
+  const attach = () => {
+    window.addEventListener('deviceorientation', onOrient, { passive: true });
+    window.addEventListener('deviceorientationabsolute', onOrient as EventListener, {
+      passive: true,
+    });
+    window.addEventListener('devicemotion', onMotion, { passive: true });
   };
 
   const listen = () => {
     if (listening) return;
     listening = true;
-    window.addEventListener('deviceorientation', onOrient, { passive: true });
+    attach();
   };
 
-  const ask = () => {
-    if (!DOE.requestPermission) {
-      listen();
-      return;
-    }
-    DOE.requestPermission()
-      .then((res) => {
-        if (res === 'granted') listen();
-        else if (btn) btn.hidden = true;
-      })
-      .catch(() => {
-        if (btn) btn.hidden = true;
-      });
+  /* iOS 13+ has a long-standing quirk: listeners registered before the grant
+     can stay silent forever, so drop and re-add them once permission lands.
+     Costs nothing and it is the difference between "works" and "never fires"
+     on some point releases. */
+  const relisten = () => {
+    window.removeEventListener('deviceorientation', onOrient);
+    window.removeEventListener('deviceorientationabsolute', onOrient as EventListener);
+    window.removeEventListener('devicemotion', onMotion);
+    attach();
+    armWatchdog();
   };
 
-  if (DOE.requestPermission) {
-    /* iOS 13+ hands out no readings until a real tap asks for them */
-    if (btn) {
-      btn.hidden = false;
-      btn.addEventListener('click', ask, { once: true });
+  const grant = async (): Promise<PermResult> => {
+    const asks: Promise<PermResult>[] = [];
+    try {
+      if (DOE.requestPermission) asks.push(DOE.requestPermission());
+    } catch {
+      /* older iOS throws here instead of rejecting */
     }
-    return;
+    try {
+      if (DME?.requestPermission) asks.push(DME.requestPermission());
+    } catch {
+      /* ditto */
+    }
+    if (!asks.length) return 'granted';
+    const settled = await Promise.allSettled(asks);
+    return settled.some((r) => r.status === 'fulfilled' && r.value === 'granted')
+      ? 'granted'
+      : 'denied';
+  };
+
+  const onTap = () => {
+    asked = true;
+    listen();
+    /* only start complaining AFTER the promise settles — a slow permission
+       dialog would otherwise trip the watchdog and show a denial that never
+       happened */
+    grant().then((res) => {
+      if (res === 'granted') {
+        relisten();
+        return;
+      }
+      say('动作权限被拒绝 · 在设置里允许后点这里重试');
+    });
+  };
+
+  /* ?motion=debug — a live readout, so a handset that stays silent can be
+     diagnosed without attaching a cable to it */
+  if (location.search.includes('motion=debug')) {
+    const pre = document.createElement('pre');
+    pre.style.cssText =
+      'position:fixed;left:8px;bottom:8px;z-index:9999;margin:0;padding:8px 10px;' +
+      'border-radius:10px;background:rgba(20,20,24,.86);color:#fff;' +
+      'font:11px/1.55 ui-monospace,SFMono-Regular,monospace;pointer-events:none;' +
+      'white-space:pre;max-width:80vw';
+    pre.textContent = 'waiting for motion …';
+    document.body.appendChild(pre);
+    dbg = (s) => {
+      pre.textContent = s;
+    };
   }
 
-  /* everywhere else the readings just arrive — but a few browsers stay silent
-     until the page has been touched, so surface the button as a fallback */
+  /* Listen immediately on every handset. iOS 13+ refuses to hand over a
+     reading until requestPermission() has been called from inside a real
+     tap, and it rejects outright if that call happens at load — so the tap
+     affordance is the whole point. If permission was already granted on a
+     previous visit the readings simply start, markOn() hides the prompt, and
+     no dialog ever appears. */
   listen();
-  idleTimer = window.setTimeout(() => {
-    if (aim.gyro || !btn) return;
-    btn.hidden = false;
-    btn.addEventListener('click', ask, { once: true });
-  }, 1200);
-  window.addEventListener('pagehide', () => clearTimeout(idleTimer), { once: true });
+  armWatchdog();
+  btn?.addEventListener('click', onTap);
 }
 
 /* ------------------------------------------------------------------ *
