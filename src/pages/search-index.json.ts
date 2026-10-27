@@ -9,6 +9,7 @@
  */
 import type { APIRoute } from 'astro';
 import { getPosts, postPath, plainExcerpt } from '../lib/posts';
+import { ymd } from '../lib/datetime';
 
 /** Remove markdown syntax so the client can match against plain words. */
 function toPlain(body: string): string {
@@ -38,7 +39,7 @@ export const GET: APIRoute = async () => {
     return {
       title: post.data.title,
       url: postPath(post),
-      date: post.data.date.toISOString().slice(0, 10),
+      date: ymd(post.data.date),
       tags: post.data.tags,
       categories: post.data.categories,
       excerpt: post.data.excerpt ?? plainExcerpt(body, 120),

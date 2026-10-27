@@ -81,32 +81,42 @@ const show = items.length > 1;
 </style>
 
 <script>
-  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'));
-  const map = new Map<string, HTMLAnchorElement>();
-  for (const a of links) map.set(a.dataset.tocLink!, a);
+  import { register, addCleanup } from '../../effects/page';
 
-  const targets = links
-    .map((a) => document.getElementById(a.dataset.tocLink!))
-    .filter((el): el is HTMLElement => Boolean(el));
+  register('post:toc', () => {
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'));
+    if (!links.length) return;
 
-  let active: HTMLAnchorElement | null = null;
+    const map = new Map<string, HTMLAnchorElement>();
+    for (const a of links) map.set(a.dataset.tocLink!, a);
 
-  const setActive = () => {
-    const line = window.innerHeight * 0.28;
-    let current: HTMLElement | null = null;
-    for (const el of targets) {
-      if (el.getBoundingClientRect().top <= line) current = el;
-      else break;
-    }
-    const next = current ? map.get(current.id) ?? null : null;
-    if (next === active) return;
-    active?.classList.remove('is-active');
-    next?.classList.add('is-active');
-    active = next;
-  };
+    const targets = links
+      .map((a) => document.getElementById(a.dataset.tocLink!))
+      .filter((el): el is HTMLElement => Boolean(el));
 
-  // Scroll listeners plus a setInterval tick — never requestAnimationFrame.
-  window.addEventListener('scroll', setActive, { passive: true });
-  window.addEventListener('resize', setActive, { passive: true });
-  setActive();
+    let active: HTMLAnchorElement | null = null;
+
+    const setActive = () => {
+      const line = window.innerHeight * 0.28;
+      let current: HTMLElement | null = null;
+      for (const el of targets) {
+        if (el.getBoundingClientRect().top <= line) current = el;
+        else break;
+      }
+      const next = current ? map.get(current.id) ?? null : null;
+      if (next === active) return;
+      active?.classList.remove('is-active');
+      next?.classList.add('is-active');
+      active = next;
+    };
+
+    // Scroll listeners plus a setInterval tick — never requestAnimationFrame.
+    window.addEventListener('scroll', setActive, { passive: true });
+    window.addEventListener('resize', setActive, { passive: true });
+    addCleanup(() => {
+      window.removeEventListener('scroll', setActive);
+      window.removeEventListener('resize', setActive);
+    });
+    setActive();
+  });
 </script>

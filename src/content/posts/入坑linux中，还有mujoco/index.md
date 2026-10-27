@@ -1,7 +1,7 @@
 ---
 title: 入坑linux中，还有mujoco
 slug: 入坑linux中，还有mujoco
-date: 2026-03-21 08:53:01
+date: 2026-03-21 08:53:01 +08:00
 tags:
   - 日记
   - 仿真

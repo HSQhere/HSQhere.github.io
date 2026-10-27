@@ -4,6 +4,7 @@ import Base from './Base.astro';
 import Toc, { type Heading } from '../components/post/Toc.astro';
 import { site } from '../lib/site';
 import { postPath, formatDateCN, readingTime, type Post } from '../lib/posts';
+import { isoShanghai } from '../lib/datetime';
 
 interface Props {
   post: Post;
@@ -43,7 +44,7 @@ const hasToc = tocItems.length > 1;
         <h1 class="post__title">{title}</h1>
 
         <p class="post__meta">
-          <time datetime={date.toISOString()}>{formatDateCN(date)}</time>
+          <time datetime={isoShanghai(date)}>{formatDateCN(date)}</time>
           <span aria-hidden="true">·</span>
           <span>{minutes} 分钟阅读</span>
         </p>
@@ -74,7 +75,7 @@ const hasToc = tocItems.length > 1;
             </summary>
             <Toc headings={headings} />
           </details>
-          <script is:inline>
+          <script is:inline data-astro-rerun>
             (function () {
               var box = document.querySelector('[data-tocwrap]');
               if (box && window.matchMedia('(max-width: 1000px)').matches) box.removeAttribute('open');

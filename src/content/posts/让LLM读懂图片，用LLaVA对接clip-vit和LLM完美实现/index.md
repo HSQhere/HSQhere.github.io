@@ -1,7 +1,7 @@
 ---
 title: 让LLM读懂图片，用LLaVA对接clip-vit和LLM完美实现
 slug: 让LLM读懂图片，用LLaVA对接clip-vit和LLM完美实现
-date: 2026-08-18 15:53:55
+date: 2026-08-18 15:53:55 +08:00
 tags:
   - 大模型
   - 视觉

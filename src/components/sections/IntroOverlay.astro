@@ -121,11 +121,5 @@ const welcome = [...site.intro.welcome];
   body.is-locked { overflow: hidden; }
 </style>
 
-<script>
-  /* the overlay only exists for the very first paint of a session */
-  if (sessionStorage.getItem('hsq-intro') === 'done') {
-    document.querySelector('[data-intro]')?.classList.add('is-off');
-  } else {
-    sessionStorage.setItem('hsq-intro', 'done');
-  }
-</script>
+<!-- The overlay's first-paint-of-the-session logic lives in motion.ts
+     (initIntro), which re-runs after every client-side navigation. -->

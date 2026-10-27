@@ -1,7 +1,7 @@
 ---
 title: 新的开始-new beginning point
 slug: 新的开始-new-beginning-point
-date: 2026-04-13 00:42:26
+date: 2026-04-13 00:42:26 +08:00
 tags: [日记,目标,生活]
 categories: [日记]
 cover: ./rm测试出发.jpg

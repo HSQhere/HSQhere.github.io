@@ -11,6 +11,7 @@ import lakeSm from '../../assets/lake-sm.webp';
 import { site } from '../../lib/site';
 import { getEntry } from 'astro:content';
 import { getPosts, postPath, collectTags, readingTime } from '../../lib/posts';
+import { monthText, yearOf } from '../../lib/datetime';
 import { parseTasks, taskStats } from '../../lib/plan';
 
 const posts = await getPosts();
@@ -22,9 +23,7 @@ const total = posts.length;
 const months = new Map<string, number>();
 for (const p of posts) {
   const d = p.data.date;
-  const y = d.getUTCFullYear();
-  const m = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const key = y + '-' + m;
+  const key = yearOf(d) + '-' + monthText(d);
   months.set(key, (months.get(key) ?? 0) + 1);
 }
 const rhythm = [...months.entries()].sort((a, b) => a[0].localeCompare(b[0]));
@@ -41,7 +40,7 @@ const planTop = planGroups.flatMap((g) => g.tasks).slice(0, 4);
  *   节点是真实阶段，位置按阶段顺序落在 S 上，标签里写真实月份和篇数。
  * ---------------------------------------------------------------- */
 
-const ymOf = (d: Date) => `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+const ymOf = (d: Date) => `${yearOf(d)}-${monthText(d)}`;
 
 const perMonth = new Map<string, number>();
 for (const p of posts) {
@@ -296,6 +295,8 @@ const spanLabel = `${firstMonth.slice(2).replace('-', '.')} – ${lastMonth.slic
 </section>
 
 <script>
+  import { register, addCleanup } from '../../effects/page';
+
   /* 首页内联搜索：第一次敲字才去拉索引，不拖慢首屏 */
   type Hit = {
     title: string;
@@ -306,11 +307,12 @@ const spanLabel = `${firstMonth.slice(2).replace('-', '.')} – ${lastMonth.slic
     excerpt: string;
   };
 
-  const form = document.querySelector<HTMLFormElement>('[data-search-form]');
-  const input = document.querySelector<HTMLInputElement>('[data-search-input]');
-  const hitsBox = document.querySelector<HTMLUListElement>('[data-search-hits]');
+  register('bento:search', () => {
+    const form = document.querySelector<HTMLFormElement>('[data-search-form]');
+    const input = document.querySelector<HTMLInputElement>('[data-search-input]');
+    const hitsBox = document.querySelector<HTMLUListElement>('[data-search-hits]');
+    if (!form || !input || !hitsBox) return;
 
-  if (form && input && hitsBox) {
     let index: Hit[] | null = null;
     let pending: Promise<Hit[]> | null = null;
 
@@ -360,7 +362,7 @@ const spanLabel = `${firstMonth.slice(2).replace('-', '.')} – ${lastMonth.slic
     };
 
     let timer = 0;
-    input.addEventListener('input', () => {
+    const onInput = () => {
       const term = input.value.trim();
       window.clearTimeout(timer);
       if (!term) return clear();
@@ -372,29 +374,42 @@ const spanLabel = `${firstMonth.slice(2).replace('-', '.')} – ${lastMonth.slic
         );
         render(hits.slice(0, 5), term);
       }, 140);
-    });
+    };
 
-    input.addEventListener('keydown', (e) => {
+    const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         input.value = '';
         clear();
         input.blur();
       }
-    });
+    };
 
     /* ⌘K / Ctrl+K 直接聚焦到这张卡 */
-    window.addEventListener('keydown', (e) => {
+    const onHotkey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         input.focus();
         input.select();
       }
-    });
+    };
 
-    document.addEventListener('click', (e) => {
+    const onOutside = (e: MouseEvent) => {
       if (!form.contains(e.target as Node)) clear();
+    };
+
+    input.addEventListener('input', onInput);
+    input.addEventListener('keydown', onKey);
+    window.addEventListener('keydown', onHotkey);
+    document.addEventListener('click', onOutside);
+
+    addCleanup(() => {
+      window.clearTimeout(timer);
+      input.removeEventListener('input', onInput);
+      input.removeEventListener('keydown', onKey);
+      window.removeEventListener('keydown', onHotkey);
+      document.removeEventListener('click', onOutside);
     });
-  }
+  });
 </script>
 
 <style>

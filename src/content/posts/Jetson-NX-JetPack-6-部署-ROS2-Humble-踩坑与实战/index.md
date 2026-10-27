@@ -1,7 +1,7 @@
 ---
 title: Jetson NX (JetPack 6) 部署 ROS2 Humble 踩坑与实战
 slug: Jetson-NX-JetPack-6-部署-ROS2-Humble-踩坑与实战
-date: 2026-06-28 12:43:29
+date: 2026-06-28 12:43:29 +08:00
 tags:
   - jetson
   - docker

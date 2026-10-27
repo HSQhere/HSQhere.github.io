@@ -6,7 +6,12 @@
  *   2. no @keyframes for anything data-driven — clock, parallax, intro, reveal
  *   3. every loop self-clears when nothing is moving, and every entry point
  *      bails out when prefers-reduced-motion is set
+ *   4. the site navigates client-side, so every binding made here goes through
+ *      `listen` / `onTeardown` and is undone before the next swap — see page.ts
  */
+
+import { addCleanup, bootPage, register } from './page';
+import { joinAudioBus } from './audio-bus';
 
 const REDUCE = '(prefers-reduced-motion: reduce)';
 
@@ -26,14 +31,50 @@ const easeInOutQuad = (p: number) =>
 
 type Timer = ReturnType<typeof setInterval>;
 const timers: Timer[] = [];
+const clearTimers = () => {
+  while (timers.length) clearTimeout(timers.pop()! as unknown as number);
+};
+
+/** `later` queues a one-shot; a navigation must not let one fire into a DOM
+ *  that no longer exists, so the queue is emptied before every swap. The
+ *  cleanup arms itself on the first use of each page. */
+let timerCleanupArmed = false;
+
 const later = (fn: () => void, ms: number) => {
+  if (!timerCleanupArmed) {
+    timerCleanupArmed = true;
+    addCleanup(() => {
+      timerCleanupArmed = false;
+      clearTimers();
+    });
+  }
   const t = setTimeout(fn, ms);
   timers.push(t as unknown as Timer);
   return t;
 };
-const clearTimers = () => {
-  while (timers.length) clearTimeout(timers.pop()! as unknown as number);
+
+/* ------------------------------------------------------------------ *
+ * page lifetime — with the ClientRouter on, a navigation swaps the body
+ * but keeps the document. Anything bound to window/document, or left
+ * ticking, therefore outlives the nodes it was written for. Every such
+ * binding registers its own undo with page.ts, which runs them before
+ * each swap.
+ * ------------------------------------------------------------------ */
+
+/** addEventListener that remembers how to unbind itself */
+const listen = <E extends Event = Event>(
+  target: EventTarget,
+  type: string,
+  fn: (e: E) => void,
+  opts?: AddEventListenerOptions | boolean
+) => {
+  const h = fn as unknown as EventListener;
+  target.addEventListener(type, h, opts);
+  addCleanup(() => target.removeEventListener(type, h, opts));
 };
+
+/** register an undo for something that cannot unbind itself (a timer) */
+const onTeardown = (fn: () => void) => addCleanup(fn);
 
 /* ------------------------------------------------------------------ *
  * 0. shared aim — one -1..1 vector, written by the pointer or by the
@@ -41,7 +82,7 @@ const clearTimers = () => {
  *    reads this instead, so a phone can drive the same motion.
  * ------------------------------------------------------------------ */
 
-type AimSource = 'pointer' | 'gyro';
+type AimSource = 'pointer' | 'gyro' | 'touch';
 
 const aim = { x: 0, y: 0, source: 'pointer' as AimSource, gyro: false };
 const aimHooks = new Set<() => void>();
@@ -57,7 +98,8 @@ const writeAim = (x: number, y: number, source: AimSource) => {
 
 /** the desktop path: mouse position, normalised to -1..1 */
 function initPointerAim() {
-  window.addEventListener(
+  listen<PointerEvent>(
+    window,
     'pointermove',
     (e) => {
       /* once the gyro is running on a phone, a stray tap should not fight it */
@@ -67,6 +109,45 @@ function initPointerAim() {
         (e.clientY / window.innerHeight) * 2 - 1,
         'pointer'
       );
+    },
+    { passive: true }
+  );
+}
+
+/** the finger path: a touch device has no mouse, and an iOS Simulator has no
+ *  motion sensors at all, so without this the scene would be dead to the hand
+ *  in both places. Dragging a finger steers the very same aim vector, which
+ *  means the parallax and the card tilt can be driven — and demonstrated —
+ *  before any permission is granted. */
+function initTouchAim() {
+  if (prefersReduced()) return;
+  if (!(navigator.maxTouchPoints > 0 || 'ontouchstart' in window)) return;
+
+  const steer = (t: Touch) => {
+    if (aim.gyro) return;
+    writeAim(
+      clamp((t.clientX / window.innerWidth) * 2 - 1, -1, 1),
+      clamp((t.clientY / window.innerHeight) * 2 - 1, -1, 1),
+      'touch'
+    );
+  };
+
+  listen<TouchEvent>(
+    window,
+    'touchstart',
+    (e) => {
+      const t = e.touches[0];
+      if (t) steer(t);
+    },
+    { passive: true }
+  );
+
+  listen<TouchEvent>(
+    window,
+    'touchmove',
+    (e) => {
+      const t = e.touches[0];
+      if (t) steer(t);
     },
     { passive: true }
   );
@@ -143,6 +224,10 @@ function initParallax() {
     if (running) return;
     running = true;
     id = window.setInterval(apply, 16);
+    onTeardown(() => {
+      running = false;
+      clearInterval(id);
+    });
   };
 
   /* the parallax no longer listens for the pointer itself — it reads the shared
@@ -153,8 +238,10 @@ function initParallax() {
     kick();
   };
   aimHooks.add(sync);
+  onTeardown(() => aimHooks.delete(sync));
 
-  window.addEventListener(
+  listen(
+    window,
     'scroll',
     () => {
       tsc = window.scrollY;
@@ -207,12 +294,17 @@ function initTilt() {
     if (running) return;
     running = true;
     id = window.setInterval(apply, 16);
+    onTeardown(() => {
+      running = false;
+      clearInterval(id);
+    });
   };
 
   /* a phone has no hover and no pointer trail, so the card leans with the
-     device instead: same numbers, fed from the shared aim vector */
+     device — or the finger — instead: same numbers, fed from the shared aim
+     vector. The pointer branch below still owns the desktop case. */
   const sync = () => {
-    if (aim.source !== 'gyro') return;
+    if (aim.source === 'pointer') return;
     try_ = aim.x * 12;
     trx = -aim.y * 12;
     tsx = aim.x * 2;
@@ -220,11 +312,13 @@ function initTilt() {
     kick();
   };
   aimHooks.add(sync);
+  onTeardown(() => aimHooks.delete(sync));
 
-  host.addEventListener(
+  listen<PointerEvent>(
+    host,
     'pointermove',
     (e) => {
-      if (aim.source === 'gyro') return;
+      if (aim.source !== 'pointer') return;
       const r = host.getBoundingClientRect();
       const nx = ((e.clientX - r.left) / r.width) * 2 - 1;
       const ny = ((e.clientY - r.top) / r.height) * 2 - 1;
@@ -237,7 +331,7 @@ function initTilt() {
     { passive: true }
   );
 
-  host.addEventListener('pointerleave', () => {
+  listen(host, 'pointerleave', () => {
     if (aim.source === 'gyro') return;
     trx = 0;
     try_ = 0;
@@ -256,18 +350,26 @@ function initTilt() {
  * left/right to swing the layers, tip it forward/back to raise them.
  * ------------------------------------------------------------------ */
 
-/** degrees of tilt that equal a full swing — parallax.js calls this MAGIC_NUMBER */
-const GYRO_RANGE = 30;
+/** degrees of tilt that equal a full swing — parallax.js calls this MAGIC_NUMBER.
+    30° is a big hand movement; 22 keeps a small, natural wrist tilt visible. */
+const GYRO_RANGE = 22;
 /** a jump this large means the handset was re-gripped, so take a new baseline */
 const GYRO_DRIFT = 45;
 
 type PermResult = 'granted' | 'denied' | 'default';
 
+/** the gyro is a property of the DEVICE, not of the page: its permission, its
+ *  calibrated baseline and its listeners all have to survive a navigation, so
+ *  it wires itself once per session and never tears down. */
+let gyroBooted = false;
+
 function initGyro() {
+  if (gyroBooted) return;
   if (prefersReduced()) return;
   if (typeof window.DeviceOrientationEvent === 'undefined') return;
   /* desktop browsers expose the constructor but never emit readings */
   if (!(navigator.maxTouchPoints > 0 || 'ontouchstart' in window)) return;
+  gyroBooted = true;
 
   const btn = document.querySelector<HTMLElement>('[data-gyro]');
   const label = document.querySelector<HTMLElement>('[data-gyro-label]');
@@ -411,22 +513,30 @@ function initGyro() {
   };
 
   const grant = async (): Promise<PermResult> => {
-    const asks: Promise<PermResult>[] = [];
+    /* iOS shows ONE permission sheet at a time. Asking for orientation and
+       motion concurrently makes the second request hang forever on several
+       iOS versions, so they are asked strictly one after the other. */
+    let ok = false;
     try {
-      if (DOE.requestPermission) asks.push(DOE.requestPermission());
+      if (DOE.requestPermission) {
+        const r = await DOE.requestPermission();
+        ok = r === 'granted';
+      } else {
+        ok = true;
+      }
     } catch {
-      /* older iOS throws here instead of rejecting */
+      /* older iOS throws instead of rejecting */
+      ok = false;
     }
     try {
-      if (DME?.requestPermission) asks.push(DME.requestPermission());
+      if (DME?.requestPermission) {
+        const r = await DME.requestPermission();
+        ok = ok || r === 'granted';
+      }
     } catch {
-      /* ditto */
+      /* motion is only the fallback channel — its refusal is not fatal */
     }
-    if (!asks.length) return 'granted';
-    const settled = await Promise.allSettled(asks);
-    return settled.some((r) => r.status === 'fulfilled' && r.value === 'granted')
-      ? 'granted'
-      : 'denied';
+    return ok ? 'granted' : 'denied';
   };
 
   const onTap = () => {
@@ -442,6 +552,33 @@ function initGyro() {
       }
       say('动作权限被拒绝 · 在设置里允许后点这里重试');
     });
+  };
+
+  /* A floating pill is easy to miss, and iOS only accepts requestPermission()
+     from inside a real gesture — so the FIRST tap or scroll anywhere on the
+     page also asks. Once per session: a returning visitor who denied it gets
+     no dialog (iOS answers instantly) and no repeated nagging. */
+  const AUTO_KEY = 'gyro-asked';
+  let autoDone = false;
+  try {
+    autoDone = sessionStorage.getItem(AUTO_KEY) === '1';
+  } catch {
+    /* private mode can throw on storage access — treat as "not asked" */
+  }
+
+  const onFirstGesture = (e?: Event) => {
+    if (asked || autoDone) return;
+    /* never steal a tap that belongs to a link or a control — the iOS sheet
+       would swallow the navigation the visitor actually intended */
+    const t = e?.target;
+    if (t instanceof Element && t.closest('a, button, input, textarea, select, label')) return;
+    autoDone = true;
+    try {
+      sessionStorage.setItem(AUTO_KEY, '1');
+    } catch {
+      /* ditto */
+    }
+    onTap();
   };
 
   /* ?motion=debug — a live readout, so a handset that stays silent can be
@@ -469,6 +606,17 @@ function initGyro() {
   listen();
   armWatchdog();
   btn?.addEventListener('click', onTap);
+
+  /* bind the one-shot auto-ask to the first real gesture */
+  window.addEventListener('pointerdown', onFirstGesture, { passive: true });
+  window.addEventListener('touchstart', onFirstGesture, { passive: true });
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (window.scrollY > 40) onFirstGesture();
+    },
+    { passive: true }
+  );
 }
 
 /* ------------------------------------------------------------------ *
@@ -497,7 +645,8 @@ function initScrollChrome() {
     raf = 0;
   };
 
-  window.addEventListener(
+  listen(
+    window,
     'scroll',
     () => {
       if (!raf) raf = window.setTimeout(run, 16);
@@ -565,6 +714,7 @@ function initReveal() {
   );
 
   items.forEach((el) => io.observe(el));
+  onTeardown(() => io.disconnect());
 
   later(() => items.forEach((el) => el.classList.add('is-in')), 1600);
 }
@@ -640,7 +790,8 @@ function tickClock() {
 function initClock() {
   if (!document.querySelector('[data-clock-time]')) return;
   tickClock();
-  window.setInterval(tickClock, 1000);
+  const id = window.setInterval(tickClock, 1000);
+  onTeardown(() => clearInterval(id));
 }
 /* ------------------------------------------------------------------ *
  * 6. 一言 — local fallback paints first, network never blocks
@@ -682,7 +833,7 @@ function initQuote() {
   };
 
   later(load, 2600);
-  box?.addEventListener('click', load);
+  if (box) listen(box, 'click', load);
 }
 
 /* ------------------------------------------------------------------ *
@@ -705,12 +856,24 @@ function initIntro() {
     document.body.classList.remove('is-locked');
   };
 
+  /* the overlay is a first-paint-of-the-session thing; with client-side
+     navigation the homepage can be re-entered, and replaying the intro on
+     every return would be unbearable */
+  if (sessionStorage.getItem('hsq-intro') === 'done') {
+    finish();
+    return;
+  }
+  sessionStorage.setItem('hsq-intro', 'done');
+
   if (prefersReduced()) {
     finish();
     return;
   }
 
   document.body.classList.add('is-locked');
+  onTeardown(() => {
+    document.body.classList.remove('is-locked');
+  });
 
   let done = false;
   const run = () => {
@@ -772,20 +935,22 @@ function initIntro() {
     later(finish, 2440);
   };
 
-  skip?.addEventListener('click', () => {
-    clearTimers();
-    intro.classList.add('is-off');
-    intro.setAttribute('aria-hidden', 'true');
-    document.body.classList.remove('is-locked');
-    letters.forEach((el) => {
-      el.style.opacity = '1';
-      el.style.transform = 'none';
+  if (skip) {
+    listen(skip, 'click', () => {
+      clearTimers();
+      intro.classList.add('is-off');
+      intro.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('is-locked');
+      letters.forEach((el) => {
+        el.style.opacity = '1';
+        el.style.transform = 'none';
+      });
+      if (head) {
+        head.style.opacity = '1';
+        head.style.transform = 'none';
+      }
     });
-    if (head) {
-      head.style.opacity = '1';
-      head.style.transform = 'none';
-    }
-  });
+  }
 
   later(run, 200);
 }
@@ -812,6 +977,10 @@ function initTape() {
     tracks = [];
   }
   if (!tracks.length) return;
+
+  /* the cassette and the page-edge CD dock must never sing together */
+  const leaveBus = joinAudioBus(audio);
+  onTeardown(leaveBus);
 
   const titleEl = shell.querySelector<HTMLElement>('[data-tape-title]');
   const artistEl = shell.querySelector<HTMLElement>('[data-tape-artist]');
@@ -854,6 +1023,14 @@ function initTape() {
     reelRunning = false;
     clearInterval(reelTimer);
   };
+
+  /* the cassette lives on the homepage only, so a navigation removes its
+     nodes while these two loops would keep ticking against them */
+  onTeardown(() => {
+    clearInterval(reelTimer);
+    clearInterval(colonTimer);
+    audio.pause();
+  });
 
   const sync = () => {
     const playing = !audio.paused && !audio.ended;
@@ -916,27 +1093,28 @@ function initTape() {
 function initNoteScroll() {
   const view = document.querySelector<HTMLElement>('[data-note-view]');
   const list = document.querySelector<HTMLElement>('[data-note-list]');
-  if (!view || !list || prefersReduced()) return;
+  if (!view || !list) return;
 
   if (list.children.length < 2) return;
 
-  const SPEED = 0.28;   /* px per 16ms frame */
-  const HOLD = 1100;    /* ms parked at each end */
+  const SPEED = 0.5;    /* px per 16ms frame — ~31px/s, brisk but readable */
+  const HOLD = 1400;    /* ms parked at each end */
 
   let offset = 0;
-  let dir = -1;         /* -1 = drifting up (content moves up), 1 = back down */
+  let dir = 1;          /* 1 = drifting down, -1 = back up */
   let hold = HOLD;
   let running = false;
   let id = 0;
   let hovering = false;
 
+  /* the note is a real scroll container now, so "how far can it go" is the
+     browser's own answer — no measuring against a transform offset */
   const span = () => Math.max(0, list.scrollHeight - view.clientHeight);
 
   const apply = () => {
     const limit = span();
     if (limit <= 0) {
-      running = false;
-      clearInterval(id);
+      stop();
       return;
     }
 
@@ -947,21 +1125,22 @@ function initNoteScroll() {
 
     offset += dir * SPEED;
 
-    if (offset <= -limit) {
-      offset = -limit;
-      dir = 1;
-      hold = HOLD;
-    } else if (offset >= 0) {
-      offset = 0;
+    if (offset >= limit) {
+      offset = limit;
       dir = -1;
+      hold = HOLD;
+    } else if (offset <= 0) {
+      offset = 0;
+      dir = 1;
       hold = HOLD;
     }
 
-    view.style.setProperty('--nt', `${offset.toFixed(2)}px`);
+    view.scrollTop = offset;
   };
 
   const kick = () => {
     if (running || hovering) return;
+    if (span() <= 0) return;
     running = true;
     id = window.setInterval(apply, 16);
   };
@@ -971,27 +1150,50 @@ function initNoteScroll() {
     clearInterval(id);
   };
 
-  view.addEventListener('pointerenter', () => {
-    hovering = true;
-    stop();
-  });
-  view.addEventListener('pointerleave', () => {
-    hovering = false;
-    kick();
-  });
-  view.addEventListener('focusin', () => {
-    hovering = true;
-    stop();
-  });
-  view.addEventListener('focusout', () => {
-    hovering = false;
-    kick();
-  });
+  onTeardown(stop);
 
-  document.addEventListener('visibilitychange', () => {
+  /* the drift picks up from wherever the visitor left the list */
+  const syncFromScroll = () => {
+    offset = view.scrollTop;
+  };
+
+  listen(view, 'pointerenter', () => {
+    hovering = true;
+    stop();
+  });
+  listen(view, 'pointerleave', () => {
+    hovering = false;
+    syncFromScroll();
+    kick();
+  });
+  listen(view, 'focusin', () => {
+    hovering = true;
+    stop();
+  });
+  listen(view, 'focusout', () => {
+    hovering = false;
+    syncFromScroll();
+    kick();
+  });
+  /* a finger drag on a phone is the same gesture as a hover here: yield */
+  listen(view, 'touchstart', () => {
+    hovering = true;
+    stop();
+  }, { passive: true });
+  listen(view, 'touchend', () => {
+    hovering = false;
+    syncFromScroll();
+    kick();
+  }, { passive: true });
+
+  listen(document, 'visibilitychange', () => {
     if (document.hidden) stop();
     else kick();
   });
+
+  /* reduced motion means no drift — but the list stays draggable, so the
+     plans are still reachable; that is the whole point of the fix */
+  if (prefersReduced()) return;
 
   /* let the note land before it starts moving */
   later(kick, 1800);
@@ -1016,29 +1218,30 @@ function initBars() {
 
 /* ------------------------------------------------------------------ */
 
-let booted = false;
+/**
+ * Every initialiser is registered rather than called, because a client-side
+ * navigation swaps the DOM under a live document: the ones whose target is
+ * absent on the new page simply return, and the ones that do bind are undone
+ * before the next swap. `bootPage()` runs them for the first page and again
+ * after every navigation.
+ *
+ * The three that are device- or document-scoped rather than page-scoped —
+ * the pointer, the finger and the gyroscope — guard themselves and keep
+ * running across navigations, so the aim vector never resets mid-session.
+ */
+register('motion:pointer', initPointerAim);
+register('motion:touch', initTouchAim);
+register('motion:gyro', initGyro);
+register('motion:parallax', initParallax);
+register('motion:tilt', initTilt);
+register('motion:chrome', initScrollChrome);
+register('motion:hero', initHeroIn);
+register('motion:reveal', initReveal);
+register('motion:clock', initClock);
+register('motion:quote', initQuote);
+register('motion:intro', initIntro);
+register('motion:tape', initTape);
+register('motion:note', initNoteScroll);
+register('motion:bars', initBars);
 
-export function initMotion() {
-  if (booted) return;
-  booted = true;
-
-  initPointerAim();
-  initGyro();
-  initParallax();
-  initTilt();
-  initScrollChrome();
-  initHeroIn();
-  initReveal();
-  initClock();
-  initQuote();
-  initIntro();
-  initTape();
-  initNoteScroll();
-  initBars();
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initMotion, { once: true });
-} else {
-  initMotion();
-}
+bootPage();

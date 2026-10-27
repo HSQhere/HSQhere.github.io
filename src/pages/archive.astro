@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import { getPosts, groupByYear, postPath, formatDate } from '../lib/posts';
+import { isoShanghai } from '../lib/datetime';
 
 const posts = await getPosts();
 const years = groupByYear(posts);
@@ -23,7 +24,7 @@ const years = groupByYear(posts);
           {list.map((p) => (
             <li class="year__item">
               <a class="year__link" href={postPath(p)}>
-                <time class="year__date" datetime={p.data.date.toISOString()}>{formatDate(p.data.date)}</time>
+                <time class="year__date" datetime={isoShanghai(p.data.date)}>{formatDate(p.data.date)}</time>
                 <span class="year__title">{p.data.title}</span>
               </a>
             </li>

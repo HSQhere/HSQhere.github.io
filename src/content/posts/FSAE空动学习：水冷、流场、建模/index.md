@@ -1,7 +1,7 @@
 ---
 title: FSAE空动学习：水冷、流场、建模
 slug: FSAE空动学习：水冷、流场、建模
-date: 2026-06-29 11:38:45
+date: 2026-06-29 11:38:45 +08:00
 tags: [车辆,水冷,建模,仿真,流场,空气动力学,ANSYS,STAR-CCM]
 categories: [车辆]
 cover: ./catia整车.png

@@ -1,6 +1,7 @@
 ---
 import type { Post } from '../../lib/posts';
 import { postPath, formatDate, plainExcerpt, readingTime } from '../../lib/posts';
+import { isoShanghai } from '../../lib/datetime';
 import { Image } from 'astro:assets';
 
 interface Props {
@@ -25,7 +26,7 @@ const minutes = readingTime(post.body);
 
     <div class="card__body">
       <p class="card__date">
-        <time datetime={date.toISOString()}>{formatDate(date)}</time>
+        <time datetime={isoShanghai(date)}>{formatDate(date)}</time>
         <span aria-hidden="true">·</span>
         <span>{minutes} 分钟</span>
       </p>

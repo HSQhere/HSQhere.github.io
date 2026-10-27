@@ -1,0 +1,422 @@
+---
+/**
+ * MusicDock.astro — the page-edge CD player.
+ *
+ * Rendered from Base.astro so every page has it, and marked with
+ * `transition:persist` so the ClientRouter hands the SAME DOM node across
+ * navigations instead of rebuilding it. That is the whole trick behind
+ * cross-page playback: the <audio> inside is never destroyed, so its
+ * currentTime, its paused flag and its event listeners all survive the swap.
+ *
+ * Behaviour lives in src/effects/music.ts — this file is markup and paint.
+ */
+import { site } from '../../lib/site';
+
+const first = site.playlist[0];
+---
+
+<div class="dock" data-dock transition:persist="music-dock">
+  <audio data-dock-audio preload="metadata" src={first.src}></audio>
+
+  <div class="dock__panel" id="dock-panel" data-dock-panel hidden>
+    <p class="dock__head">
+      <span class="dock__label">PLAYING</span>
+      <button class="dock__close" type="button" data-dock-close aria-label="收起播放器"></button>
+    </p>
+    <ol class="dock__list">
+      {site.playlist.map((t, i) => (
+        <li>
+          <button class="dock__track" type="button" data-dock-track={i}>
+            <span class="dock__no">{String(i + 1).padStart(2, '0')}</span>
+            <span class="dock__meta">
+              <span class="dock__name">{t.title}</span>
+              <span class="dock__artist">{t.artist}</span>
+            </span>
+          </button>
+        </li>
+      ))}
+    </ol>
+  </div>
+
+  <button class="dock__fold" type="button" data-dock-fold aria-expanded="true" aria-controls="dock-panel" aria-label="收起播放器">
+    <i class="dock__chev" aria-hidden="true"></i>
+  </button>
+
+  <div class="dock__row">
+    <button class="dock__mini dock__mini--list" type="button" data-dock-open aria-label="播放列表" aria-expanded="false">
+      <i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i>
+    </button>
+
+    <button class="dock__disc" type="button" data-dock-toggle aria-label="播放" aria-pressed="false">
+      <img class="dock__art" data-dock-art src={first.cover} alt="" width="200" height="200" loading="lazy" />
+      <span class="dock__hole" aria-hidden="true"></span>
+      <span class="dock__state" aria-hidden="true"></span>
+    </button>
+
+    <button class="dock__mini dock__mini--prev" type="button" data-dock-prev aria-label="上一首">
+      <i aria-hidden="true"></i><i aria-hidden="true"></i>
+    </button>
+
+    <button class="dock__mini dock__mini--next" type="button" data-dock-next aria-label="下一首">
+      <i aria-hidden="true"></i><i aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <script type="application/json" data-dock-json set:html={JSON.stringify(site.playlist)} />
+</div>
+
+<style>
+  .dock {
+    position: fixed;
+    right: clamp(10px, 1.6vw, 26px);
+    bottom: calc(clamp(10px, 1.6vw, 26px) + env(safe-area-inset-bottom, 0px));
+    z-index: calc(var(--z-sticky) + 1);
+    display: grid;
+    justify-items: end;
+    gap: 10px;
+    font-family: var(--font-mono);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ---- the fold handle --------------------------------------------- *
+     A small tab that rides above the row. Collapsed, the dock shrinks to
+     just the disc plus this handle, so it stops covering the page corner
+     on a phone without losing the one control people actually reach for. */
+
+  .dock__fold {
+    justify-self: end;
+    width: 34px;
+    height: 16px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: var(--r-pill);
+    background: var(--paper);
+    box-shadow: var(--sh-1);
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+  }
+
+  .dock__fold:hover { background: var(--mint); }
+  .dock__fold:active { transform: scale(0.94); }
+
+  /* the chevron: points down to mean "tuck away", flips up when folded */
+  .dock__chev {
+    width: 7px;
+    height: 7px;
+    margin-top: -3px;
+    border-right: 1.5px solid var(--ink-soft);
+    border-bottom: 1.5px solid var(--ink-soft);
+    border-radius: 0 0 1px 0;
+    transform: rotate(45deg);
+    transition: transform var(--dur-base) var(--ease-out), margin var(--dur-base) var(--ease-out);
+  }
+
+  .dock[data-folded='1'] .dock__chev {
+    transform: rotate(-135deg);
+    margin-top: 3px;
+  }
+
+  /* folded: the whole player disappears — disc, list and skip buttons all go.
+     Only the handle is left outside, and it swells into a round tab so it is
+     still a comfortable thumb target on a phone. */
+  .dock[data-folded='1'] .dock__panel,
+  .dock[data-folded='1'] .dock__mini,
+  .dock[data-folded='1'] .dock__disc {
+    display: none;
+  }
+
+  .dock[data-folded='1'] {
+    gap: 0;
+  }
+
+  .dock[data-folded='1'] .dock__fold {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--r-pill);
+  }
+
+  /* ---- the disc ---------------------------------------------------- */
+
+  .dock__row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .dock__disc {
+    position: relative;
+    width: clamp(58px, 6.4vw, 76px);
+    aspect-ratio: 1;
+    padding: 0;
+    border: 0;
+    border-radius: var(--r-pill);
+    background: none;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    filter: drop-shadow(0 10px 22px rgb(0 0 0 / 18%));
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
+  .dock__disc:hover { transform: scale(1.06); }
+  .dock__disc:active { transform: scale(0.97); }
+
+  .dock__art {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--r-pill);
+    object-fit: cover;
+    display: block;
+    /* the angle is written by music.ts while a track is playing */
+    transform: rotate(var(--spin, 0deg));
+  }
+
+  /* the centre spindle, and the sheen of a real disc */
+  .dock__hole {
+    position: absolute;
+    width: 22%;
+    aspect-ratio: 1;
+    border-radius: var(--r-pill);
+    background: var(--paper);
+    box-shadow: inset 0 0 0 1px var(--line), 0 0 0 4px rgb(255 255 255 / 42%);
+  }
+
+  .dock__disc::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--r-pill);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 55%), inset 0 0 26px rgb(255 255 255 / 18%);
+    pointer-events: none;
+  }
+
+  /* the play glyph sits over the disc while it is paused */
+  .dock__state {
+    position: absolute;
+    width: 30%;
+    height: 30%;
+    background: rgb(20 20 20 / 62%);
+    border-radius: var(--r-pill);
+    backdrop-filter: blur(2px);
+    transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+  }
+
+  .dock__state::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 0;
+    height: 0;
+    border-left: 9px solid rgb(255 255 255 / 92%);
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    transform: translateX(2px);
+  }
+
+  .dock[data-playing='1'] .dock__state {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+
+  /* ---- the three small controls ------------------------------------ */
+
+  .dock__mini {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    gap: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--r-pill);
+    background: var(--paper);
+    box-shadow: var(--sh-1);
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+  }
+
+  .dock__mini:hover { background: var(--mint); transform: translateY(-1px); }
+
+  .dock__mini--list i {
+    display: block;
+    width: 12px;
+    height: 1.5px;
+    margin: 1.6px 0;
+    border-radius: 2px;
+    background: var(--ink-soft);
+  }
+
+  .dock__mini--list i:nth-child(2) { width: 9px; }
+  .dock__mini--list i:nth-child(3) { width: 6px; }
+
+  /* prev / next are mirror images: a chevron plus the bar that tells "skip to
+     the edge" apart from "just move one step". Both chevrons point AWAY from
+     the disc and both bars sit on the inner side, so the pair reads as
+     ◀|  |▶ at 30px and stays distinguishable in greyscale. */
+  .dock__mini--prev i,
+  .dock__mini--next i {
+    display: block;
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+  }
+
+  .dock__mini--prev i {
+    border-right: 7px solid var(--ink-soft);
+  }
+
+  .dock__mini--next i {
+    border-left: 7px solid var(--ink-soft);
+  }
+
+  .dock__mini--prev i:nth-child(2),
+  .dock__mini--next i:nth-child(2) {
+    width: 1.5px;
+    height: 11px;
+    border: 0;
+    border-radius: 1px;
+    background: var(--ink-soft);
+  }
+
+  .dock__mini--prev i:nth-child(2) { margin-left: 1.5px; }
+  .dock__mini--next i:nth-child(2) { margin-right: 1.5px; order: -1; }
+
+  .dock__mini--prev,
+  .dock__mini--next {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  /* ---- the playlist panel ------------------------------------------ */
+
+  .dock__panel {
+    width: min(268px, calc(100vw - 24px));
+    padding: var(--s-3);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    background: var(--paper);
+    box-shadow: var(--sh-3);
+    transform-origin: 100% 100%;
+  }
+
+  .dock__panel[hidden] { display: none; }
+
+  .dock__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 0 var(--s-2);
+  }
+
+  .dock__label {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--ink-faint);
+  }
+
+  .dock__close {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    color: var(--ink-faint);
+  }
+
+  .dock__close::before,
+  .dock__close::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 10px;
+    height: 1.4px;
+    border-radius: 2px;
+    background: currentColor;
+    transform: rotate(45deg);
+  }
+
+  .dock__close::after { transform: rotate(-45deg); }
+
+  .dock__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+  }
+
+  .dock__track {
+    width: 100%;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 6px 8px;
+    border: 0;
+    border-radius: var(--r-sm);
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background var(--dur-fast) var(--ease-out);
+  }
+
+  .dock__track:hover { background: var(--glass); }
+  .dock__track.is-on { background: var(--mint-soft, var(--glass)); }
+
+  .dock__no {
+    font-size: 10px;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dock__meta { display: grid; min-width: 0; }
+
+  .dock__name {
+    font-size: var(--fs-xs);
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dock__artist {
+    font-size: 10px;
+    color: var(--ink-faint);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dock__track.is-on .dock__name { color: var(--ink); font-weight: 600; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dock__disc,
+    .dock__mini,
+    .dock__fold,
+    .dock__chev,
+    .dock__state { transition: none; }
+    .dock__disc:hover,
+    .dock__disc:active,
+    .dock__mini:hover,
+    .dock__fold:active { transform: none; }
+  }
+
+  @media (max-width: 700px) {
+    /* the phone keeps every control: list, disc, prev, next. The row is
+       allowed to be wide here because it is the only music surface on a
+       handset — hiding the list entry made the dock feel broken. */
+    .dock { gap: 8px; }
+    .dock__row { gap: 5px; }
+    .dock__mini { width: 32px; height: 32px; }
+    .dock__panel { transform-origin: 100% 100%; }
+  }
+</style>

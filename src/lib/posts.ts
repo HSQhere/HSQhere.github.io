@@ -1,25 +1,20 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
+import { dayText, monthText, yearOf, yearText, ymd, ymdCN } from './datetime';
 
 export type Post = CollectionEntry<'posts'>;
 
 /** 旧站 permalink 是 /:year/:month/:day/:title/，title 取的是文件名。 */
 export function postPath(post: Post): string {
   const d = post.data.date;
-  const y = d.getUTCFullYear();
-  const m = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(d.getUTCDate()).padStart(2, '0');
-  return `/${y}/${m}/${day}/${post.data.slug}/`;
+  return `/${yearText(d)}/${monthText(d)}/${dayText(d)}/${post.data.slug}/`;
 }
 
 export function formatDate(d: Date): string {
-  const y = d.getUTCFullYear();
-  const m = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(d.getUTCDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
+  return ymd(d);
 }
 
 export function formatDateCN(d: Date): string {
-  return `${d.getUTCFullYear()} 年 ${d.getUTCMonth() + 1} 月 ${d.getUTCDate()} 日`;
+  return ymdCN(d);
 }
 
 /** 所有已发布文章，按日期倒序。 */
@@ -32,7 +27,7 @@ export async function getPosts(): Promise<Post[]> {
 export function groupByYear(posts: Post[]): { year: number; posts: Post[] }[] {
   const map = new Map<number, Post[]>();
   for (const p of posts) {
-    const y = p.data.date.getUTCFullYear();
+    const y = yearOf(p.data.date);
     if (!map.has(y)) map.set(y, []);
     map.get(y)!.push(p);
   }

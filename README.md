@@ -71,7 +71,15 @@ npm run preview    # 起一个静态服务器
 
 ### 加一篇日志
 
-在 `src/content/posts/` 下新建一个**文件夹**，文件夹名就是 URL 里的最后一段，里面放 `index.md` 和这篇要用的图片：
+**推荐：双击根目录的 `新建文章.bat`**，输入标题 → 标签 → 分类，它会自动建好文件夹、写好 frontmatter、填上当前时间，然后问你要不要用 VS Code 打开。
+
+也可以用命令行一次带上参数：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\new-post.ps1 -Title "我的新文章" -Tags "电控,笔记" -Categories "技术"
+```
+
+不想用脚本的话，就手动建：在 `src/content/posts/` 下新建一个**文件夹**，文件夹名就是 URL 里的最后一段，里面放 `index.md` 和这篇要用的图片：
 
 ```
 src\content\posts\我的新文章\
@@ -218,7 +226,7 @@ git push -u origin main
 
 ```powershell
 cd F:\myblognew
-git add -A
+git add --all
 git commit -m "写了篇新文章"
 git push
 ```
@@ -241,6 +249,8 @@ npm run check        # TypeScript + Astro 类型检查（当前 0 error / 0 warn
 
 | 脚本 | 用途 |
 | --- | --- |
+| `新建文章.bat`（根目录） | 交互式新建文章：问标题/标签/分类 → 生成文件夹 + frontmatter，再问要不要打开 |
+| `scripts\new-post.ps1` | 上面那个 bat 的实际实现，也可以直接带参数调用 |
 | `node scripts\check.mjs http://localhost:4321` | 批量探页面状态码 + 统计 KaTeX 报错数 |
 | `node scripts\linkcheck.mjs` | 遍历 `dist\` 里每个 `index.html`，逐条请求，验证没有死路由（对着 `preview` 的 4400 端口） |
 | `node scripts\refcheck.mjs` | 抓所有页面里的 `href`/`src`，逐条请求，验证没有死资源 |
@@ -342,5 +352,5 @@ Astro 会缓存渲染结果。删掉 `.astro\` 目录再重启 dev。
 
 ## 八、许可
 
-文章内容 © HSQ，转载请先问一声。
+文章内容 © HSQ，转载请附带原链接。
 代码随便看随便抄。

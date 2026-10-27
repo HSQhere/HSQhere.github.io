@@ -1,7 +1,7 @@
 ---
 title: LQR的simulink仿真与在平衡车的应用实战
 slug: LQR的simulink仿真与在平衡车的应用实战
-date: 2026-07-20 20:24:29
+date: 2026-07-20 20:24:29 +08:00
 tags:
   - LQR
   - 仿真

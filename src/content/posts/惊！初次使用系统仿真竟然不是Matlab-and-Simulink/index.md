@@ -1,7 +1,7 @@
 ---
 title: 惊！初次使用系统仿真竟然不是Matlab and Simulink
 slug: 惊！初次使用系统仿真竟然不是Matlab-and-Simulink
-date: 2026-05-18 00:33:19
+date: 2026-05-18 00:33:19 +08:00
 tags:
   - 日记
   - 计算机

@@ -1,7 +1,7 @@
 ---
 title: Transformer它的自注意力机制确实值得你的注意力
 slug: Transformer它的自注意力机制确实值得你的注意力
-date: 2026-08-04 16:22:23
+date: 2026-08-04 16:22:23 +08:00
 tags:
   - Transformer
   - 多模态

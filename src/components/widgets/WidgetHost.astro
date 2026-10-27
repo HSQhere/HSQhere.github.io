@@ -514,9 +514,20 @@ const first = site.playlist[0];
   .w__noteview {
     position: relative;
     height: 118px;
-    overflow: hidden;
+    /* a real scroll container: the drift in motion.ts writes scrollTop, and
+       if the drift is off (reduced motion, a hover, a phone) the visitor can
+       still drag the list themselves. The mask fades both edges, which is
+       also the affordance that says "there is more below". */
+    overflow-x: hidden;
+    overflow-y: auto;
+    /* no `overscroll-behavior: contain` on purpose — when the list reaches
+       its end the page must still scroll, otherwise the note traps the
+       visitor's thumb on a phone */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     mask-image: linear-gradient(to bottom, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
   }
+  .w__noteview::-webkit-scrollbar { width: 0; height: 0; }
   .w__tasks {
     list-style: none;
     margin: 0;
@@ -524,8 +535,6 @@ const first = site.playlist[0];
     font-size: 11px;
     line-height: 1.7;
     color: #5a4a2c;
-    transform: translate3d(0, var(--nt, 0px), 0);
-    will-change: transform;
   }
   /* 长条目换行显示，不再用省略号截断 */
   .w__tasks li {

@@ -1,7 +1,7 @@
 ---
 title: MPU6050 radical tutorials in one article
 slug: MPU6050-radical-tutorials-in-one-article
-date: 2026-04-15 00:39:32
+date: 2026-04-15 00:39:32 +08:00
 tags: [电控,陀螺仪,加速度计,教程]
 categories: [电控]
 cover: ./MPU6050.jpg

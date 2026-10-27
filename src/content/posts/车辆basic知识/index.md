@@ -1,7 +1,7 @@
 ---
 title: 车辆basic知识
 slug: 车辆basic知识
-date: 2026-03-29 01:59:40
+date: 2026-03-29 01:59:40 +08:00
 tags: [日记,车辆]
 categories: [车辆]
 cover: ./阿克曼角.jpg

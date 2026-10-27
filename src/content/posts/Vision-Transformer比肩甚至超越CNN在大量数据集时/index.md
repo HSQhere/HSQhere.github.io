@@ -1,7 +1,7 @@
 ---
 title: Vision Transformer比肩甚至超越CNN在大量数据集时
 slug: Vision-Transformer比肩甚至超越CNN在大量数据集时
-date: 2026-08-09 10:28:59
+date: 2026-08-09 10:28:59 +08:00
 tags:
   - ViT
   - 多模态

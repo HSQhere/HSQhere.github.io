@@ -1,7 +1,7 @@
 ---
 title: Linux的胆战心惊之路
 slug: Linux的胆战心惊之路
-date: 2026-03-23 01:17:39
+date: 2026-03-23 01:17:39 +08:00
 tags: [日记,报错,Linux,操作系统]
 categories: [计算机]
 cover: ./VAM关闭导致win报错.jpg

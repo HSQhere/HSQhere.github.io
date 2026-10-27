@@ -1,7 +1,7 @@
 ---
 title: 电控入门到入土
 slug: 电控入门到入土
-date: 2026-03-21 16:53:38
+date: 2026-03-21 16:53:38 +08:00
 tags: [日记,电控,stm32,keysking]
 categories: [电控]
 cover: ./keyskingstm32.png

@@ -1,7 +1,7 @@
 ---
 title: lerobot入门
 slug: lerobot入门
-date: 2026-03-25 01:13:11
+date: 2026-03-25 01:13:11 +08:00
 tags: [日记,机械,编程,电控,机器人]
 categories: [机器人]
 cover: ./安装lerobot.jpg

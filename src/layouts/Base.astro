@@ -1,7 +1,9 @@
 ---
 import { site } from '../lib/site';
+import { ClientRouter } from 'astro:transitions';
 import Header from '../components/chrome/Header.astro';
 import Footer from '../components/chrome/Footer.astro';
+import MusicDock from '../components/chrome/MusicDock.astro';
 import '../styles/tokens.css';
 import '../styles/base.css';
 import '../styles/prose.css';
@@ -50,6 +52,11 @@ const ogImage = image ? new URL(image, Astro.site) : undefined;
 
     <link rel="preconnect" href="https://v1.hitokoto.cn" />
 
+    <!-- Client-side navigation keeps the document (and the music) alive.
+         Every page component that binds listeners must therefore re-run after
+         a swap — that is what src/effects/page.ts is for. -->
+    <ClientRouter />
+
     <!-- Reveal-on-scroll starts at opacity 0; if the script never runs the page
          must still be readable, so the fallback puts everything back. -->
     <noscript>
@@ -66,6 +73,14 @@ const ogImage = image ? new URL(image, Astro.site) : undefined;
       <slot />
     </main>
     <Footer />
+
+    <!-- the dock survives navigation: it is the one node that owns the audio -->
+    <MusicDock />
+
+    <script>
+      import '../effects/motion';
+      import '../effects/music';
+    </script>
   </body>
 </html>
 

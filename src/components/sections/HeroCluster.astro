@@ -412,6 +412,27 @@ const quotes = site.quotes.map((q) => `${q.text}##${q.from}`).join('|||');
     .hero__gyro { animation: none; }
   }
 
+  /* On a phone the music dock owns the bottom-right corner, and since the
+     dock now carries four controls (list, disc, prev, next) it is far too
+     wide to share the bottom line with a centred hint. The hint takes the
+     free lane on the LEFT instead — same bottom line as the dock, so it
+     grows upward inside that lane and never crosses the disc's tap target. */
+  @media (max-width: 700px) {
+    .hero__gyro {
+      left: var(--s-3);
+      right: auto;
+      bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+      transform: none;
+      padding: 6px 10px;
+      max-width: calc(100vw - 200px);
+      font-size: 10px;
+      line-height: 1.35;
+      letter-spacing: 0;
+      text-align: left;
+      animation: none;
+    }
+  }
+
   /* ---------- responsive ---------- */
   @media (max-width: 1460px) { .hero__stage { --rs: .92; } }
   @media (max-width: 1360px) { .hero__stage { --rs: .84; } }

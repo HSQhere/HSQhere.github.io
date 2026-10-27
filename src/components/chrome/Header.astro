@@ -166,19 +166,32 @@ const isActive = (href: string) =>
 </style>
 
 <script>
-  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
-  const nav = document.querySelector<HTMLElement>('.header__nav');
-  if (toggle && nav) {
-    toggle.addEventListener('click', () => {
+  import { register, addCleanup } from '../../effects/page';
+
+  /* the header is on every page, so its script runs once per session and the
+     menu is re-bound from page.ts after each navigation */
+  register('chrome:menu', () => {
+    const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+    const nav = document.querySelector<HTMLElement>('.header__nav');
+    if (!toggle || !nav) return;
+
+    const onClick = () => {
       const open = toggle.getAttribute('aria-expanded') === 'true';
       toggle.setAttribute('aria-expanded', String(!open));
       nav.classList.toggle('is-open', !open);
-    });
-    nav.addEventListener('click', (e) => {
+    };
+    const onNavClick = (e: Event) => {
       if ((e.target as HTMLElement).closest('a')) {
         toggle.setAttribute('aria-expanded', 'false');
         nav.classList.remove('is-open');
       }
+    };
+
+    toggle.addEventListener('click', onClick);
+    nav.addEventListener('click', onNavClick);
+    addCleanup(() => {
+      toggle.removeEventListener('click', onClick);
+      nav.removeEventListener('click', onNavClick);
     });
-  }
+  });
 </script>

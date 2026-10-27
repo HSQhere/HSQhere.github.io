@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "node scripts/check-dates.mjs && astro build",
     "preview": "astro preview",
-    "check": "astro check"
+    "check": "astro check",
+    "check:dates": "node scripts/check-dates.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",

@@ -1,7 +1,7 @@
 ---
 title: Machine Learning 你需要了解的一些基本知识
 slug: Machine-Learning-你需要了解的一些基本知识
-date: 2026-08-04 10:24:34
+date: 2026-08-04 10:24:34 +08:00
 tags:
   - 机器学习
   - 日记

@@ -1,7 +1,7 @@
 ---
 title: 有感FOC(SVPWM)
 slug: 有感FOC(SVPWM)
-date: 2026-07-02 15:40:05
+date: 2026-07-02 15:40:05 +08:00
 tags:
   - 电控
   - 无刷电机

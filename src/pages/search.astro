@@ -43,6 +43,8 @@ import Base from '../layouts/Base.astro';
 </Base>
 
 <script>
+  import { register, addCleanup } from '../effects/page';
+
   type Item = {
     title: string;
     url: string;
@@ -53,128 +55,144 @@ import Base from '../layouts/Base.astro';
     text: string;
   };
 
-  const input = document.querySelector<HTMLInputElement>('[data-q]');
-  const list = document.querySelector<HTMLUListElement>('[data-list]');
-  const stat = document.querySelector<HTMLElement>('[data-stat]');
-  const empty = document.querySelector<HTMLElement>('[data-empty]');
-  const clear = document.querySelector<HTMLButtonElement>('[data-clear]');
-  const modes = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-mode]'));
-
-  let items: Item[] = [];
-  let mode: 'title' | 'full' = 'title';
-  let ready = false;
-
-  const escapeHtml = (s: string) =>
-    s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
-
-  const highlight = (text: string, terms: string[]) => {
-    let out = escapeHtml(text);
-    for (const t of terms) {
-      if (!t) continue;
-      const safe = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      out = out.replace(new RegExp(safe, 'gi'), (m) => `<mark>${m}</mark>`);
-    }
-    return out;
-  };
-
-  const haystack = (it: Item) => {
-    const base = [it.title, it.tags.join(' '), it.categories.join(' '), it.excerpt].join(' ');
-    return mode === 'full' ? `${base} ${it.text}` : base;
-  };
-
-  const render = (hits: Item[], terms: string[]) => {
+  register('page:search', () => {
+    const input = document.querySelector<HTMLInputElement>('[data-q]');
+    const list = document.querySelector<HTMLUListElement>('[data-list]');
+    const stat = document.querySelector<HTMLElement>('[data-stat]');
+    const empty = document.querySelector<HTMLElement>('[data-empty]');
+    const clear = document.querySelector<HTMLButtonElement>('[data-clear]');
+    const modes = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-mode]'));
     if (!list || !stat || !empty) return;
 
-    list.innerHTML = hits
-      .map((it) => {
-        const tagBits = [...it.categories, ...it.tags]
-          .slice(0, 5)
-          .map((t) => `<span class="tag">${escapeHtml(t)}</span>`)
-          .join('');
-        const where = mode === 'full' && terms.length ? snippet(it.text, terms) : it.excerpt;
-        return `<li class="hit">
-          <a class="hit__link" href="${it.url}">
-            <span class="hit__date">${it.date}</span>
-            <span class="hit__title">${highlight(it.title, terms)}</span>
-            <span class="hit__desc">${highlight(where, terms)}</span>
-            <span class="hit__tags">${tagBits}</span>
-          </a>
-        </li>`;
-      })
-      .join('');
+    let items: Item[] = [];
+    let mode: 'title' | 'full' = 'title';
+    let ready = false;
+    let dead = false;
 
-    stat.textContent = hits.length ? `${hits.length} 篇 · ${mode === 'title' ? '标题模式' : '全文模式'}` : '';
-    empty.hidden = hits.length > 0 || !terms.length;
-    list.hidden = hits.length === 0;
-  };
+    const escapeHtml = (s: string) =>
+      s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
-  /** 全文模式下取命中词附近的一段文字 */
-  const snippet = (text: string, terms: string[]) => {
-    const lower = text.toLowerCase();
-    let at = -1;
-    for (const t of terms) {
-      const i = lower.indexOf(t.toLowerCase());
-      if (i !== -1 && (at === -1 || i < at)) at = i;
-    }
-    if (at === -1) return text.slice(0, 120);
-    const from = Math.max(0, at - 40);
-    return (from > 0 ? '…' : '') + text.slice(from, from + 130) + '…';
-  };
+    const highlight = (text: string, terms: string[]) => {
+      let out = escapeHtml(text);
+      for (const t of terms) {
+        if (!t) continue;
+        const safe = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        out = out.replace(new RegExp(safe, 'gi'), (m) => `<mark>${m}</mark>`);
+      }
+      return out;
+    };
 
-  const search = () => {
-    const raw = (input?.value ?? '').trim();
-    const terms = raw.split(/\s+/).filter(Boolean);
-    if (!terms.length) {
-      render([], []);
-      return;
-    }
-    const hits = items.filter((it) => {
-      const hay = haystack(it).toLowerCase();
-      return terms.every((t) => hay.includes(t.toLowerCase()));
-    });
-    render(hits.slice(0, 60), terms);
-  };
+    const haystack = (it: Item) => {
+      const base = [it.title, it.tags.join(' '), it.categories.join(' '), it.excerpt].join(' ');
+      return mode === 'full' ? `${base} ${it.text}` : base;
+    };
 
-  const setMode = (next: 'title' | 'full') => {
-    mode = next;
-    modes.forEach((b) => {
-      const on = b.dataset.mode === next;
-      b.classList.toggle('is-on', on);
-      b.setAttribute('aria-pressed', String(on));
-    });
-    if (input?.value.trim()) search();
-  };
+    /** 全文模式下取命中词附近的一段文字 */
+    const snippet = (text: string, terms: string[]) => {
+      const lower = text.toLowerCase();
+      let at = -1;
+      for (const t of terms) {
+        const i = lower.indexOf(t.toLowerCase());
+        if (i !== -1 && (at === -1 || i < at)) at = i;
+      }
+      if (at === -1) return text.slice(0, 120);
+      const from = Math.max(0, at - 40);
+      return (from > 0 ? '…' : '') + text.slice(from, from + 130) + '…';
+    };
 
-  modes.forEach((b) => b.addEventListener('click', () => setMode((b.dataset.mode as 'title' | 'full') ?? 'title')));
-  clear?.addEventListener('click', () => {
-    if (!input) return;
-    input.value = '';
-    input.focus();
-    search();
-  });
+    const render = (hits: Item[], terms: string[]) => {
+      list.innerHTML = hits
+        .map((it) => {
+          const tagBits = [...it.categories, ...it.tags]
+            .slice(0, 5)
+            .map((t) => `<span class="tag">${escapeHtml(t)}</span>`)
+            .join('');
+          const where = mode === 'full' && terms.length ? snippet(it.text, terms) : it.excerpt;
+          return `<li class="hit">
+            <a class="hit__link" href="${it.url}">
+              <span class="hit__date">${it.date}</span>
+              <span class="hit__title">${highlight(it.title, terms)}</span>
+              <span class="hit__desc">${highlight(where, terms)}</span>
+              <span class="hit__tags">${tagBits}</span>
+            </a>
+          </li>`;
+        })
+        .join('');
 
-  let timer = 0;
-  input?.addEventListener('input', () => {
-    if (!ready) return;
-    clearTimeout(timer);
-    timer = window.setTimeout(search, 120);
-  });
+      stat.textContent = hits.length ? `${hits.length} 篇 · ${mode === 'title' ? '标题模式' : '全文模式'}` : '';
+      empty.hidden = hits.length > 0 || !terms.length;
+      list.hidden = hits.length === 0;
+    };
 
-  // 支持 /search/?q=xxx 直接带词进来
-  const preset = new URLSearchParams(location.search).get('q');
-  if (preset && input) input.value = preset;
+    const search = () => {
+      const raw = (input?.value ?? '').trim();
+      const terms = raw.split(/\s+/).filter(Boolean);
+      if (!terms.length) {
+        render([], []);
+        return;
+      }
+      const hits = items.filter((it) => {
+        const hay = haystack(it).toLowerCase();
+        return terms.every((t) => hay.includes(t.toLowerCase()));
+      });
+      render(hits.slice(0, 60), terms);
+    };
 
-  fetch('/search-index.json')
-    .then((r) => r.json() as Promise<Item[]>)
-    .then((data) => {
-      items = data;
-      ready = true;
+    const setMode = (next: 'title' | 'full') => {
+      mode = next;
+      modes.forEach((b) => {
+        const on = b.dataset.mode === next;
+        b.classList.toggle('is-on', on);
+        b.setAttribute('aria-pressed', String(on));
+      });
       if (input?.value.trim()) search();
-      else if (stat) stat.textContent = `共 ${items.length} 篇文章可搜`;
-    })
-    .catch(() => {
-      if (stat) stat.textContent = '索引加载失败，刷新试试。';
+    };
+
+    const onMode = (b: HTMLButtonElement) => () => setMode((b.dataset.mode as 'title' | 'full') ?? 'title');
+    modes.forEach((b) => b.addEventListener('click', onMode(b)));
+
+    const onClear = () => {
+      if (!input) return;
+      input.value = '';
+      input.focus();
+      search();
+    };
+    clear?.addEventListener('click', onClear);
+
+    let timer = 0;
+    const onInput = () => {
+      if (!ready) return;
+      clearTimeout(timer);
+      timer = window.setTimeout(search, 120);
+    };
+    input?.addEventListener('input', onInput);
+
+    // 支持 /search/?q=xxx 直接带词进来
+    const preset = new URLSearchParams(location.search).get('q');
+    if (preset && input) input.value = preset;
+
+    addCleanup(() => {
+      dead = true;
+      window.clearTimeout(timer);
+      modes.forEach((b) => b.removeEventListener('click', onMode(b)));
+      clear?.removeEventListener('click', onClear);
+      input?.removeEventListener('input', onInput);
     });
+
+    fetch('/search-index.json')
+      .then((r) => r.json() as Promise<Item[]>)
+      .then((data) => {
+        if (dead) return;
+        items = data;
+        ready = true;
+        if (input?.value.trim()) search();
+        else stat.textContent = `共 ${items.length} 篇文章可搜`;
+      })
+      .catch(() => {
+        if (dead) return;
+        stat.textContent = '索引加载失败，刷新试试。';
+      });
+  });
 </script>
 
 <style>

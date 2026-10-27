@@ -1,7 +1,7 @@
 ---
 title: PNP姿态解算
 slug: PNP姿态解算
-date: 2026-04-30 00:27:48
+date: 2026-04-30 00:27:48 +08:00
 tags: [日记,视觉,cv,pnp]
 categories: [计算机]
 cover: ./pnp二维码.png

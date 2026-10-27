@@ -1,7 +1,7 @@
 ---
 title: Interpersonal Isolation(人际孤岛)
 slug: Interpersonal-Isolation-人际孤岛
-date: 2026-04-14 01:16:44
+date: 2026-04-14 01:16:44 +08:00
 tags: [日记,反思,感情,读书]
 categories: [日记]
 cover: ./孤单的灯塔.jpg
